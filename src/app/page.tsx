@@ -613,6 +613,18 @@ export default function HomePage() {
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginRight: '12px' }}>
               <a
+                href="/about"
+                style={{
+                  fontSize: '13px', fontWeight: 600, textDecoration: 'none',
+                  padding: '6px 12px', borderRadius: '999px',
+                  color: activeConfig.logoColor, opacity: 0.75,
+                  transition: 'opacity 0.2s',
+                }}
+                aria-label="About Earth AI"
+              >
+                About
+              </a>
+              <a
                 href="/agriculture"
                 style={{
                   fontSize: '13px', fontWeight: 600, textDecoration: 'none',
@@ -639,15 +651,15 @@ export default function HomePage() {
             </div>
 
             <a
-              href="/app/agriculture"
+              href="/login"
               className="nav-btn"
               style={{
                 background: 'rgba(34,197,94,0.85)',
                 color: '#fff',
               }}
-              aria-label="Launch Intelligence E Agriculture App"
+              aria-label="Try Intelligence E Agriculture"
             >
-              Launch App
+              Try Intelligence E Now
             </a>
           </div>
         </nav>
@@ -663,12 +675,12 @@ export default function HomePage() {
             </p>
             <div className="hero-cta">
               <a
-                href="/app/agriculture"
+                href="/login"
                 className="cta-btn"
                 style={{ background: activeConfig.buttonBg, color: activeConfig.buttonText }}
-                aria-label="Launch Intelligence E Agriculture"
+                aria-label="Try Intelligence E Agriculture"
               >
-                <span>Launch Intelligence E</span>
+                <span>Try Intelligence E Now</span>
                 <span className="cta-arrow" aria-hidden="true">
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: '1.05em', height: '1.05em' }}>
                     <path d="M2.5 8h11" />
@@ -683,7 +695,7 @@ export default function HomePage() {
         {/* Footer */}
         <div className="time-badge">
           <div className="footer-links" style={{ color: activeConfig.linkColor }}>
-            <a href="#" className="footer-link" style={{ color: 'inherit' }} aria-label="About Earth AI">About</a>
+            <a href="/about" className="footer-link" style={{ color: 'inherit' }} aria-label="About Earth AI">About</a>
             <a href="/agriculture" className="footer-link" style={{ color: 'inherit' }} aria-label="Agriculture Intelligence">Agriculture</a>
             <a href="/finance" className="footer-link" style={{ color: 'inherit' }} aria-label="Finance Intelligence">Finance</a>
             <a href="/privacy" className="footer-link" style={{ color: 'inherit' }} aria-label="Privacy Policy">Privacy</a>

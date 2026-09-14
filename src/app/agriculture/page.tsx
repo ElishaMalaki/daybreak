@@ -356,10 +356,11 @@ export default function AgriculturePage() {
           <div className="ag-nav-spacer" />
           {mounted && <span className="ag-nav-time" style={{ color: cfg.logoColor }}>{currentTime}</span>}
           <div className="ag-nav-links">
+            <Link href="/about" className="ag-nav-link" style={{ color: cfg.logoColor }}>About</Link>
             <Link href="/agriculture" className="ag-nav-link active" style={{ color: cfg.logoColor }}>Agriculture</Link>
             <Link href="/finance" className="ag-nav-link" style={{ color: cfg.logoColor }}>Finance</Link>
           </div>
-          <Link href="/app/agriculture" className="ag-nav-btn" style={{ background: cfg.buttonBg, color: cfg.buttonText }}>Launch App</Link>
+          <Link href="/login" className="ag-nav-btn" style={{ background: cfg.buttonBg, color: cfg.buttonText }}>Try Intelligence E Now</Link>
         </nav>
 
         {/* Content */}
@@ -433,6 +434,7 @@ export default function AgriculturePage() {
         <footer className="ag-footer">
           <div className="ag-footer-links" style={{ color: cfg.linkColor }}>
             <Link href="/" className="ag-footer-link" style={{ color: 'inherit' }}>Home</Link>
+            <Link href="/about" className="ag-footer-link" style={{ color: 'inherit' }}>About</Link>
             <Link href="/agriculture" className="ag-footer-link" style={{ color: 'inherit' }}>Agriculture</Link>
             <Link href="/finance" className="ag-footer-link" style={{ color: 'inherit' }}>Finance</Link>
             <Link href="/privacy" className="ag-footer-link" style={{ color: 'inherit' }}>Privacy</Link>
