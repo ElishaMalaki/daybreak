@@ -29,7 +29,7 @@ export class GeminiAdapter implements AIProvider {
   }
 
   isConfigured(): boolean {
-    return !!(this.apiKey && this.apiKey !== 'your-gemini-api-key-here' && this.apiKey.length > 10);
+    return !!(this.apiKey && this.apiKey !== 'AQ.Ab8RN6KZYhSSxPjC9bTJyFIAG1luvO8bKu4My6YTdIm50-HP1Q' && this.apiKey.length > 10);
   }
 
   async generateResponse(request: AIRequest): Promise<AIResponse> {
