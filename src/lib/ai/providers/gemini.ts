@@ -24,12 +24,12 @@ export class GeminiAdapter implements AIProvider {
 
   constructor() {
     this.apiKey = process.env.GEMINI_API_KEY;
-    this.model = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+    this.model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
     this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
   }
 
   isConfigured(): boolean {
-    return !!(this.apiKey && this.apiKey !== 'AQ.Ab8RN6KZYhSSxPjC9bTJyFIAG1luvO8bKu4My6YTdIm50-HP1Q' && this.apiKey.length > 10);
+    return !!(this.apiKey && this.apiKey !== 'AQ.Ab8RN6KzgwR2UDyKVdxphGI1s5N1dr1NqMm2bKs1GBh22cYfyg' && this.apiKey.length > 10);
   }
 
   async generateResponse(request: AIRequest): Promise<AIResponse> {
