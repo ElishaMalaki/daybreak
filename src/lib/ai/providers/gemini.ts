@@ -31,7 +31,7 @@ function classifyGeminiError(status: number, errorMessage: string): GeminiErrorR
     return { category: 'unauthorized', message: 'API key does not have permission to access this resource', isAuthError: true, retryable: false };
   }
   if (status === 404) {
-    return { category: 'model_not_found', message: `Model not found or not accessible`, isAuthError: false, retryable: false };
+    return { category: 'model_not_found', message: `Model not found or access restricted. Google is limiting gemini-2.5 access for new API keys — set GEMINI_MODEL=gemini-3.5-flash in your environment variables.`, isAuthError: false, retryable: false };
   }
   if (status === 429) {
     return { category: 'rate_limit', message: 'Rate limit or quota exceeded', isAuthError: false, retryable: true };
@@ -61,7 +61,7 @@ export class GeminiAdapter implements AIProvider {
   constructor() {
     // Read exclusively from server-side environment variables
     this.apiKey = process.env.GEMINI_API_KEY;
-    this.model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+    this.model = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
     this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
   }
 
