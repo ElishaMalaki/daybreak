@@ -202,11 +202,11 @@ export default function HomePage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [currentTime, setCurrentTime] = useState('');
   const [mounted, setMounted] = useState(false);
-  const [showTimePanel, setShowTimePanel] = useState(false);
 
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
+      // Use browser's local time — automatically respects the visitor's device timezone
       const hour = now.getHours();
       const config = getTimeConfig(hour);
       const timeStr = now.toLocaleTimeString('en-US', {
@@ -310,7 +310,6 @@ export default function HomePage() {
           background-size: 300px 300px;
         }
 
-        /* Nav */
         .nav-wrap {
           position: fixed;
           top: 0;
@@ -383,13 +382,13 @@ export default function HomePage() {
           font-family: inherit;
           transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.2s;
           white-space: nowrap;
+          text-decoration: none;
         }
 
         .nav-btn:hover {
           transform: translateY(-1px);
         }
 
-        /* Hero */
         .hero-wrap {
           position: fixed;
           inset: 0;
@@ -453,6 +452,7 @@ export default function HomePage() {
           transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.25s;
           box-shadow: 0 4px 24px rgba(0,0,0,0.18);
           white-space: nowrap;
+          text-decoration: none;
         }
 
         .cta-btn:hover {
@@ -479,7 +479,6 @@ export default function HomePage() {
           transform: translateX(0);
         }
 
-        /* Time badge */
         .time-badge {
           position: fixed;
           bottom: 0;
@@ -517,11 +516,6 @@ export default function HomePage() {
           opacity: 0.75;
         }
 
-        .footer-social {
-          min-width: 44px;
-          padding-inline: 0;
-        }
-
         .period-pill {
           display: flex;
           align-items: center;
@@ -534,13 +528,7 @@ export default function HomePage() {
           font-size: 13px;
           font-weight: 600;
           letter-spacing: 0.01em;
-          cursor: pointer;
-          transition: transform 0.2s, opacity 0.2s;
-          position: relative;
-        }
-
-        .period-pill:hover {
-          transform: translateY(-1px);
+          pointer-events: none;
         }
 
         .period-dot {
@@ -550,78 +538,6 @@ export default function HomePage() {
           flex-shrink: 0;
         }
 
-        /* Time panel */
-        .time-panel {
-          position: fixed;
-          bottom: 80px;
-          right: 4vw;
-          z-index: 50;
-          width: min(320px, 90vw);
-          border-radius: 20px;
-          backdrop-filter: blur(24px) saturate(1.5);
-          -webkit-backdrop-filter: blur(24px) saturate(1.5);
-          border: 1px solid rgba(255,255,255,0.18);
-          padding: 16px;
-          box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-          opacity: 0;
-          transform: translateY(12px);
-          pointer-events: none;
-          transition: opacity 0.35s cubic-bezier(0.23,1,0.32,1), transform 0.35s cubic-bezier(0.23,1,0.32,1);
-        }
-
-        .time-panel.open {
-          opacity: 1;
-          transform: translateY(0);
-          pointer-events: auto;
-        }
-
-        .time-panel-title {
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          margin-bottom: 10px;
-          opacity: 0.55;
-        }
-
-        .time-row {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          padding: 9px 10px;
-          border-radius: 10px;
-          cursor: pointer;
-          transition: background 0.2s;
-          font-size: 13px;
-          font-weight: 600;
-        }
-
-        .time-row:hover {
-          background: rgba(255,255,255,0.10);
-        }
-
-        .time-row.active {
-          background: rgba(255,255,255,0.14);
-        }
-
-        .time-row-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          flex-shrink: 0;
-        }
-
-        .time-row-label {
-          flex: 1;
-        }
-
-        .time-row-period {
-          font-size: 11px;
-          font-weight: 500;
-          opacity: 0.55;
-        }
-
-        /* Transitions */
         @keyframes fadeInUp {
           from { opacity: 0; transform: translateY(16px); }
           to { opacity: 1; transform: translateY(0); }
@@ -634,11 +550,10 @@ export default function HomePage() {
         @media (max-width: 600px) {
           .nav-time { display: none; }
           .hero-subline { font-size: 14px; }
-          .time-panel { right: 4vw; left: 4vw; width: auto; }
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .sky-bg, .cta-btn, .nav-btn, .period-pill, .time-panel {
+          .sky-bg, .cta-btn, .nav-btn, .period-pill {
             transition: none !important;
             animation: none !important;
           }
@@ -649,27 +564,22 @@ export default function HomePage() {
         {/* Current background */}
         <div
           className="sky-bg sky-bg-current"
-          style={{
-            backgroundImage: `url(${activeConfig.image})`
-          }}
+          style={{ backgroundImage: `url(${activeConfig.image})` }}
           role="img"
-          aria-label={activeConfig.imageAlt} />
+          aria-label={activeConfig.imageAlt}
+        />
 
         {/* Next background (for transition) */}
-        {isTransitioning &&
-        <div
-          className={`sky-bg sky-bg-next ${isTransitioning ? 'transitioning' : ''}`}
-          style={{
-            backgroundImage: `url(${nextConfig.image})`
-          }}
-          aria-hidden="true" />
-        }
+        {isTransitioning && (
+          <div
+            className={`sky-bg sky-bg-next ${isTransitioning ? 'transitioning' : ''}`}
+            style={{ backgroundImage: `url(${nextConfig.image})` }}
+            aria-hidden="true"
+          />
+        )}
 
         {/* Overlay gradient */}
-        <div
-          className="sky-overlay"
-          style={{ background: activeConfig.overlayGradient }}
-          aria-hidden="true" />
+        <div className="sky-overlay" style={{ background: activeConfig.overlayGradient }} aria-hidden="true" />
 
         {/* Film grain */}
         <div className="grain" aria-hidden="true" />
@@ -677,11 +587,7 @@ export default function HomePage() {
         {/* Navigation */}
         <nav className="nav-wrap" aria-label="Earth AI">
           <div className="nav">
-            <a
-              href="#"
-              className="nav-logo"
-              style={{ color: activeConfig.logoColor }}
-              aria-label="Earth AI — Home">
+            <a href="#" className="nav-logo" style={{ color: activeConfig.logoColor }} aria-label="Earth AI — Home">
               <Image
                 src="/assets/images/h9O7B-1789370942958.jpg"
                 alt="Earth AI logo"
@@ -694,15 +600,16 @@ export default function HomePage() {
 
             <div className="nav-spacer" />
 
-            {mounted &&
-            <span
-              className="nav-time"
-              style={{ color: activeConfig.logoColor }}
-              aria-live="polite"
-              aria-label={`Current time: ${currentTime}`}>
-              {currentTime}
-            </span>
-            }
+            {mounted && (
+              <span
+                className="nav-time"
+                style={{ color: activeConfig.logoColor }}
+                aria-live="polite"
+                aria-label={`Current time: ${currentTime}`}
+              >
+                {currentTime}
+              </span>
+            )}
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginRight: '12px' }}>
               <a
@@ -711,9 +618,10 @@ export default function HomePage() {
                   fontSize: '13px', fontWeight: 600, textDecoration: 'none',
                   padding: '6px 12px', borderRadius: '999px',
                   color: activeConfig.logoColor, opacity: 0.75,
-                  transition: 'opacity 0.2s, background 0.2s'
+                  transition: 'opacity 0.2s',
                 }}
-                aria-label="Agriculture Intelligence">
+                aria-label="Agriculture Intelligence"
+              >
                 Agriculture
               </a>
               <a
@@ -722,34 +630,23 @@ export default function HomePage() {
                   fontSize: '13px', fontWeight: 600, textDecoration: 'none',
                   padding: '6px 12px', borderRadius: '999px',
                   color: activeConfig.logoColor, opacity: 0.75,
-                  transition: 'opacity 0.2s, background 0.2s'
+                  transition: 'opacity 0.2s',
                 }}
-                aria-label="Finance Intelligence">
+                aria-label="Finance Intelligence"
+              >
                 Finance
               </a>
             </div>
 
-            <button
-              className="nav-btn"
-              style={{
-                background: activeConfig.buttonBg,
-                color: activeConfig.buttonText
-              }}
-              onClick={() => setShowTimePanel(!showTimePanel)}
-              aria-expanded={showTimePanel}
-              aria-label="Explore Earth AI products">
-              Explore
-            </button>
             <a
               href="/app/agriculture"
               className="nav-btn"
               style={{
                 background: 'rgba(34,197,94,0.85)',
                 color: '#fff',
-                marginLeft: '8px',
-                textDecoration: 'none',
               }}
-              aria-label="Launch Intelligence E Agriculture App">
+              aria-label="Launch Intelligence E Agriculture App"
+            >
               Launch App
             </a>
           </div>
@@ -758,160 +655,59 @@ export default function HomePage() {
         {/* Hero content */}
         <div className="hero-wrap" aria-hidden="false">
           <div className="hero-copy">
-            <h1
-              className="hero-headline"
-              style={{ color: activeConfig.textColor }}>
+            <h1 className="hero-headline" style={{ color: activeConfig.textColor }}>
               {activeConfig.headline}
             </h1>
-
-            <p
-              className="hero-subline"
-              style={{ color: activeConfig.textColor, opacity: 0.72 }}>
+            <p className="hero-subline" style={{ color: activeConfig.textColor, opacity: 0.72 }}>
               {activeConfig.subline}
             </p>
-
             <div className="hero-cta">
-              <button
+              <a
+                href="/app/agriculture"
                 className="cta-btn"
-                style={{
-                  background: activeConfig.buttonBg,
-                  color: activeConfig.buttonText
-                }}
-                aria-label="Discover Earth AI products">
-                <span>Discover our AI</span>
+                style={{ background: activeConfig.buttonBg, color: activeConfig.buttonText }}
+                aria-label="Launch Intelligence E Agriculture"
+              >
+                <span>Launch Intelligence E</span>
                 <span className="cta-arrow" aria-hidden="true">
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: '1.05em', height: '1.05em' }}>
                     <path d="M2.5 8h11" />
                     <path d="M9 3.5 13.5 8 9 12.5" />
                   </svg>
                 </span>
-              </button>
+              </a>
             </div>
           </div>
         </div>
 
-        {/* Footer / Time badge */}
+        {/* Footer */}
         <div className="time-badge">
-          {/* Footer links */}
-          <div
-            className="footer-links"
-            style={{ color: activeConfig.linkColor }}>
-            <a
-              href="#"
-              className="footer-link"
-              style={{ color: 'inherit' }}
-              aria-label="About Earth AI">
-              About
-            </a>
-            <a
-              href="/agriculture"
-              className="footer-link"
-              style={{ color: 'inherit' }}
-              aria-label="Earth AI Agriculture Intelligence">
-              Agriculture
-            </a>
-            <a
-              href="/finance"
-              className="footer-link"
-              style={{ color: 'inherit' }}
-              aria-label="Earth AI Finance Intelligence">
-              Finance
-            </a>
-            <a
-              href="/privacy"
-              className="footer-link"
-              style={{ color: 'inherit' }}
-              aria-label="Privacy Policy">
-              Privacy
-            </a>
-            <a
-              href="/terms"
-              className="footer-link"
-              style={{ color: 'inherit' }}
-              aria-label="Terms of Service">
-              Terms
-            </a>
+          <div className="footer-links" style={{ color: activeConfig.linkColor }}>
+            <a href="#" className="footer-link" style={{ color: 'inherit' }} aria-label="About Earth AI">About</a>
+            <a href="/agriculture" className="footer-link" style={{ color: 'inherit' }} aria-label="Agriculture Intelligence">Agriculture</a>
+            <a href="/finance" className="footer-link" style={{ color: 'inherit' }} aria-label="Finance Intelligence">Finance</a>
+            <a href="/privacy" className="footer-link" style={{ color: 'inherit' }} aria-label="Privacy Policy">Privacy</a>
+            <a href="/terms" className="footer-link" style={{ color: 'inherit' }} aria-label="Terms of Service">Terms</a>
           </div>
 
-          {/* Period pill */}
-          {mounted &&
-          <button
-            className="period-pill"
-            style={{
-              background: activeConfig.badgeBg,
-              color: activeConfig.badgeText
-            }}
-            onClick={() => setShowTimePanel(!showTimePanel)}
-            aria-label={`Current period: ${activeConfig.label}. Click to explore.`}
-            aria-expanded={showTimePanel}>
-            <span
-              className="period-dot"
-              style={{
-                background: activeConfig.buttonBg === '#F2F6FF' || activeConfig.buttonBg === '#EAF0FF' || activeConfig.buttonBg === '#E8EEFF' || activeConfig.buttonBg === '#F0EAFF' ? 'rgba(150,170,255,0.8)' :
-                activeConfig.buttonBg
-              }}
-              aria-hidden="true" />
-            <span>{activeConfig.label}</span>
-            <svg aria-hidden="true" width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M2 4l3-3 3 3" />
-              <path d="M2 7l3-3 3 3" opacity="0.4" />
-            </svg>
-          </button>
-          }
-        </div>
-
-        {/* Time period panel */}
-        <div
-          className={`time-panel ${showTimePanel ? 'open' : ''}`}
-          style={{
-            background: activeConfig.badgeBg,
-            color: activeConfig.badgeText
-          }}
-          role="dialog"
-          aria-label="Time periods"
-          aria-hidden={!showTimePanel}>
-          <div className="time-panel-title">Time of Day</div>
-          {timeConfigs.map((config) =>
-          <div
-            key={config.label}
-            className={`time-row ${config.label === activeConfig.label ? 'active' : ''}`}
-            onClick={() => {
-              setCurrentConfig(config);
-              setShowTimePanel(false);
-            }}
-            role="button"
-            tabIndex={showTimePanel ? 0 : -1}
-            aria-label={`View ${config.label}: ${config.period}`}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                setCurrentConfig(config);
-                setShowTimePanel(false);
-              }
-            }}>
-            <span
-              className="time-row-dot"
-              style={{
-                background: config.buttonBg === '#F2F6FF' || config.buttonBg === '#EAF0FF' || config.buttonBg === '#E8EEFF' || config.buttonBg === '#F0EAFF' ? 'rgba(150,170,255,0.8)' :
-                config.buttonBg
-              }}
-              aria-hidden="true" />
-            <span className="time-row-label">{config.label}</span>
-            <span className="time-row-period">{config.period}</span>
-          </div>
+          {/* Period indicator — display only, no manual override */}
+          {mounted && (
+            <div
+              className="period-pill"
+              style={{ background: activeConfig.badgeBg, color: activeConfig.badgeText }}
+              aria-label={`Current period: ${activeConfig.label}`}
+            >
+              <span
+                className="period-dot"
+                style={{
+                  background: activeConfig.buttonBg === '#F2F6FF' || activeConfig.buttonBg === '#EAF0FF' || activeConfig.buttonBg === '#E8EEFF' || activeConfig.buttonBg === '#F0EAFF' ?'rgba(150,170,255,0.8)' : activeConfig.buttonBg
+                }}
+                aria-hidden="true"
+              />
+              <span>{activeConfig.label}</span>
+            </div>
           )}
         </div>
-
-        {/* Click outside to close panel */}
-        {showTimePanel &&
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 45
-          }}
-          onClick={() => setShowTimePanel(false)}
-          aria-hidden="true" />
-        }
       </div>
     </>
   );
