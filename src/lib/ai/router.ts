@@ -185,6 +185,10 @@ export class AIRouter {
 
       lastError = response.error || 'Unknown error';
 
+      // Do not retry on authentication errors — a bad key won't succeed on retry
+      const isAuthError = (response as AIResponse & { isAuthError?: boolean }).isAuthError === true;
+      if (isAuthError) break;
+
       // Don't retry on configuration errors
       if (lastError.includes('not configured')) continue;
     }
