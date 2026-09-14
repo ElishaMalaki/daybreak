@@ -250,6 +250,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 10, fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', padding: '0 10px', marginBottom: 4 }}>
                 Earth AI
               </div>
+              <Link href="/help" className={`ie-nav-item${pathname?.startsWith('/help') ? ' active' : ''}`} style={{ fontSize: 12.5 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                Help and Docs
+              </Link>
               <Link href="/" className="ie-nav-item" style={{ fontSize: 12.5 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>

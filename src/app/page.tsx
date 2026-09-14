@@ -648,6 +648,18 @@ export default function HomePage() {
               >
                 Finance
               </a>
+              <a
+                href="/help"
+                style={{
+                  fontSize: '13px', fontWeight: 600, textDecoration: 'none',
+                  padding: '6px 12px', borderRadius: '999px',
+                  color: activeConfig.logoColor, opacity: 0.75,
+                  transition: 'opacity 0.2s',
+                }}
+                aria-label="Help and Documentation"
+              >
+                Help
+              </a>
             </div>
 
             <a
@@ -698,6 +710,7 @@ export default function HomePage() {
             <a href="/about" className="footer-link" style={{ color: 'inherit' }} aria-label="About Earth AI">About</a>
             <a href="/agriculture" className="footer-link" style={{ color: 'inherit' }} aria-label="Agriculture Intelligence">Agriculture</a>
             <a href="/finance" className="footer-link" style={{ color: 'inherit' }} aria-label="Finance Intelligence">Finance</a>
+            <a href="/help" className="footer-link" style={{ color: 'inherit' }} aria-label="Help and Documentation">Help</a>
             <a href="/privacy" className="footer-link" style={{ color: 'inherit' }} aria-label="Privacy Policy">Privacy</a>
             <a href="/terms" className="footer-link" style={{ color: 'inherit' }} aria-label="Terms of Service">Terms</a>
           </div>
