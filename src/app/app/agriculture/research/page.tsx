@@ -118,10 +118,10 @@ export default function ResearchPage() {
   return (
     <div style={{ maxWidth: 1000, margin: '0 auto' }}>
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ color: '#fff', fontSize: 20, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 4 }}>
-          Agricultural Research Assistant
+        <h1 style={{ color: '#0f172a', fontSize: 20, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 4 }}>
+          Agricultural Research
         </h1>
-        <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>
+        <p style={{ color: '#64748b', fontSize: 13 }}>
           Evidence-based agricultural research and intelligence
         </p>
       </div>
@@ -131,10 +131,11 @@ export default function ResearchPage() {
         <div>
           {/* Research Input */}
           <div style={{
-            background: '#0D1017', border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: 12, padding: '18px 20px', marginBottom: 16,
+            background: '#fff', border: '1px solid #e8edf2',
+            borderRadius: 14, padding: '20px 22px', marginBottom: 16,
+            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
           }}>
-            <label style={{ display: 'block', color: 'rgba(255,255,255,0.35)', fontSize: 10.5, fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', marginBottom: 10 }}>
+            <label style={{ display: 'block', color: '#64748b', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 10 }}>
               Research Query
             </label>
             <textarea
@@ -145,16 +146,18 @@ export default function ResearchPage() {
               rows={3}
               style={{
                 width: '100%', padding: '10px 14px', borderRadius: 9,
-                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)',
-                color: '#fff', fontSize: 13.5, fontFamily: 'inherit', outline: 'none',
+                background: '#f8fafc', border: '1px solid #e2e8f0',
+                color: '#1e293b', fontSize: 13.5, fontFamily: 'inherit', outline: 'none',
                 resize: 'vertical', lineHeight: 1.55, marginBottom: 12,
-                transition: 'border-color 0.15s',
+                transition: 'border-color 0.15s, box-shadow 0.15s',
               }}
+              onFocus={(e) => { e.target.style.borderColor = '#16a34a'; e.target.style.boxShadow = '0 0 0 3px rgba(22,163,74,0.08)'; e.target.style.background = '#fff'; }}
+              onBlur={(e) => { e.target.style.borderColor = '#e2e8f0'; e.target.style.boxShadow = 'none'; e.target.style.background = '#f8fafc'; }}
             />
             {error && (
               <div style={{
-                background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.18)',
-                borderRadius: 8, padding: '8px 12px', color: '#fca5a5', fontSize: 12.5, marginBottom: 12,
+                background: '#fef2f2', border: '1px solid #fecaca',
+                borderRadius: 8, padding: '9px 12px', color: '#dc2626', fontSize: 12.5, marginBottom: 12,
                 display: 'flex', alignItems: 'center', gap: 8,
               }}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -164,19 +167,21 @@ export default function ResearchPage() {
               </div>
             )}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>Ctrl+Enter to submit</span>
+              <span style={{ color: '#94a3b8', fontSize: 11.5 }}>Ctrl+Enter to submit</span>
               <button
                 onClick={handleResearch}
                 disabled={researching || !query.trim()}
                 style={{
-                  padding: '8px 20px', borderRadius: 8, border: 'none',
-                  background: researching || !query.trim() ? 'rgba(34,197,94,0.25)' : '#22c55e',
-                  color: '#fff', fontSize: 13, fontWeight: 600, cursor: researching || !query.trim() ? 'not-allowed' : 'pointer',
+                  padding: '9px 22px', borderRadius: 8, border: 'none',
+                  background: researching || !query.trim() ? '#bbf7d0' : '#16a34a',
+                  color: '#fff', fontSize: 13, fontWeight: 600,
+                  cursor: researching || !query.trim() ? 'not-allowed' : 'pointer',
                   fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 7,
+                  boxShadow: researching || !query.trim() ? 'none' : '0 2px 8px rgba(22,163,74,0.25)',
                 }}
               >
                 {researching && (
-                  <div style={{ width: 13, height: 13, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                  <div style={{ width: 13, height: 13, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
                 )}
                 {researching ? 'Researching...' : 'Research'}
               </button>
@@ -186,26 +191,27 @@ export default function ResearchPage() {
           {/* Active Result */}
           {activeResult && (
             <div style={{
-              background: '#0D1017', border: '1px solid rgba(255,255,255,0.07)',
-              borderRadius: 12, padding: '18px 20px', marginBottom: 16,
+              background: '#fff', border: '1px solid #e8edf2',
+              borderRadius: 14, padding: '20px 22px', marginBottom: 16,
+              boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
             }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
                 <div>
-                  <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>Research Result</div>
-                  <div style={{ color: '#fff', fontSize: 13.5, fontWeight: 600, letterSpacing: '-0.01em' }}>{activeResult.query}</div>
+                  <div style={{ color: '#94a3b8', fontSize: 10.5, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 4 }}>Research Result</div>
+                  <div style={{ color: '#0f172a', fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em' }}>{activeResult.query}</div>
                 </div>
                 <button
                   onClick={() => setActiveResult(null)}
-                  style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.25)', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 4, flexShrink: 0 }}
+                  style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 20, lineHeight: 1, padding: 4, flexShrink: 0 }}
                 >×</button>
               </div>
               <div style={{
-                color: 'rgba(255,255,255,0.75)', fontSize: 13.5, lineHeight: 1.7,
+                color: '#374151', fontSize: 13.5, lineHeight: 1.75,
                 whiteSpace: 'pre-wrap', letterSpacing: '-0.01em',
               }}>
                 {activeResult.result}
               </div>
-              <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>
+              <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid #f1f5f9', color: '#94a3b8', fontSize: 11.5 }}>
                 Intelligence E Agriculture · Research results are AI-generated. Verify critical findings with local agricultural experts.
               </div>
             </div>
@@ -214,17 +220,47 @@ export default function ResearchPage() {
           {/* Empty state */}
           {!activeResult && !researching && (
             <div style={{
-              background: '#0D1017', border: '1px dashed rgba(255,255,255,0.07)',
-              borderRadius: 12, padding: '40px 24px', textAlign: 'center',
+              background: '#fff', border: '1.5px dashed #e2e8f0',
+              borderRadius: 14, padding: '48px 24px', textAlign: 'center',
             }}>
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <div style={{ width: 52, height: 52, borderRadius: 14, background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
               </div>
-              <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13.5, fontWeight: 600, marginBottom: 5 }}>Agricultural Research Assistant</div>
-              <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12.5, lineHeight: 1.6 }}>
+              <div style={{ color: '#374151', fontSize: 15, fontWeight: 700, marginBottom: 5 }}>Agricultural Research Assistant</div>
+              <div style={{ color: '#94a3b8', fontSize: 13, lineHeight: 1.6 }}>
                 Enter a research question above or select a suggested topic to begin.
+              </div>
+            </div>
+          )}
+
+          {/* History */}
+          {history.length > 0 && (
+            <div style={{ background: '#fff', border: '1px solid #e8edf2', borderRadius: 14, padding: '18px 20px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+              <div style={{ color: '#64748b', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>
+                Research History
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {history.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveResult(item)}
+                    style={{
+                      padding: '10px 12px', borderRadius: 9, border: '1px solid #e8edf2',
+                      background: activeResult?.id === item.id ? '#f0fdf4' : '#f8fafc',
+                      cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
+                      transition: 'all 0.12s',
+                    }}
+                  >
+                    <div style={{ color: '#0f172a', fontSize: 13, fontWeight: 600, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {item.query}
+                    </div>
+                    <div style={{ color: '#94a3b8', fontSize: 11.5 }}>
+                      {item.status === 'completed' ? 'Completed' : item.status}
+                    </div>
+                  </button>
+                ))}
               </div>
             </div>
           )}
@@ -233,8 +269,8 @@ export default function ResearchPage() {
         {/* Right sidebar */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* Suggested topics */}
-          <div style={{ background: '#0D1017', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '16px 16px' }}>
-            <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10.5, fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', marginBottom: 12 }}>
+          <div style={{ background: '#fff', border: '1px solid #e8edf2', borderRadius: 14, padding: '18px 18px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+            <div style={{ color: '#64748b', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>
               Suggested Topics
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
@@ -243,11 +279,13 @@ export default function ResearchPage() {
                   key={topic}
                   onClick={() => setQuery(topic)}
                   style={{
-                    padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.07)',
-                    background: 'rgba(255,255,255,0.02)', color: 'rgba(255,255,255,0.5)',
-                    fontSize: 11.5, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
-                    lineHeight: 1.4, transition: 'all 0.12s',
+                    padding: '9px 11px', borderRadius: 8, border: '1px solid #e8edf2',
+                    background: '#f8fafc', color: '#374151',
+                    fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
+                    lineHeight: 1.45, transition: 'all 0.12s',
                   }}
+                  onMouseEnter={(e) => { (e.target as HTMLButtonElement).style.background = '#f0fdf4'; (e.target as HTMLButtonElement).style.borderColor = '#bbf7d0'; (e.target as HTMLButtonElement).style.color = '#16a34a'; }}
+                  onMouseLeave={(e) => { (e.target as HTMLButtonElement).style.background = '#f8fafc'; (e.target as HTMLButtonElement).style.borderColor = '#e8edf2'; (e.target as HTMLButtonElement).style.color = '#374151'; }}
                 >
                   {topic}
                 </button>
@@ -255,34 +293,20 @@ export default function ResearchPage() {
             </div>
           </div>
 
-          {/* Research history */}
-          {history.length > 0 && (
-            <div style={{ background: '#0D1017', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '16px 16px' }}>
-              <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10.5, fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', marginBottom: 12 }}>
-                Recent Research
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                {history.slice(0, 8).map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => item.result && setActiveResult(item)}
-                    style={{
-                      padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.06)',
-                      background: activeResult?.id === item.id ? 'rgba(34,197,94,0.08)' : 'rgba(255,255,255,0.02)',
-                      color: 'rgba(255,255,255,0.5)', fontSize: 11.5, cursor: item.result ? 'pointer' : 'default',
-                      fontFamily: 'inherit', textAlign: 'left', lineHeight: 1.4,
-                    }}
-                  >
-                    <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.query}</div>
-                    <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 10, marginTop: 2 }}>{item.status}</div>
-                  </button>
-                ))}
-              </div>
+          {/* Info card */}
+          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 14, padding: '16px 18px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span style={{ color: '#16a34a', fontSize: 12.5, fontWeight: 700 }}>About Research</span>
             </div>
-          )}
+            <div style={{ color: '#166534', fontSize: 12, lineHeight: 1.55 }}>
+              Research results are generated by Intelligence E AI. Always verify critical agricultural decisions with local experts and extension services.
+            </div>
+          </div>
         </div>
       </div>
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

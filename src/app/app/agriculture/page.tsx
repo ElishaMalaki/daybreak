@@ -20,137 +20,153 @@ interface RecentConversation {
   updated_at: string;
 }
 
-function StatCard({ label, value, loading, icon }: { label: string; value: number; loading: boolean; icon: React.ReactNode }) {
-  return (
-    <div style={{
-      background: '#0D1017', border: '1px solid rgba(255,255,255,0.07)',
-      borderRadius: 12, padding: '18px 20px',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-        <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12, fontWeight: 600, letterSpacing: '-0.01em' }}>{label}</div>
-        <div style={{ color: 'rgba(255,255,255,0.2)', width: 16, height: 16 }}>{icon}</div>
-      </div>
-      <div style={{ color: loading ? 'rgba(255,255,255,0.2)' : '#fff', fontSize: 28, fontWeight: 700, letterSpacing: '-0.04em', lineHeight: 1 }}>
-        {loading ? '—' : value.toLocaleString()}
-      </div>
-    </div>
-  );
-}
-
-const quickActions = [
-  {
-    label: 'Ask Intelligence E',
-    description: 'Start an agricultural intelligence session',
-    href: '/app/agriculture/intelligence',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/>
-        <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/>
-      </svg>
-    ),
-    accent: '#22c55e',
-  },
-  {
-    label: 'Add Farm Data',
-    description: 'Register a farm or add agricultural records',
-    href: '/app/agriculture/data',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <ellipse cx="12" cy="5" rx="9" ry="3"/>
-        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
-        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
-      </svg>
-    ),
-    accent: '#3b82f6',
-  },
-  {
-    label: 'Research Agriculture',
-    description: 'Query the agricultural research assistant',
-    href: '/app/agriculture/research',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
-    ),
-    accent: '#a855f7',
-  },
-  {
-    label: 'Generate Report',
-    description: 'Create an agricultural intelligence report',
-    href: '/app/agriculture/reports',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-        <polyline points="14 2 14 8 20 8"/>
-        <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-      </svg>
-    ),
-    accent: '#f59e0b',
-  },
-];
-
-const capabilities = [
-  {
-    title: 'Market Analysis',
-    desc: 'Commodity pricing, supply chain & trade intelligence',
-    href: '/app/agriculture/intelligence?type=market_analysis',
-    icon: (
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
-      </svg>
-    ),
-  },
-  {
-    title: 'Farm Intelligence',
-    desc: 'Crop, livestock & production analysis',
-    href: '/app/agriculture/data',
-    icon: (
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <ellipse cx="12" cy="5" rx="9" ry="3"/>
-        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
-        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
-      </svg>
-    ),
-  },
-  {
-    title: 'Decision Support',
-    desc: 'AI-driven planting, irrigation & input recommendations',
-    href: '/app/agriculture/intelligence?type=decision_support',
-    icon: (
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-      </svg>
-    ),
-  },
-  {
-    title: 'Risk Intelligence',
-    desc: 'Weather, pest, disease & market risk assessment',
-    href: '/app/agriculture/intelligence?type=risk_assessment',
-    icon: (
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-      </svg>
-    ),
-  },
-  {
-    title: 'Research Assistant',
-    desc: 'Agricultural research, literature & analysis',
-    href: '/app/agriculture/research',
-    icon: (
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
-    ),
-  },
-];
-
 function getGreeting(): string {
   const hour = new Date().getHours();
   if (hour < 12) return 'Good morning';
   if (hour < 17) return 'Good afternoon';
   return 'Good evening';
 }
+
+const quickActions = [
+  {
+    label: 'Ask Intelligence E',
+    description: 'Get AI-powered insights and analysis',
+    href: '/app/agriculture/intelligence',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/>
+        <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/>
+      </svg>
+    ),
+    color: '#16a34a',
+    bg: '#f0fdf4',
+    border: '#bbf7d0',
+  },
+  {
+    label: 'Analyze Farm Data',
+    description: 'Turn your farm data into valuable insights',
+    href: '/app/agriculture/data',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <ellipse cx="12" cy="5" rx="9" ry="3"/>
+        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+      </svg>
+    ),
+    color: '#2563eb',
+    bg: '#eff6ff',
+    border: '#bfdbfe',
+  },
+  {
+    label: 'Research Agriculture',
+    description: 'Explore research and best practices',
+    href: '/app/agriculture/research',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    ),
+    color: '#7c3aed',
+    bg: '#f5f3ff',
+    border: '#ddd6fe',
+  },
+  {
+    label: 'Generate Report',
+    description: 'Create professional agricultural reports',
+    href: '/app/agriculture/reports',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+      </svg>
+    ),
+    color: '#d97706',
+    bg: '#fffbeb',
+    border: '#fde68a',
+  },
+  {
+    label: 'Import Data',
+    description: 'Upload and integrate your data',
+    href: '/app/agriculture/data',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="16 16 12 12 8 16"/>
+        <line x1="12" y1="12" x2="12" y2="21"/>
+        <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+      </svg>
+    ),
+    color: '#0891b2',
+    bg: '#ecfeff',
+    border: '#a5f3fc',
+  },
+];
+
+const capabilities = [
+  {
+    title: 'Market Analysis',
+    desc: 'Understand market trends, prices and opportunities',
+    href: '/app/agriculture/intelligence?type=market_analysis',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
+      </svg>
+    ),
+    color: '#16a34a',
+    bg: '#f0fdf4',
+  },
+  {
+    title: 'Farm Intelligence',
+    desc: 'Analyze your farm data and performance',
+    href: '/app/agriculture/data',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <ellipse cx="12" cy="5" rx="9" ry="3"/>
+        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+      </svg>
+    ),
+    color: '#2563eb',
+    bg: '#eff6ff',
+  },
+  {
+    title: 'Decision Support',
+    desc: 'Get recommendations for better outcomes',
+    href: '/app/agriculture/intelligence?type=decision_support',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    ),
+    color: '#16a34a',
+    bg: '#f0fdf4',
+  },
+  {
+    title: 'Risk Intelligence',
+    desc: 'Identify and manage agricultural risks',
+    href: '/app/agriculture/intelligence?type=risk_assessment',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+    ),
+    color: '#7c3aed',
+    bg: '#f5f3ff',
+  },
+  {
+    title: 'Research Assistant',
+    desc: 'Access the latest research and insights',
+    href: '/app/agriculture/research',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    ),
+    color: '#0891b2',
+    bg: '#ecfeff',
+  },
+];
 
 export default function AgricultureDashboard() {
   const { user } = useAuth();
@@ -194,72 +210,111 @@ export default function AgricultureDashboard() {
   }, [user]);
 
   return (
-    <div style={{ maxWidth: 1120, margin: '0 auto' }}>
-      {/* Page header */}
-      <div style={{ marginBottom: 28 }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
-          <h1 style={{ color: '#fff', fontSize: 22, fontWeight: 700, letterSpacing: '-0.03em' }}>
-            {greeting}, {userName}
-          </h1>
-        </div>
-        <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, letterSpacing: '-0.01em' }}>
-          Agricultural intelligence platform — powered by Earth AI
-        </p>
-      </div>
-
-      {/* Stats row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
-        <StatCard label="Conversations" value={stats.conversations} loading={loadingStats} icon={
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-          </svg>
-        } />
-        <StatCard label="Farms" value={stats.farms} loading={loadingStats} icon={
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <ellipse cx="12" cy="5" rx="9" ry="3"/>
-            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
-            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
-          </svg>
-        } />
-        <StatCard label="Analyses" value={stats.analyses} loading={loadingStats} icon={
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
-          </svg>
-        } />
-        <StatCard label="Reports" value={stats.reports} loading={loadingStats} icon={
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-          </svg>
-        } />
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 16 }}>
-        {/* Left column */}
+    <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 20, alignItems: 'start' }}>
+        {/* Left / main column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Quick Actions */}
-          <div style={{ background: '#0D1017', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '18px 20px' }}>
-            <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10.5, fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', marginBottom: 14 }}>
-              Quick Actions
+
+          {/* Welcome hero card */}
+          <div style={{
+            borderRadius: 14, overflow: 'hidden', position: 'relative',
+            background: 'linear-gradient(135deg, #dbeafe 0%, #e0f2fe 40%, #dcfce7 100%)',
+            border: '1px solid #bfdbfe', padding: '28px 28px 24px',
+            minHeight: 160,
+          }}>
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <div style={{ color: '#16a34a', fontSize: 12, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 8 }}>
+                Intelligence E for Agriculture
+              </div>
+              <h1 style={{ color: '#0f172a', fontSize: 28, fontWeight: 800, letterSpacing: '-0.03em', marginBottom: 8, lineHeight: 1.15 }}>
+                {greeting}, {userName}
+              </h1>
+              <p style={{ color: '#475569', fontSize: 14, lineHeight: 1.55, maxWidth: 480 }}>
+                Your <span style={{ color: '#16a34a', fontWeight: 600 }}>agricultural intelligence platform</span> is ready.{' '}
+                What would you like to explore today?
+              </p>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            {/* Decorative circle */}
+            <div style={{
+              position: 'absolute', right: 24, top: '50%', transform: 'translateY(-50%)',
+              width: 90, height: 90, borderRadius: '50%',
+              background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.8)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.7 }}>
+                <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/>
+                <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div style={{
+            background: '#ffffff', border: '1px solid #e8edf2', borderRadius: 14,
+            padding: '20px 22px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <h2 style={{ color: '#0f172a', fontSize: 15, fontWeight: 700, letterSpacing: '-0.02em' }}>Quick Actions</h2>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
               {quickActions.map((action) => (
                 <Link key={action.label} href={action.href} style={{
-                  display: 'flex', alignItems: 'flex-start', gap: 11, padding: '13px 14px',
-                  background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
-                  borderRadius: 10, textDecoration: 'none', transition: 'border-color 0.12s, background 0.12s',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+                  padding: '16px 10px 14px',
+                  background: action.bg, border: `1px solid ${action.border}`,
+                  borderRadius: 12, textDecoration: 'none', transition: 'transform 0.12s, box-shadow 0.12s',
+                  textAlign: 'center',
                 }}>
                   <div style={{
-                    width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-                    background: `${action.accent}12`, border: `1px solid ${action.accent}22`,
+                    width: 40, height: 40, borderRadius: 10, flexShrink: 0,
+                    background: '#fff', border: `1px solid ${action.border}`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: action.accent,
+                    color: action.color,
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
                   }}>
                     {action.icon}
                   </div>
                   <div>
-                    <div style={{ color: 'rgba(255,255,255,0.85)', fontSize: 12.5, fontWeight: 600, marginBottom: 2, letterSpacing: '-0.01em' }}>{action.label}</div>
-                    <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11, lineHeight: 1.45 }}>{action.description}</div>
+                    <div style={{ color: '#0f172a', fontSize: 12, fontWeight: 700, marginBottom: 3, letterSpacing: '-0.01em', lineHeight: 1.3 }}>{action.label}</div>
+                    <div style={{ color: '#64748b', fontSize: 10.5, lineHeight: 1.4 }}>{action.description}</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Intelligence E Capabilities */}
+          <div style={{
+            background: '#ffffff', border: '1px solid #e8edf2', borderRadius: 14,
+            padding: '20px 22px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+          }}>
+            <div style={{ marginBottom: 16 }}>
+              <h2 style={{ color: '#0f172a', fontSize: 15, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 3 }}>
+                Intelligence <span style={{ color: '#16a34a' }}>E</span> Capabilities
+              </h2>
+              <p style={{ color: '#64748b', fontSize: 12.5 }}>Powerful AI tools for smarter agricultural decisions</p>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
+              {capabilities.map((cap) => (
+                <Link key={cap.title} href={cap.href} style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 9,
+                  padding: '16px 10px 14px',
+                  background: cap.bg, border: '1px solid #e8edf2',
+                  borderRadius: 12, textDecoration: 'none', transition: 'transform 0.12s',
+                  textAlign: 'center',
+                }}>
+                  <div style={{
+                    width: 38, height: 38, borderRadius: 10,
+                    background: '#fff', border: '1px solid #e2e8f0',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: cap.color,
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                  }}>
+                    {cap.icon}
+                  </div>
+                  <div>
+                    <div style={{ color: '#0f172a', fontSize: 12, fontWeight: 700, marginBottom: 3, lineHeight: 1.3 }}>{cap.title}</div>
+                    <div style={{ color: '#64748b', fontSize: 10.5, lineHeight: 1.4 }}>{cap.desc}</div>
                   </div>
                 </Link>
               ))}
@@ -267,62 +322,63 @@ export default function AgricultureDashboard() {
           </div>
 
           {/* Recent Conversations */}
-          <div style={{ background: '#0D1017', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '18px 20px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10.5, fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase' }}>
-                Recent Intelligence Sessions
-              </div>
-              <Link href="/app/agriculture/intelligence" style={{ color: '#4ade80', fontSize: 11.5, fontWeight: 600, textDecoration: 'none', letterSpacing: '-0.01em' }}>
+          <div style={{
+            background: '#ffffff', border: '1px solid #e8edf2', borderRadius: 14,
+            padding: '20px 22px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <h2 style={{ color: '#0f172a', fontSize: 15, fontWeight: 700, letterSpacing: '-0.02em' }}>Recent Conversations</h2>
+              <Link href="/app/agriculture/intelligence" style={{ color: '#16a34a', fontSize: 12.5, fontWeight: 600, textDecoration: 'none' }}>
                 View all
               </Link>
             </div>
 
             {loadingStats ? (
-              <div style={{ padding: '20px 0', textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>Loading...</div>
+              <div style={{ padding: '20px 0', textAlign: 'center', color: '#94a3b8', fontSize: 12.5 }}>Loading...</div>
             ) : recentConversations.length === 0 ? (
               <div style={{
-                border: '1px dashed rgba(255,255,255,0.08)', borderRadius: 10,
-                padding: '28px 20px', textAlign: 'center',
+                border: '1.5px dashed #e2e8f0', borderRadius: 12,
+                padding: '36px 20px', textAlign: 'center',
               }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <div style={{ width: 48, height: 48, borderRadius: 12, background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                   </svg>
                 </div>
-                <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: 600, marginBottom: 5 }}>No intelligence sessions yet</div>
-                <div style={{ color: 'rgba(255,255,255,0.25)', fontSize: 12, marginBottom: 16, lineHeight: 1.5 }}>
-                  Start your first agricultural intelligence conversation
+                <div style={{ color: '#374151', fontSize: 14, fontWeight: 600, marginBottom: 5 }}>No conversations yet</div>
+                <div style={{ color: '#94a3b8', fontSize: 13, marginBottom: 18, lineHeight: 1.5 }}>
+                  Start a conversation with Intelligence E to get agricultural insights and analysis.
                 </div>
                 <Link href="/app/agriculture/intelligence" style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px',
-                  background: 'rgba(34,197,94,0.10)', border: '1px solid rgba(34,197,94,0.20)',
-                  borderRadius: 7, color: '#4ade80', fontSize: 12, fontWeight: 600, textDecoration: 'none',
+                  display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 20px',
+                  background: '#16a34a', borderRadius: 8, color: '#fff', fontSize: 13, fontWeight: 600, textDecoration: 'none',
+                  boxShadow: '0 2px 8px rgba(22,163,74,0.25)',
                 }}>
-                  Begin Intelligence Session
+                  Start a Conversation
                 </Link>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {recentConversations.map((conv) => (
                   <Link key={conv.id} href={`/app/agriculture/intelligence?conv=${conv.id}`} style={{
-                    display: 'flex', alignItems: 'center', gap: 11, padding: '10px 12px',
-                    background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
-                    borderRadius: 9, textDecoration: 'none',
+                    display: 'flex', alignItems: 'center', gap: 12, padding: '11px 14px',
+                    background: '#f8fafc', border: '1px solid #e8edf2',
+                    borderRadius: 10, textDecoration: 'none', transition: 'background 0.12s',
                   }}>
-                    <div style={{ width: 28, height: 28, borderRadius: 7, background: 'rgba(34,197,94,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <div style={{ width: 32, height: 32, borderRadius: 8, background: '#f0fdf4', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                       </svg>
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12.5, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', letterSpacing: '-0.01em' }}>
+                      <div style={{ color: '#1e293b', fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', letterSpacing: '-0.01em' }}>
                         {conv.title}
                       </div>
-                      <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11 }}>
+                      <div style={{ color: '#94a3b8', fontSize: 11.5, marginTop: 1 }}>
                         {conv.message_count || 0} messages · {conv.analysis_type?.replace(/_/g, ' ') || 'general'}
                       </div>
                     </div>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="9 18 15 12 9 6"/>
                     </svg>
                   </Link>
@@ -332,50 +388,124 @@ export default function AgricultureDashboard() {
           </div>
         </div>
 
-        {/* Right column — Capabilities */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div style={{ background: '#0D1017', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '18px 20px' }}>
-            <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10.5, fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', marginBottom: 14 }}>
-              Intelligence Capabilities
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              {capabilities.map((cap) => (
-                <Link key={cap.title} href={cap.href} style={{
-                  display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
-                  background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)',
-                  borderRadius: 9, textDecoration: 'none',
+        {/* Right sidebar */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+
+          {/* Quick Stats */}
+          <div style={{
+            background: '#ffffff', border: '1px solid #e8edf2', borderRadius: 14,
+            padding: '18px 20px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+          }}>
+            <h3 style={{ color: '#0f172a', fontSize: 14, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 14 }}>Quick Stats</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+              {[
+                { label: 'Farms', value: stats.farms, icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>, color: '#16a34a' },
+                { label: 'Crops', value: 0, icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22V12"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/><path d="M12 12C12 7 7 3 7 3s-1 5 5 9z"/><path d="M12 12c0-5 5-9 5-9s1 5-5 9z"/></svg>, color: '#16a34a' },
+                { label: 'Livestock', value: 0, icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>, color: '#2563eb' },
+                { label: 'Reports', value: stats.reports, icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>, color: '#7c3aed' },
+              ].map((stat, i, arr) => (
+                <div key={stat.label} style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '10px 0',
+                  borderBottom: i < arr.length - 1 ? '1px solid #f1f5f9' : 'none',
                 }}>
-                  <div style={{ color: 'rgba(255,255,255,0.3)', flexShrink: 0 }}>{cap.icon}</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: 12.5, fontWeight: 600, letterSpacing: '-0.01em' }}>{cap.title}</div>
-                    <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, lineHeight: 1.4, marginTop: 1 }}>{cap.desc}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                    <div style={{ color: stat.color }}>{stat.icon}</div>
+                    <span style={{ color: '#374151', fontSize: 13, fontWeight: 500 }}>{stat.label}</span>
                   </div>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="9 18 15 12 9 6"/>
-                  </svg>
-                </Link>
+                  <span style={{ color: loadingStats ? '#cbd5e1' : '#0f172a', fontSize: 14, fontWeight: 700 }}>
+                    {loadingStats ? '—' : stat.value}
+                  </span>
+                </div>
               ))}
             </div>
           </div>
 
-          {/* Finance Coming Soon */}
+          {/* Recent Activity */}
           <div style={{
-            background: '#0D1017', border: '1px dashed rgba(255,255,255,0.07)',
-            borderRadius: 12, padding: '14px 16px',
+            background: '#ffffff', border: '1px solid #e8edf2', borderRadius: 14,
+            padding: '18px 20px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
-              </svg>
-              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12.5, fontWeight: 600 }}>Intelligence E · Finance</span>
-              <span style={{
-                padding: '2px 7px', borderRadius: 999,
-                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
-                color: 'rgba(255,255,255,0.3)', fontSize: 9.5, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase',
-              }}>Coming Soon</span>
+            <h3 style={{ color: '#0f172a', fontSize: 14, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 14 }}>Recent Activity</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {[
+                { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>, title: 'No recent conversations', sub: 'Start a new conversation', color: '#64748b' },
+                { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>, title: 'No research activity', sub: 'Explore agricultural research', color: '#64748b' },
+                { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>, title: 'No reports generated', sub: 'Create your first report', color: '#64748b' },
+              ].map((item, i) => (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', gap: 10, padding: '9px 10px',
+                  borderRadius: 8, cursor: 'default',
+                }}>
+                  <div style={{ color: item.color, flexShrink: 0 }}>{item.icon}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ color: '#374151', fontSize: 12.5, fontWeight: 600 }}>{item.title}</div>
+                    <div style={{ color: '#94a3b8', fontSize: 11.5 }}>{item.sub}</div>
+                  </div>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                </div>
+              ))}
             </div>
-            <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11.5, lineHeight: 1.5 }}>
-              Financial market intelligence — in development
+          </div>
+
+          {/* Your Usage */}
+          <div style={{
+            background: '#ffffff', border: '1px solid #e8edf2', borderRadius: 14,
+            padding: '18px 20px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+          }}>
+            <h3 style={{ color: '#0f172a', fontSize: 14, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 14 }}>Your Usage</h3>
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                <span style={{ color: '#64748b', fontSize: 12.5 }}>Free tier</span>
+                <span style={{ color: '#374151', fontSize: 12.5, fontWeight: 600 }}>{stats.conversations} / 50 today</span>
+              </div>
+              <div style={{ height: 5, background: '#f1f5f9', borderRadius: 999, overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%', borderRadius: 999,
+                  background: '#16a34a',
+                  width: `${Math.min((stats.conversations / 50) * 100, 100)}%`,
+                  transition: 'width 0.4s ease',
+                }} />
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#64748b', fontSize: 11.5 }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              Usage limits reset at 00:00 (your timezone)
+            </div>
+          </div>
+
+          {/* Need Help */}
+          <div style={{
+            background: '#ffffff', border: '1px solid #e8edf2', borderRadius: 14,
+            padding: '18px 20px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 9, background: '#eff6ff', border: '1px solid #bfdbfe', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ color: '#0f172a', fontSize: 13.5, fontWeight: 700, marginBottom: 4 }}>Need Help?</div>
+                <div style={{ color: '#64748b', fontSize: 12.5, lineHeight: 1.5, marginBottom: 12 }}>
+                  Get help, view guides, or contact our support team.
+                </div>
+                <Link href="/help" style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  color: '#2563eb', fontSize: 12.5, fontWeight: 600, textDecoration: 'none',
+                }}>
+                  Visit Help Center
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                  </svg>
+                </Link>
+              </div>
             </div>
           </div>
         </div>

@@ -37,13 +37,14 @@ interface Livestock {
 
 const inputStyle: React.CSSProperties = {
   width: '100%', padding: '9px 12px', borderRadius: 8,
-  background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)',
-  color: '#fff', fontSize: 13, fontFamily: 'inherit', outline: 'none',
+  background: '#f8fafc', border: '1px solid #e2e8f0',
+  color: '#1e293b', fontSize: 13, fontFamily: 'inherit', outline: 'none',
+  transition: 'border-color 0.15s',
 };
 
 const labelStyle: React.CSSProperties = {
-  display: 'block', color: 'rgba(255,255,255,0.4)', fontSize: 10.5, fontWeight: 600,
-  letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 5,
+  display: 'block', color: '#64748b', fontSize: 11, fontWeight: 600,
+  letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 5,
 };
 
 export default function FarmDataPage() {
@@ -143,15 +144,16 @@ export default function FarmDataPage() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24 }}>
         <div>
-          <h1 style={{ color: '#fff', fontSize: 20, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 4 }}>Farm Data Intelligence</h1>
-          <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>Manage farms, crops, and livestock records</p>
+          <h1 style={{ color: '#0f172a', fontSize: 20, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 4 }}>Farm Data</h1>
+          <p style={{ color: '#64748b', fontSize: 13 }}>Manage farms, crops, and livestock records</p>
         </div>
         <button
           onClick={() => setShowFarmForm(true)}
           style={{
-            padding: '8px 16px', borderRadius: 8, border: '1px solid rgba(34,197,94,0.2)',
-            background: 'rgba(34,197,94,0.08)', color: '#4ade80', fontSize: 12.5, fontWeight: 600,
-            cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6,
+            padding: '9px 18px', borderRadius: 9, border: '1px solid #bbf7d0',
+            background: '#f0fdf4', color: '#16a34a', fontSize: 13, fontWeight: 600,
+            cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 7,
+            transition: 'all 0.12s',
           }}
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -164,15 +166,16 @@ export default function FarmDataPage() {
       {/* Add Farm Form */}
       {showFarmForm && (
         <div style={{
-          background: '#0D1017', border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: 12, padding: '20px 22px', marginBottom: 20,
+          background: '#fff', border: '1px solid #e8edf2',
+          borderRadius: 14, padding: '22px 24px', marginBottom: 20,
+          boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <h3 style={{ color: '#fff', fontSize: 14, fontWeight: 700, letterSpacing: '-0.02em' }}>Register New Farm</h3>
-            <button onClick={() => { setShowFarmForm(false); setFormError(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.3)', fontSize: 18, lineHeight: 1, padding: 4 }}>×</button>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+            <h3 style={{ color: '#0f172a', fontSize: 15, fontWeight: 700, letterSpacing: '-0.02em' }}>Register New Farm</h3>
+            <button onClick={() => { setShowFarmForm(false); setFormError(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 20, lineHeight: 1, padding: 4 }}>×</button>
           </div>
           <form onSubmit={handleAddFarm}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
               <div>
                 <label style={labelStyle}>Farm Name *</label>
                 <input type="text" value={farmForm.name} onChange={(e) => setFarmForm({ ...farmForm, name: e.target.value })} placeholder="e.g. Pelit Farm" required style={inputStyle} />
@@ -190,26 +193,27 @@ export default function FarmDataPage() {
                 <input type="number" value={farmForm.totalAreaHectares} onChange={(e) => setFarmForm({ ...farmForm, totalAreaHectares: e.target.value })} placeholder="e.g. 50" min="0" step="0.01" style={inputStyle} />
               </div>
             </div>
-            <div style={{ marginBottom: 16 }}>
+            <div style={{ marginBottom: 18 }}>
               <label style={labelStyle}>Primary Activity</label>
               <input type="text" value={farmForm.primaryActivity} onChange={(e) => setFarmForm({ ...farmForm, primaryActivity: e.target.value })} placeholder="e.g. Mixed farming, Dairy, Crop production" style={inputStyle} />
             </div>
             {formError && (
-              <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.18)', borderRadius: 8, padding: '8px 12px', color: '#fca5a5', fontSize: 12.5, marginBottom: 12 }}>
+              <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: '9px 12px', color: '#dc2626', fontSize: 12.5, marginBottom: 14 }}>
                 {formError}
               </div>
             )}
             <div style={{ display: 'flex', gap: 8 }}>
               <button type="submit" disabled={savingFarm} style={{
-                padding: '8px 18px', borderRadius: 8, border: 'none',
-                background: savingFarm ? 'rgba(34,197,94,0.4)' : '#22c55e',
+                padding: '9px 20px', borderRadius: 8, border: 'none',
+                background: savingFarm ? '#bbf7d0' : '#16a34a',
                 color: '#fff', fontSize: 13, fontWeight: 600, cursor: savingFarm ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
+                boxShadow: savingFarm ? 'none' : '0 2px 8px rgba(22,163,74,0.25)',
               }}>
                 {savingFarm ? 'Saving...' : 'Save Farm'}
               </button>
               <button type="button" onClick={() => { setShowFarmForm(false); setFormError(''); }} style={{
-                padding: '8px 18px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.10)',
-                background: 'transparent', color: 'rgba(255,255,255,0.45)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                padding: '9px 20px', borderRadius: 8, border: '1px solid #e2e8f0',
+                background: '#f8fafc', color: '#64748b', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
               }}>
                 Cancel
               </button>
@@ -219,19 +223,21 @@ export default function FarmDataPage() {
       )}
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 2, marginBottom: 16, background: 'rgba(255,255,255,0.04)', borderRadius: 9, padding: 3, width: 'fit-content' }}>
+      <div style={{ display: 'flex', gap: 2, marginBottom: 16, background: '#f1f5f9', borderRadius: 10, padding: 3, width: 'fit-content' }}>
         {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
             style={{
-              padding: '6px 14px', borderRadius: 7, border: 'none', cursor: 'pointer',
-              background: activeTab === tab.key ? 'rgba(255,255,255,0.09)' : 'transparent',
-              color: activeTab === tab.key ? '#fff' : 'rgba(255,255,255,0.35)',
-              fontSize: 12.5, fontWeight: 600, fontFamily: 'inherit', transition: 'all 0.12s',
+              padding: '7px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
+              background: activeTab === tab.key ? '#fff' : 'transparent',
+              color: activeTab === tab.key ? '#0f172a' : '#64748b',
+              fontSize: 13, fontWeight: activeTab === tab.key ? 600 : 500,
+              fontFamily: 'inherit', transition: 'all 0.12s',
+              boxShadow: activeTab === tab.key ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
             }}
           >
-            {tab.label} <span style={{ opacity: 0.6, fontSize: 11 }}>({tab.count})</span>
+            {tab.label} <span style={{ opacity: 0.6, fontSize: 11.5 }}>({tab.count})</span>
           </button>
         ))}
       </div>
@@ -243,14 +249,14 @@ export default function FarmDataPage() {
             value={selectedFarm || ''}
             onChange={(e) => setSelectedFarm(e.target.value || null)}
             style={{
-              background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)',
-              borderRadius: 8, color: 'rgba(255,255,255,0.6)', fontSize: 12.5, padding: '7px 12px',
+              background: '#f8fafc', border: '1px solid #e2e8f0',
+              borderRadius: 8, color: '#374151', fontSize: 13, padding: '8px 12px',
               fontFamily: 'inherit', cursor: 'pointer', outline: 'none',
             }}
           >
-            <option value="" style={{ background: '#0D1017' }}>All farms</option>
+            <option value="">All Farms</option>
             {farms.map((f) => (
-              <option key={f.id} value={f.id} style={{ background: '#0D1017' }}>{f.name}</option>
+              <option key={f.id} value={f.id}>{f.name}</option>
             ))}
           </select>
         </div>
@@ -258,163 +264,181 @@ export default function FarmDataPage() {
 
       {/* Content */}
       {loading ? (
-        <div style={{ padding: '32px', textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>Loading farm data...</div>
+        <div style={{ background: '#fff', border: '1px solid #e8edf2', borderRadius: 14, padding: '40px 24px', textAlign: 'center', color: '#94a3b8', fontSize: 13 }}>
+          Loading farm data...
+        </div>
       ) : (
         <>
           {/* Farms tab */}
           {activeTab === 'farms' && (
-            farms.length === 0 ? (
-              <div style={{
-                background: '#0D1017', border: '1px dashed rgba(255,255,255,0.08)',
-                borderRadius: 12, padding: '48px 24px', textAlign: 'center',
-              }}>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <ellipse cx="12" cy="5" rx="9" ry="3"/>
-                    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
-                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
-                  </svg>
-                </div>
-                <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, fontWeight: 600, marginBottom: 6 }}>No farms registered yet</div>
-                <div style={{ color: 'rgba(255,255,255,0.25)', fontSize: 12.5, marginBottom: 20, lineHeight: 1.6, maxWidth: 320, margin: '0 auto 20px' }}>
-                  Add your first farm to begin building your agricultural intelligence profile.
-                </div>
-                <button
-                  onClick={() => setShowFarmForm(true)}
-                  style={{
-                    padding: '8px 18px', borderRadius: 8, border: '1px solid rgba(34,197,94,0.2)',
-                    background: 'rgba(34,197,94,0.08)', color: '#4ade80', fontSize: 12.5, fontWeight: 600,
-                    cursor: 'pointer', fontFamily: 'inherit',
-                  }}
-                >
-                  Register First Farm
-                </button>
-              </div>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
-                {farms.map((farm) => (
-                  <div key={farm.id} style={{
-                    background: '#0D1017', border: '1px solid rgba(255,255,255,0.07)',
-                    borderRadius: 12, padding: '16px 18px',
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
-                      <div>
-                        <div style={{ color: '#fff', fontSize: 14, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 2 }}>{farm.name}</div>
-                        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{farm.country}{farm.region ? `, ${farm.region}` : ''}</div>
-                      </div>
-                      <div style={{
-                        padding: '2px 8px', borderRadius: 999, fontSize: 10, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase',
-                        background: farm.isActive ? 'rgba(34,197,94,0.10)' : 'rgba(255,255,255,0.05)',
-                        border: `1px solid ${farm.isActive ? 'rgba(34,197,94,0.20)' : 'rgba(255,255,255,0.08)'}`,
-                        color: farm.isActive ? '#4ade80' : 'rgba(255,255,255,0.3)',
-                      }}>
-                        {farm.isActive ? 'Active' : 'Inactive'}
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', gap: 16 }}>
-                      {farm.totalAreaHectares && (
-                        <div>
-                          <div style={{ color: 'rgba(255,255,255,0.25)', fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 2 }}>Area</div>
-                          <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 600 }}>{farm.totalAreaHectares} ha</div>
-                        </div>
-                      )}
-                      {farm.primaryActivity && (
-                        <div>
-                          <div style={{ color: 'rgba(255,255,255,0.25)', fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 2 }}>Activity</div>
-                          <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 600 }}>{farm.primaryActivity}</div>
-                        </div>
-                      )}
-                    </div>
+            <div>
+              {farms.length === 0 ? (
+                <div style={{
+                  background: '#fff', border: '1.5px dashed #e2e8f0', borderRadius: 14,
+                  padding: '48px 24px', textAlign: 'center',
+                }}>
+                  <div style={{ width: 52, height: 52, borderRadius: 14, background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                      <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                      <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                      <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                    </svg>
                   </div>
-                ))}
-              </div>
-            )
+                  <div style={{ color: '#374151', fontSize: 15, fontWeight: 700, marginBottom: 6 }}>No farms registered</div>
+                  <div style={{ color: '#94a3b8', fontSize: 13, marginBottom: 20, lineHeight: 1.5 }}>
+                    Register your first farm to start tracking agricultural data.
+                  </div>
+                  <button
+                    onClick={() => setShowFarmForm(true)}
+                    style={{
+                      padding: '9px 20px', borderRadius: 9, border: 'none',
+                      background: '#16a34a', color: '#fff', fontSize: 13, fontWeight: 600,
+                      cursor: 'pointer', fontFamily: 'inherit',
+                      boxShadow: '0 2px 8px rgba(22,163,74,0.25)',
+                    }}
+                  >
+                    Register First Farm
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
+                  {farms.map((farm) => (
+                    <div key={farm.id} style={{
+                      background: '#fff', border: '1px solid #e8edf2', borderRadius: 12,
+                      padding: '18px 20px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <div style={{ width: 36, height: 36, borderRadius: 9, background: '#f0fdf4', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                              <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                              <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                            </svg>
+                          </div>
+                          <div>
+                            <div style={{ color: '#0f172a', fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em' }}>{farm.name}</div>
+                            <div style={{ color: '#64748b', fontSize: 12 }}>{farm.country}{farm.region ? `, ${farm.region}` : ''}</div>
+                          </div>
+                        </div>
+                        <span style={{
+                          padding: '2px 8px', borderRadius: 999, fontSize: 10.5, fontWeight: 600,
+                          background: farm.isActive ? '#f0fdf4' : '#f8fafc',
+                          border: `1px solid ${farm.isActive ? '#bbf7d0' : '#e2e8f0'}`,
+                          color: farm.isActive ? '#16a34a' : '#94a3b8',
+                        }}>
+                          {farm.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', gap: 16 }}>
+                        {farm.totalAreaHectares && (
+                          <div>
+                            <div style={{ color: '#94a3b8', fontSize: 10.5, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>Area</div>
+                            <div style={{ color: '#374151', fontSize: 13, fontWeight: 600 }}>{farm.totalAreaHectares} ha</div>
+                          </div>
+                        )}
+                        {farm.primaryActivity && (
+                          <div>
+                            <div style={{ color: '#94a3b8', fontSize: 10.5, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>Activity</div>
+                            <div style={{ color: '#374151', fontSize: 13, fontWeight: 600 }}>{farm.primaryActivity}</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
 
           {/* Crops tab */}
           {activeTab === 'crops' && (
-            filteredCrops.length === 0 ? (
-              <div style={{
-                background: '#0D1017', border: '1px dashed rgba(255,255,255,0.08)',
-                borderRadius: 12, padding: '48px 24px', textAlign: 'center',
-              }}>
-                <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, fontWeight: 600, marginBottom: 6 }}>No crop records yet</div>
-                <div style={{ color: 'rgba(255,255,255,0.25)', fontSize: 12.5, lineHeight: 1.6 }}>
-                  {farms.length === 0 ? 'Register a farm first, then add crop records.' : 'Add crop records to track your agricultural production.'}
+            <div>
+              {filteredCrops.length === 0 ? (
+                <div style={{
+                  background: '#fff', border: '1.5px dashed #e2e8f0', borderRadius: 14,
+                  padding: '48px 24px', textAlign: 'center',
+                }}>
+                  <div style={{ color: '#374151', fontSize: 15, fontWeight: 700, marginBottom: 6 }}>No crop records</div>
+                  <div style={{ color: '#94a3b8', fontSize: 13, lineHeight: 1.5 }}>
+                    {farms.length === 0 ? 'Register a farm first, then add crop records.' : 'No crops have been recorded for the selected farm.'}
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div style={{ background: '#0D1017', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-                      {['Crop', 'Variety', 'Field', 'Area (ha)', 'Planting Date', 'Status'].map((h) => (
-                        <th key={h} style={{ padding: '11px 16px', textAlign: 'left', color: 'rgba(255,255,255,0.3)', fontSize: 10.5, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase' }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredCrops.map((crop, i) => (
-                      <tr key={crop.id} style={{ borderBottom: i < filteredCrops.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
-                        <td style={{ padding: '11px 16px', color: 'rgba(255,255,255,0.85)', fontSize: 13, fontWeight: 600 }}>{crop.cropName}</td>
-                        <td style={{ padding: '11px 16px', color: 'rgba(255,255,255,0.45)', fontSize: 12.5 }}>{crop.variety || '—'}</td>
-                        <td style={{ padding: '11px 16px', color: 'rgba(255,255,255,0.45)', fontSize: 12.5 }}>{crop.fieldName || '—'}</td>
-                        <td style={{ padding: '11px 16px', color: 'rgba(255,255,255,0.45)', fontSize: 12.5 }}>{crop.areaHectares || '—'}</td>
-                        <td style={{ padding: '11px 16px', color: 'rgba(255,255,255,0.45)', fontSize: 12.5 }}>{crop.plantingDate || '—'}</td>
-                        <td style={{ padding: '11px 16px' }}>
-                          <span style={{
-                            padding: '2px 8px', borderRadius: 999, fontSize: 10.5, fontWeight: 600,
-                            background: 'rgba(34,197,94,0.10)', border: '1px solid rgba(34,197,94,0.18)', color: '#4ade80',
-                          }}>{crop.status}</span>
-                        </td>
+              ) : (
+                <div style={{ background: '#fff', border: '1px solid #e8edf2', borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e8edf2' }}>
+                        {['Crop', 'Variety', 'Field', 'Area (ha)', 'Planting Date', 'Status'].map((h) => (
+                          <th key={h} style={{ padding: '11px 16px', textAlign: 'left', color: '#64748b', fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{h}</th>
+                        ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )
+                    </thead>
+                    <tbody>
+                      {filteredCrops.map((crop, i) => (
+                        <tr key={crop.id} style={{ borderBottom: i < filteredCrops.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
+                          <td style={{ padding: '12px 16px', color: '#0f172a', fontSize: 13, fontWeight: 600 }}>{crop.cropName}</td>
+                          <td style={{ padding: '12px 16px', color: '#64748b', fontSize: 13 }}>{crop.variety || '—'}</td>
+                          <td style={{ padding: '12px 16px', color: '#64748b', fontSize: 13 }}>{crop.fieldName || '—'}</td>
+                          <td style={{ padding: '12px 16px', color: '#64748b', fontSize: 13 }}>{crop.areaHectares ?? '—'}</td>
+                          <td style={{ padding: '12px 16px', color: '#64748b', fontSize: 13 }}>{crop.plantingDate || '—'}</td>
+                          <td style={{ padding: '12px 16px' }}>
+                            <span style={{
+                              padding: '2px 8px', borderRadius: 999, fontSize: 11, fontWeight: 600,
+                              background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#16a34a',
+                            }}>{crop.status}</span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           )}
 
           {/* Livestock tab */}
           {activeTab === 'livestock' && (
-            filteredLivestock.length === 0 ? (
-              <div style={{
-                background: '#0D1017', border: '1px dashed rgba(255,255,255,0.08)',
-                borderRadius: 12, padding: '48px 24px', textAlign: 'center',
-              }}>
-                <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, fontWeight: 600, marginBottom: 6 }}>No livestock records yet</div>
-                <div style={{ color: 'rgba(255,255,255,0.25)', fontSize: 12.5, lineHeight: 1.6 }}>
-                  {farms.length === 0 ? 'Register a farm first, then add livestock records.' : 'Add livestock records to track your animals.'}
+            <div>
+              {filteredLivestock.length === 0 ? (
+                <div style={{
+                  background: '#fff', border: '1.5px dashed #e2e8f0', borderRadius: 14,
+                  padding: '48px 24px', textAlign: 'center',
+                }}>
+                  <div style={{ color: '#374151', fontSize: 15, fontWeight: 700, marginBottom: 6 }}>No livestock records</div>
+                  <div style={{ color: '#94a3b8', fontSize: 13, lineHeight: 1.5 }}>
+                    {farms.length === 0 ? 'Register a farm first, then add livestock records.' : 'No livestock have been recorded for the selected farm.'}
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div style={{ background: '#0D1017', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-                      {['Animal Type', 'Breed', 'Count', 'Status'].map((h) => (
-                        <th key={h} style={{ padding: '11px 16px', textAlign: 'left', color: 'rgba(255,255,255,0.3)', fontSize: 10.5, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase' }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredLivestock.map((animal, i) => (
-                      <tr key={animal.id} style={{ borderBottom: i < filteredLivestock.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
-                        <td style={{ padding: '11px 16px', color: 'rgba(255,255,255,0.85)', fontSize: 13, fontWeight: 600 }}>{animal.animalType}</td>
-                        <td style={{ padding: '11px 16px', color: 'rgba(255,255,255,0.45)', fontSize: 12.5 }}>{animal.breed || '—'}</td>
-                        <td style={{ padding: '11px 16px', color: 'rgba(255,255,255,0.45)', fontSize: 12.5 }}>{animal.count.toLocaleString()}</td>
-                        <td style={{ padding: '11px 16px' }}>
-                          <span style={{
-                            padding: '2px 8px', borderRadius: 999, fontSize: 10.5, fontWeight: 600,
-                            background: 'rgba(34,197,94,0.10)', border: '1px solid rgba(34,197,94,0.18)', color: '#4ade80',
-                          }}>{animal.status}</span>
-                        </td>
+              ) : (
+                <div style={{ background: '#fff', border: '1px solid #e8edf2', borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e8edf2' }}>
+                        {['Animal Type', 'Breed', 'Count', 'Status'].map((h) => (
+                          <th key={h} style={{ padding: '11px 16px', textAlign: 'left', color: '#64748b', fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{h}</th>
+                        ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )
+                    </thead>
+                    <tbody>
+                      {filteredLivestock.map((animal, i) => (
+                        <tr key={animal.id} style={{ borderBottom: i < filteredLivestock.length - 1 ? '1px solid #f1f5f9' : 'none' }}>
+                          <td style={{ padding: '12px 16px', color: '#0f172a', fontSize: 13, fontWeight: 600 }}>{animal.animalType}</td>
+                          <td style={{ padding: '12px 16px', color: '#64748b', fontSize: 13 }}>{animal.breed || '—'}</td>
+                          <td style={{ padding: '12px 16px', color: '#374151', fontSize: 13, fontWeight: 600 }}>{animal.count}</td>
+                          <td style={{ padding: '12px 16px' }}>
+                            <span style={{
+                              padding: '2px 8px', borderRadius: 999, fontSize: 11, fontWeight: 600,
+                              background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#16a34a',
+                            }}>{animal.status}</span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           )}
         </>
       )}

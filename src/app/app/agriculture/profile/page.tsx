@@ -30,13 +30,14 @@ const LANGUAGES = [
 
 const inputStyle: React.CSSProperties = {
   width: '100%', padding: '9px 12px', borderRadius: 8,
-  background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)',
-  color: '#fff', fontSize: 13, fontFamily: 'inherit', outline: 'none',
+  background: '#f8fafc', border: '1px solid #e2e8f0',
+  color: '#1e293b', fontSize: 13, fontFamily: 'inherit', outline: 'none',
+  transition: 'border-color 0.15s',
 };
 
 const labelStyle: React.CSSProperties = {
-  display: 'block', color: 'rgba(255,255,255,0.4)', fontSize: 10.5, fontWeight: 600,
-  letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 5,
+  display: 'block', color: '#64748b', fontSize: 11, fontWeight: 600,
+  letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 5,
 };
 
 export default function ProfilePage() {
@@ -54,7 +55,6 @@ export default function ProfilePage() {
   const [detectedTimezone, setDetectedTimezone] = useState('');
 
   useEffect(() => {
-    // Detect browser timezone
     try {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
       setDetectedTimezone(tz);
@@ -90,7 +90,6 @@ export default function ProfilePage() {
         created_at: data?.created_at || user?.created_at || '',
       });
     } catch {
-      // Profile may not exist yet — use auth data
       setProfile((prev) => ({
         ...prev,
         full_name: user?.user_metadata?.full_name || '',
@@ -128,7 +127,6 @@ export default function ProfilePage() {
         return;
       }
 
-      // Also update auth metadata for full_name
       if (profile.full_name.trim()) {
         await supabase.auth.updateUser({
           data: { full_name: profile.full_name.trim() },
@@ -157,7 +155,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div style={{ maxWidth: 680, margin: '0 auto', padding: '32px 0', textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>
+      <div style={{ maxWidth: 680, margin: '0 auto', padding: '32px 0', textAlign: 'center', color: '#94a3b8', fontSize: 13 }}>
         Loading profile...
       </div>
     );
@@ -166,42 +164,45 @@ export default function ProfilePage() {
   return (
     <div style={{ maxWidth: 680, margin: '0 auto' }}>
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ color: '#fff', fontSize: 20, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 4 }}>Profile</h1>
-        <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>Manage your account information and preferences</p>
+        <h1 style={{ color: '#0f172a', fontSize: 20, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 4 }}>Profile</h1>
+        <p style={{ color: '#64748b', fontSize: 13 }}>Manage your account information and preferences</p>
       </div>
 
       {/* Avatar + account info */}
       <div style={{
-        background: '#0D1017', border: '1px solid rgba(255,255,255,0.07)',
-        borderRadius: 12, padding: '20px 22px', marginBottom: 16,
+        background: '#fff', border: '1px solid #e8edf2',
+        borderRadius: 14, padding: '22px 24px', marginBottom: 16,
         display: 'flex', alignItems: 'center', gap: 16,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
       }}>
         <div style={{
-          width: 52, height: 52, borderRadius: 14, flexShrink: 0,
-          background: 'linear-gradient(135deg, #22c55e, #15803d)',
+          width: 56, height: 56, borderRadius: 14, flexShrink: 0,
+          background: 'linear-gradient(135deg, #16a34a, #166534)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: '#fff', fontWeight: 700, fontSize: 20,
+          color: '#fff', fontWeight: 700, fontSize: 22,
+          boxShadow: '0 2px 8px rgba(22,163,74,0.25)',
         }}>
           {userInitial}
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ color: '#fff', fontSize: 15, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 3 }}>
+          <div style={{ color: '#0f172a', fontSize: 16, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 3 }}>
             {profile.full_name || 'No name set'}
           </div>
-          <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>{profile.email}</div>
+          <div style={{ color: '#64748b', fontSize: 13 }}>{profile.email}</div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ color: 'rgba(255,255,255,0.25)', fontSize: 10.5, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 3 }}>Member since</div>
-          <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12.5 }}>{formatDate(profile.created_at)}</div>
+          <div style={{ color: '#94a3b8', fontSize: 10.5, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 3 }}>Member since</div>
+          <div style={{ color: '#374151', fontSize: 13, fontWeight: 600 }}>{formatDate(profile.created_at)}</div>
         </div>
       </div>
 
       {/* Profile form */}
       <div style={{
-        background: '#0D1017', border: '1px solid rgba(255,255,255,0.07)',
-        borderRadius: 12, padding: '20px 22px',
+        background: '#fff', border: '1px solid #e8edf2',
+        borderRadius: 14, padding: '22px 24px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
       }}>
-        <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10.5, fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', marginBottom: 18 }}>
+        <div style={{ color: '#64748b', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 20 }}>
           Profile Information
         </div>
 
@@ -223,7 +224,7 @@ export default function ProfilePage() {
                 type="email"
                 value={profile.email}
                 disabled
-                style={{ ...inputStyle, opacity: 0.5, cursor: 'not-allowed' }}
+                style={{ ...inputStyle, opacity: 0.5, cursor: 'not-allowed', background: '#f1f5f9' }}
               />
             </div>
             <div>
@@ -256,55 +257,37 @@ export default function ProfilePage() {
                 onChange={(e) => setProfile({ ...profile, preferred_language: e.target.value })}
                 style={{ ...inputStyle, cursor: 'pointer' }}
               >
-                {LANGUAGES.map((l) => (
-                  <option key={l.value} value={l.value} style={{ background: '#0D1017' }}>{l.label}</option>
+                {LANGUAGES.map((lang) => (
+                  <option key={lang.value} value={lang.value}>{lang.label}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label style={labelStyle}>
-                Timezone
-                {detectedTimezone && (
-                  <span style={{ color: 'rgba(34,197,94,0.7)', fontWeight: 500, marginLeft: 6, textTransform: 'none', letterSpacing: 0 }}>
-                    · detected: {detectedTimezone}
-                  </span>
-                )}
-              </label>
+              <label style={labelStyle}>Timezone</label>
               <select
                 value={profile.timezone}
                 onChange={(e) => setProfile({ ...profile, timezone: e.target.value })}
                 style={{ ...inputStyle, cursor: 'pointer' }}
               >
-                {/* Show detected timezone first if not in list */}
-                {detectedTimezone && !TIMEZONES.includes(detectedTimezone) && (
-                  <option value={detectedTimezone} style={{ background: '#0D1017' }}>{detectedTimezone} (detected)</option>
-                )}
                 {TIMEZONES.map((tz) => (
-                  <option key={tz} value={tz} style={{ background: '#0D1017' }}>{tz}</option>
+                  <option key={tz} value={tz}>{tz}</option>
                 ))}
               </select>
             </div>
           </div>
 
-          {error && (
-            <div style={{
-              background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.18)',
-              borderRadius: 8, padding: '8px 12px', color: '#fca5a5', fontSize: 12.5, marginBottom: 14,
-            }}>
-              {error}
-            </div>
-          )}
-
           {saveSuccess && (
-            <div style={{
-              background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.18)',
-              borderRadius: 8, padding: '8px 12px', color: '#4ade80', fontSize: 12.5, marginBottom: 14,
-              display: 'flex', alignItems: 'center', gap: 7,
-            }}>
+            <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '9px 12px', color: '#16a34a', fontSize: 12.5, marginBottom: 14, display: 'flex', alignItems: 'center', gap: 7 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
               Profile saved successfully
+            </div>
+          )}
+
+          {error && (
+            <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: '9px 12px', color: '#dc2626', fontSize: 12.5, marginBottom: 14 }}>
+              {error}
             </div>
           )}
 
@@ -313,48 +296,16 @@ export default function ProfilePage() {
             disabled={saving}
             style={{
               padding: '9px 22px', borderRadius: 8, border: 'none',
-              background: saving ? 'rgba(34,197,94,0.4)' : '#22c55e',
+              background: saving ? '#bbf7d0' : '#16a34a',
               color: '#fff', fontSize: 13, fontWeight: 600,
               cursor: saving ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
-              display: 'flex', alignItems: 'center', gap: 7,
+              boxShadow: saving ? 'none' : '0 2px 8px rgba(22,163,74,0.25)',
             }}
           >
-            {saving && <div style={{ width: 13, height: 13, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />}
             {saving ? 'Saving...' : 'Save Profile'}
           </button>
         </form>
       </div>
-
-      {/* Account info */}
-      <div style={{
-        background: '#0D1017', border: '1px solid rgba(255,255,255,0.07)',
-        borderRadius: 12, padding: '16px 22px', marginTop: 16,
-      }}>
-        <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10.5, fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', marginBottom: 14 }}>
-          Account
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13 }}>Plan</span>
-            <span style={{
-              padding: '2px 8px', borderRadius: 999, fontSize: 10.5, fontWeight: 700,
-              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)',
-              color: 'rgba(255,255,255,0.5)',
-            }}>Free</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13 }}>Account ID</span>
-            <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 11.5, fontFamily: 'monospace' }}>{user?.id?.slice(0, 8)}...</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13 }}>Email verified</span>
-            <span style={{ color: user?.email_confirmed_at ? '#4ade80' : '#fca5a5', fontSize: 12.5, fontWeight: 600 }}>
-              {user?.email_confirmed_at ? 'Verified' : 'Not verified'}
-            </span>
-          </div>
-        </div>
-      </div>
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

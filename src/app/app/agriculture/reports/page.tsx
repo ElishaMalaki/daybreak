@@ -25,6 +25,7 @@ const REPORT_TYPES = [
         <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
       </svg>
     ),
+    color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0',
   },
   {
     value: 'market_intelligence',
@@ -35,6 +36,7 @@ const REPORT_TYPES = [
         <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
       </svg>
     ),
+    color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe',
   },
   {
     value: 'risk_intelligence',
@@ -46,6 +48,7 @@ const REPORT_TYPES = [
         <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
       </svg>
     ),
+    color: '#d97706', bg: '#fffbeb', border: '#fde68a',
   },
   {
     value: 'research_summary',
@@ -56,19 +59,20 @@ const REPORT_TYPES = [
         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
       </svg>
     ),
+    color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe',
   },
 ];
 
 function statusBadge(status: string) {
   const map: Record<string, { bg: string; border: string; text: string; label: string }> = {
-    completed: { bg: 'rgba(34,197,94,0.10)', border: 'rgba(34,197,94,0.20)', text: '#4ade80', label: 'Completed' },
-    generating: { bg: 'rgba(59,130,246,0.10)', border: 'rgba(59,130,246,0.20)', text: '#60a5fa', label: 'Generating' },
-    failed: { bg: 'rgba(239,68,68,0.10)', border: 'rgba(239,68,68,0.20)', text: '#fca5a5', label: 'Failed' },
+    completed: { bg: '#f0fdf4', border: '#bbf7d0', text: '#16a34a', label: 'Completed' },
+    generating: { bg: '#eff6ff', border: '#bfdbfe', text: '#2563eb', label: 'Generating' },
+    failed: { bg: '#fef2f2', border: '#fecaca', text: '#dc2626', label: 'Failed' },
   };
-  const s = map[status] || { bg: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.10)', text: 'rgba(255,255,255,0.4)', label: status };
+  const s = map[status] || { bg: '#f8fafc', border: '#e2e8f0', text: '#64748b', label: status };
   return (
     <span style={{
-      padding: '2px 8px', borderRadius: 999, fontSize: 10.5, fontWeight: 600,
+      padding: '2px 9px', borderRadius: 999, fontSize: 11, fontWeight: 600,
       background: s.bg, border: `1px solid ${s.border}`, color: s.text,
     }}>{s.label}</span>
   );
@@ -196,15 +200,15 @@ For agricultural professionals and businesses. Be specific, evidence-based, and 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24 }}>
         <div>
-          <h1 style={{ color: '#fff', fontSize: 20, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 4 }}>Reports</h1>
-          <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>AI-generated agricultural intelligence reports</p>
+          <h1 style={{ color: '#0f172a', fontSize: 20, fontWeight: 700, letterSpacing: '-0.03em', marginBottom: 4 }}>Reports</h1>
+          <p style={{ color: '#64748b', fontSize: 13 }}>AI-generated agricultural intelligence reports</p>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
           style={{
-            padding: '8px 16px', borderRadius: 8, border: '1px solid rgba(34,197,94,0.2)',
-            background: 'rgba(34,197,94,0.08)', color: '#4ade80', fontSize: 12.5, fontWeight: 600,
-            cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6,
+            padding: '9px 18px', borderRadius: 9, border: '1px solid #bbf7d0',
+            background: '#f0fdf4', color: '#16a34a', fontSize: 13, fontWeight: 600,
+            cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 7,
           }}
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -217,16 +221,17 @@ For agricultural professionals and businesses. Be specific, evidence-based, and 
       {/* Generate Form */}
       {showForm && (
         <div style={{
-          background: '#0D1017', border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: 12, padding: '20px 22px', marginBottom: 20,
+          background: '#fff', border: '1px solid #e8edf2',
+          borderRadius: 14, padding: '22px 24px', marginBottom: 20,
+          boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <h3 style={{ color: '#fff', fontSize: 14, fontWeight: 700, letterSpacing: '-0.02em' }}>Generate New Report</h3>
-            <button onClick={() => setShowForm(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.3)', fontSize: 18, lineHeight: 1, padding: 4 }}>×</button>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+            <h3 style={{ color: '#0f172a', fontSize: 15, fontWeight: 700, letterSpacing: '-0.02em' }}>Generate New Report</h3>
+            <button onClick={() => setShowForm(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 20, lineHeight: 1, padding: 4 }}>×</button>
           </div>
 
-          <div style={{ marginBottom: 14 }}>
-            <label style={{ display: 'block', color: 'rgba(255,255,255,0.35)', fontSize: 10.5, fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', marginBottom: 10 }}>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', color: '#64748b', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 10 }}>
               Report Type
             </label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
@@ -235,39 +240,40 @@ For agricultural professionals and businesses. Be specific, evidence-based, and 
                   key={type.value}
                   onClick={() => setSelectedType(type.value)}
                   style={{
-                    padding: '11px 14px', borderRadius: 10,
-                    border: `1px solid ${selectedType === type.value ? 'rgba(34,197,94,0.25)' : 'rgba(255,255,255,0.08)'}`,
-                    background: selectedType === type.value ? 'rgba(34,197,94,0.08)' : 'rgba(255,255,255,0.03)',
+                    padding: '12px 14px', borderRadius: 10,
+                    border: `1px solid ${selectedType === type.value ? type.border : '#e2e8f0'}`,
+                    background: selectedType === type.value ? type.bg : '#f8fafc',
                     cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', transition: 'all 0.12s',
                   }}
                 >
-                  <div style={{ color: selectedType === type.value ? '#4ade80' : 'rgba(255,255,255,0.3)', marginBottom: 6 }}>{type.icon}</div>
-                  <div style={{ color: selectedType === type.value ? '#4ade80' : 'rgba(255,255,255,0.7)', fontSize: 12.5, fontWeight: 600, marginBottom: 2 }}>{type.label}</div>
-                  <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, lineHeight: 1.4 }}>{type.description}</div>
+                  <div style={{ color: selectedType === type.value ? type.color : '#94a3b8', marginBottom: 6 }}>{type.icon}</div>
+                  <div style={{ color: selectedType === type.value ? type.color : '#374151', fontSize: 12.5, fontWeight: 600, marginBottom: 2 }}>{type.label}</div>
+                  <div style={{ color: '#94a3b8', fontSize: 11, lineHeight: 1.4 }}>{type.description}</div>
                 </button>
               ))}
             </div>
           </div>
 
           <div style={{ marginBottom: 16 }}>
-            <label style={{ display: 'block', color: 'rgba(255,255,255,0.35)', fontSize: 10.5, fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', marginBottom: 8 }}>
-              Report Topic / Focus Area
+            <label style={{ display: 'block', color: '#64748b', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 8 }}>
+              Report Topic
             </label>
-            <textarea
+            <input
+              type="text"
               value={reportTopic}
               onChange={(e) => setReportTopic(e.target.value)}
-              placeholder="e.g. Maize production outlook for East Africa Q1 2025, Impact of El Niño on smallholder farmers..."
-              rows={2}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleGenerateReport(); }}
+              placeholder="e.g. Maize market outlook in East Africa Q4 2026"
               style={{
                 width: '100%', padding: '10px 14px', borderRadius: 9,
-                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)',
-                color: '#fff', fontSize: 13, fontFamily: 'inherit', outline: 'none', resize: 'vertical',
+                background: '#f8fafc', border: '1px solid #e2e8f0',
+                color: '#1e293b', fontSize: 13.5, fontFamily: 'inherit', outline: 'none',
               }}
             />
           </div>
 
           {error && (
-            <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.18)', borderRadius: 8, padding: '8px 12px', color: '#fca5a5', fontSize: 12.5, marginBottom: 12 }}>
+            <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: '9px 12px', color: '#dc2626', fontSize: 12.5, marginBottom: 14 }}>
               {error}
             </div>
           )}
@@ -277,19 +283,22 @@ For agricultural professionals and businesses. Be specific, evidence-based, and 
               onClick={handleGenerateReport}
               disabled={generating || !reportTopic.trim()}
               style={{
-                padding: '8px 20px', borderRadius: 8, border: 'none',
-                background: generating || !reportTopic.trim() ? 'rgba(34,197,94,0.3)' : '#22c55e',
+                padding: '9px 22px', borderRadius: 8, border: 'none',
+                background: generating || !reportTopic.trim() ? '#bbf7d0' : '#16a34a',
                 color: '#fff', fontSize: 13, fontWeight: 600,
                 cursor: generating || !reportTopic.trim() ? 'not-allowed' : 'pointer',
                 fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 7,
+                boxShadow: generating || !reportTopic.trim() ? 'none' : '0 2px 8px rgba(22,163,74,0.25)',
               }}
             >
-              {generating && <div style={{ width: 13, height: 13, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />}
+              {generating && (
+                <div style={{ width: 13, height: 13, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+              )}
               {generating ? 'Generating...' : 'Generate Report'}
             </button>
             <button onClick={() => setShowForm(false)} style={{
-              padding: '8px 18px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.10)',
-              background: 'transparent', color: 'rgba(255,255,255,0.45)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+              padding: '9px 20px', borderRadius: 8, border: '1px solid #e2e8f0',
+              background: '#f8fafc', color: '#64748b', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
             }}>
               Cancel
             </button>
@@ -300,89 +309,116 @@ For agricultural professionals and businesses. Be specific, evidence-based, and 
       {/* Active Report */}
       {activeReport && (
         <div style={{
-          background: '#0D1017', border: '1px solid rgba(255,255,255,0.07)',
-          borderRadius: 12, padding: '20px 22px', marginBottom: 20,
+          background: '#fff', border: '1px solid #e8edf2',
+          borderRadius: 14, padding: '22px 24px', marginBottom: 16,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
         }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
-            <div>
-              <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 5 }}>Report</div>
-              <div style={{ color: '#fff', fontSize: 14, fontWeight: 700, letterSpacing: '-0.02em' }}>{activeReport.title}</div>
+            <div style={{ flex: 1, minWidth: 0, paddingRight: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                {statusBadge(activeReport.status)}
+                <span style={{ color: '#94a3b8', fontSize: 11.5 }}>
+                  {REPORT_TYPES.find(t => t.value === activeReport.reportType)?.label || activeReport.reportType}
+                </span>
+              </div>
+              <div style={{ color: '#0f172a', fontSize: 15, fontWeight: 700, letterSpacing: '-0.02em' }}>{activeReport.title}</div>
             </div>
-            <button onClick={() => setActiveReport(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.25)', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 4, flexShrink: 0 }}>×</button>
+            <button
+              onClick={() => setActiveReport(null)}
+              style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 20, lineHeight: 1, padding: 4, flexShrink: 0 }}
+            >×</button>
           </div>
-          <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13.5, lineHeight: 1.7, whiteSpace: 'pre-wrap', letterSpacing: '-0.01em' }}>
+          <div style={{
+            color: '#374151', fontSize: 13.5, lineHeight: 1.75,
+            whiteSpace: 'pre-wrap', letterSpacing: '-0.01em',
+          }}>
             {activeReport.summary}
           </div>
-          <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>
-            Intelligence E Agriculture · AI-generated report. Verify critical data with local agricultural experts and official sources.
+          <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid #f1f5f9', color: '#94a3b8', fontSize: 11.5 }}>
+            Intelligence E Agriculture · Reports are AI-generated. Verify critical decisions with local agricultural experts.
           </div>
         </div>
       )}
 
       {/* Reports list */}
       {loading ? (
-        <div style={{ padding: '32px', textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>Loading reports...</div>
+        <div style={{ background: '#fff', border: '1px solid #e8edf2', borderRadius: 14, padding: '40px 24px', textAlign: 'center', color: '#94a3b8', fontSize: 13 }}>
+          Loading reports...
+        </div>
       ) : reports.length === 0 ? (
         <div style={{
-          background: '#0D1017', border: '1px dashed rgba(255,255,255,0.07)',
-          borderRadius: 12, padding: '48px 24px', textAlign: 'center',
+          background: '#fff', border: '1.5px dashed #e2e8f0', borderRadius: 14,
+          padding: '48px 24px', textAlign: 'center',
         }}>
-          <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
               <polyline points="14 2 14 8 20 8"/>
               <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
             </svg>
           </div>
-          <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, fontWeight: 600, marginBottom: 6 }}>No reports generated yet</div>
-          <div style={{ color: 'rgba(255,255,255,0.25)', fontSize: 12.5, marginBottom: 20, lineHeight: 1.6, maxWidth: 320, margin: '0 auto 20px' }}>
-            Generate your first agricultural intelligence report to get started.
+          <div style={{ color: '#374151', fontSize: 15, fontWeight: 700, marginBottom: 6 }}>No reports generated</div>
+          <div style={{ color: '#94a3b8', fontSize: 13, marginBottom: 20, lineHeight: 1.5 }}>
+            Generate your first agricultural intelligence report.
           </div>
           <button
             onClick={() => setShowForm(true)}
             style={{
-              padding: '8px 18px', borderRadius: 8, border: '1px solid rgba(34,197,94,0.2)',
-              background: 'rgba(34,197,94,0.08)', color: '#4ade80', fontSize: 12.5, fontWeight: 600,
+              padding: '9px 20px', borderRadius: 9, border: 'none',
+              background: '#16a34a', color: '#fff', fontSize: 13, fontWeight: 600,
               cursor: 'pointer', fontFamily: 'inherit',
+              boxShadow: '0 2px 8px rgba(22,163,74,0.25)',
             }}
           >
             Generate First Report
           </button>
         </div>
       ) : (
-        <div style={{ background: '#0D1017', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, overflow: 'hidden' }}>
-          <div style={{ padding: '12px 18px', borderBottom: '1px solid rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.3)', fontSize: 10.5, fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase' }}>
-            Generated Reports ({reports.length})
+        <div style={{ background: '#fff', border: '1px solid #e8edf2', borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+          <div style={{ padding: '12px 20px', borderBottom: '1px solid #f1f5f9', color: '#64748b', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+            All Reports ({reports.length})
           </div>
-          {reports.map((report, i) => (
-            <div
-              key={report.id}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 14, padding: '13px 18px',
-                borderBottom: i < reports.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
-                cursor: report.status === 'completed' ? 'pointer' : 'default',
-              }}
-              onClick={() => report.status === 'completed' && setActiveReport(report)}
-            >
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ color: 'rgba(255,255,255,0.85)', fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', letterSpacing: '-0.01em', marginBottom: 3 }}>
-                  {report.title}
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {reports.map((report, i) => (
+              <button
+                key={report.id}
+                onClick={() => setActiveReport(report)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 14, padding: '14px 20px',
+                  borderBottom: i < reports.length - 1 ? '1px solid #f1f5f9' : 'none',
+                  background: activeReport?.id === report.id ? '#f8fafc' : 'transparent',
+                  cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
+                  transition: 'background 0.1s', border: 'none',
+                }}
+              >
+                <div style={{
+                  width: 36, height: 36, borderRadius: 9, flexShrink: 0,
+                  background: REPORT_TYPES.find(t => t.value === report.reportType)?.bg || '#f8fafc',
+                  border: `1px solid ${REPORT_TYPES.find(t => t.value === report.reportType)?.border || '#e2e8f0'}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: REPORT_TYPES.find(t => t.value === report.reportType)?.color || '#64748b',
+                }}>
+                  {REPORT_TYPES.find(t => t.value === report.reportType)?.icon}
                 </div>
-                <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11.5 }}>
-                  {report.reportType?.replace(/_/g, ' ')}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ color: '#0f172a', fontSize: 13.5, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 3 }}>
+                    {report.title}
+                  </div>
+                  <div style={{ color: '#94a3b8', fontSize: 11.5 }}>
+                    {REPORT_TYPES.find(t => t.value === report.reportType)?.label || report.reportType}
+                  </div>
                 </div>
-              </div>
-              {statusBadge(report.status)}
-              {report.status === 'completed' && (
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="9 18 15 12 9 6"/>
-                </svg>
-              )}
-            </div>
-          ))}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                  {statusBadge(report.status)}
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
       )}
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
