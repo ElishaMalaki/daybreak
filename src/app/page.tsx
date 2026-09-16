@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import BackgroundAnimation from '@/components/ui/BackgroundAnimation';
 
 interface TimeOfDay {
   label: string;
@@ -583,6 +584,9 @@ export default function HomePage() {
 
         {/* Film grain */}
         <div className="grain" aria-hidden="true" />
+
+        {/* Subtle natural motion layer — clouds / stars / shooting stars */}
+        <BackgroundAnimation period={activeConfig.label} />
 
         {/* Navigation */}
         <nav className="nav-wrap" aria-label="Earth AI">
