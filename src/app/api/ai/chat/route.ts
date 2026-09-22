@@ -3,13 +3,18 @@ import { getAIRouter } from '@/lib/ai/router';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import type { AIRequestType } from '@/lib/ai/types';
+import {
+  checkAIRequestAllowed,
+  recordAICreditsUsed,
+  validateInputLength,
+} from '@/lib/subscription/enforcer';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
 
 export async function POST(request: NextRequest) {
   try {
-    // Authenticate user
+    // ── 1. Authenticate user (server-side, never trust client) ──
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
@@ -17,7 +22,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Parse request body
+    // ── 2. Parse request body ──
     let body: {
       messages?: Array<{ role: string; content: string }>;
       requestType?: string;
@@ -47,7 +52,37 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Route through AI abstraction layer
+    // ── 3. Server-side input length validation ──
+    const lastUserMessage = messages.filter((m) => m.role === 'user').pop();
+    if (lastUserMessage) {
+      const inputCheck = validateInputLength(lastUserMessage.content);
+      if (!inputCheck.allowed) {
+        return NextResponse.json(
+          { error: inputCheck.reason, success: false, limitType: inputCheck.limitType },
+          { status: 429 }
+        );
+      }
+    }
+
+    // ── 4. Server-side subscription & credit enforcement ──
+    // This check happens BEFORE any AI provider is called.
+    // The client cannot bypass this by refreshing, switching providers, or manipulating JS.
+    const enforcementResult = await checkAIRequestAllowed(user.id, requestType);
+
+    if (!enforcementResult.allowed) {
+      return NextResponse.json(
+        {
+          error: enforcementResult.reason,
+          success: false,
+          limitType: enforcementResult.limitType,
+          creditsRemaining: enforcementResult.creditsRemaining ?? 0,
+          upgradeRequired: true,
+        },
+        { status: 429 }
+      );
+    }
+
+    // ── 5. Route through AI abstraction layer ──
     const router = getAIRouter();
     const aiResponse = await router.route({
       messages: messages as Array<{ role: 'user' | 'assistant' | 'system'; content: string }>,
@@ -56,8 +91,23 @@ export async function POST(request: NextRequest) {
       contextData,
     });
 
-    // Track usage in database (non-blocking)
-    if (aiResponse.success && aiResponse.totalTokens) {
+    // ── 6. Record usage ONLY after successful response ──
+    if (aiResponse.success) {
+      const creditsUsed = enforcementResult.creditsRequired ?? 1;
+
+      // Record credits and provider usage (non-blocking)
+      recordAICreditsUsed(
+        user.id,
+        creditsUsed,
+        requestType,
+        aiResponse.provider,
+        aiResponse.model,
+        aiResponse.inputTokens || 0,
+        aiResponse.outputTokens || 0,
+        aiResponse.processingTimeMs
+      ).catch(() => {});
+
+      // Also update legacy usage_records for backward compatibility
       supabase.rpc('increment_usage', {
         p_user_id: user.id,
         p_tokens: aiResponse.totalTokens || 0,
@@ -66,21 +116,19 @@ export async function POST(request: NextRequest) {
       }).then(() => {}).catch(() => {});
     }
 
-    // Persist message to conversation if conversationId provided
+    // ── 7. Persist message to conversation if conversationId provided ──
     if (conversationId && aiResponse.success) {
-      const lastUserMessage = messages.filter((m) => m.role === 'user').pop();
+      const userMsg = messages.filter((m) => m.role === 'user').pop();
 
-      if (lastUserMessage) {
-        // Save user message
+      if (userMsg) {
         await supabase.from('messages').insert({
           conversation_id: conversationId,
           user_id: user.id,
           role: 'user',
-          content: lastUserMessage.content,
+          content: userMsg.content,
         });
       }
 
-      // Save assistant response
       await supabase.from('messages').insert({
         conversation_id: conversationId,
         user_id: user.id,
@@ -92,7 +140,6 @@ export async function POST(request: NextRequest) {
         processing_time_ms: aiResponse.processingTimeMs,
       });
 
-      // Update conversation metadata
       await supabase
         .from('conversations')
         .update({
@@ -111,7 +158,8 @@ export async function POST(request: NextRequest) {
       processingTimeMs: aiResponse.processingTimeMs,
       success: aiResponse.success,
       error: aiResponse.error,
-      rateLimitRemaining: aiResponse.rateLimitRemaining,
+      creditsUsed: enforcementResult.creditsRequired,
+      creditsRemaining: enforcementResult.creditsRemaining,
     });
   } catch (error) {
     console.error('[AI API] Unhandled error:', error);

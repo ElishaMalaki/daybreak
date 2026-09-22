@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { createClient } from '@/lib/supabase/client';
+import { SUBSCRIPTION_PLANS, type SubscriptionTier } from '@/lib/subscription/config';
 
 interface DashboardStats {
   conversations: number;
@@ -18,6 +19,16 @@ interface RecentConversation {
   analysis_type: string;
   message_count: number;
   updated_at: string;
+}
+
+interface UsageSummary {
+  tier: SubscriptionTier;
+  aiCreditsUsed: number;
+  aiCreditsLimit: number;
+  aiRequestsUsed: number;
+  aiRequestsLimit: number;
+  reportsUsed: number;
+  reportsLimit: number;
 }
 
 function getGreeting(): string {
@@ -174,6 +185,7 @@ export default function AgricultureDashboard() {
   const [recentConversations, setRecentConversations] = useState<RecentConversation[]>([]);
   const [loadingStats, setLoadingStats] = useState(true);
   const [greeting, setGreeting] = useState('Good morning');
+  const [usageSummary, setUsageSummary] = useState<UsageSummary | null>(null);
 
   const userName = user?.user_metadata?.full_name?.split(' ')[0] || user?.email?.split('@')[0] || 'there';
 
@@ -207,6 +219,24 @@ export default function AgricultureDashboard() {
       }
     };
     fetchDashboardData();
+
+    // Load real usage data from server
+    fetch('/api/subscription/usage')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.subscription && data.usage && data.limits) {
+          setUsageSummary({
+            tier: data.subscription.tier as SubscriptionTier,
+            aiCreditsUsed: data.usage.aiCreditsUsed,
+            aiCreditsLimit: data.limits.aiCredits,
+            aiRequestsUsed: data.usage.aiRequestsUsed,
+            aiRequestsLimit: data.limits.aiRequests,
+            reportsUsed: data.usage.reportsUsed,
+            reportsLimit: data.limits.reports,
+          });
+        }
+      })
+      .catch(() => {});
   }, [user]);
 
   return (
@@ -400,9 +430,9 @@ export default function AgricultureDashboard() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
               {[
                 { label: 'Farms', value: stats.farms, icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>, color: '#16a34a' },
-                { label: 'Crops', value: 0, icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22V12"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/><path d="M12 12C12 7 7 3 7 3s-1 5 5 9z"/><path d="M12 12c0-5 5-9 5-9s1 5-5 9z"/></svg>, color: '#16a34a' },
-                { label: 'Livestock', value: 0, icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>, color: '#2563eb' },
+                { label: 'Conversations', value: stats.conversations, icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>, color: '#16a34a' },
                 { label: 'Reports', value: stats.reports, icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>, color: '#7c3aed' },
+                { label: 'Analyses', value: stats.analyses, icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>, color: '#2563eb' },
               ].map((stat, i, arr) => (
                 <div key={stat.label} style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -421,61 +451,87 @@ export default function AgricultureDashboard() {
             </div>
           </div>
 
-          {/* Recent Activity */}
+          {/* AI Usage — real data from server */}
           <div style={{
             background: '#ffffff', border: '1px solid #e8edf2', borderRadius: 14,
             padding: '18px 20px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
           }}>
-            <h3 style={{ color: '#0f172a', fontSize: 14, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 14 }}>Recent Activity</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {[
-                { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>, title: 'No recent conversations', sub: 'Start a new conversation', color: '#64748b' },
-                { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>, title: 'No research activity', sub: 'Explore agricultural research', color: '#64748b' },
-                { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>, title: 'No reports generated', sub: 'Create your first report', color: '#64748b' },
-              ].map((item, i) => (
-                <div key={i} style={{
-                  display: 'flex', alignItems: 'center', gap: 10, padding: '9px 10px',
-                  borderRadius: 8, cursor: 'default',
-                }}>
-                  <div style={{ color: item.color, flexShrink: 0 }}>{item.icon}</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ color: '#374151', fontSize: 12.5, fontWeight: 600 }}>{item.title}</div>
-                    <div style={{ color: '#94a3b8', fontSize: 11.5 }}>{item.sub}</div>
-                  </div>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="9 18 15 12 9 6"/>
-                  </svg>
-                </div>
-              ))}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <h3 style={{ color: '#0f172a', fontSize: 14, fontWeight: 700, letterSpacing: '-0.02em' }}>AI Usage</h3>
+              <Link href="/app/agriculture/subscription" style={{ color: '#16a34a', fontSize: 11.5, fontWeight: 600, textDecoration: 'none' }}>
+                View plan
+              </Link>
             </div>
-          </div>
 
-          {/* Your Usage */}
-          <div style={{
-            background: '#ffffff', border: '1px solid #e8edf2', borderRadius: 14,
-            padding: '18px 20px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-          }}>
-            <h3 style={{ color: '#0f172a', fontSize: 14, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 14 }}>Your Usage</h3>
-            <div style={{ marginBottom: 10 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                <span style={{ color: '#64748b', fontSize: 12.5 }}>Free tier</span>
-                <span style={{ color: '#374151', fontSize: 12.5, fontWeight: 600 }}>{stats.conversations} / 50 today</span>
-              </div>
-              <div style={{ height: 5, background: '#f1f5f9', borderRadius: 999, overflow: 'hidden' }}>
-                <div style={{
-                  height: '100%', borderRadius: 999,
-                  background: '#16a34a',
-                  width: `${Math.min((stats.conversations / 50) * 100, 100)}%`,
-                  transition: 'width 0.4s ease',
-                }} />
-              </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#64748b', fontSize: 11.5 }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-              </svg>
-              Usage limits reset at 00:00 (your timezone)
-            </div>
+            {usageSummary ? (
+              <>
+                {/* Plan badge */}
+                <div style={{ marginBottom: 12 }}>
+                  <span style={{
+                    display: 'inline-block', padding: '2px 10px', borderRadius: 999,
+                    background: '#f0fdf4', border: '1px solid #bbf7d0',
+                    color: '#16a34a', fontSize: 11, fontWeight: 700, letterSpacing: '0.04em',
+                    textTransform: 'uppercase',
+                  }}>
+                    {SUBSCRIPTION_PLANS[usageSummary.tier]?.name || 'Free'} Plan
+                  </span>
+                </div>
+
+                {/* AI Credits */}
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                    <span style={{ color: '#374151', fontSize: 12.5, fontWeight: 500 }}>AI Credits</span>
+                    <span style={{ color: '#6b7280', fontSize: 12, fontWeight: 500 }}>
+                      {usageSummary.aiCreditsUsed} / {usageSummary.aiCreditsLimit === -1 ? 'Unlimited' : usageSummary.aiCreditsLimit}
+                    </span>
+                  </div>
+                  {usageSummary.aiCreditsLimit !== -1 && (
+                    <div style={{ height: 5, background: '#f1f5f9', borderRadius: 999, overflow: 'hidden' }}>
+                      <div style={{
+                        height: '100%', borderRadius: 999,
+                        background: usageSummary.aiCreditsUsed / usageSummary.aiCreditsLimit >= 0.9 ? '#dc2626' :
+                                    usageSummary.aiCreditsUsed / usageSummary.aiCreditsLimit >= 0.75 ? '#d97706' : '#16a34a',
+                        width: `${Math.min(100, Math.round((usageSummary.aiCreditsUsed / usageSummary.aiCreditsLimit) * 100))}%`,
+                        transition: 'width 0.4s ease',
+                      }} />
+                    </div>
+                  )}
+                  <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 3 }}>
+                    {usageSummary.aiCreditsLimit === -1
+                      ? 'Unlimited credits'
+                      : `${Math.max(0, usageSummary.aiCreditsLimit - usageSummary.aiCreditsUsed)} remaining`}
+                  </div>
+                </div>
+
+                {/* Reports */}
+                <div style={{ marginBottom: 10 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                    <span style={{ color: '#374151', fontSize: 12.5, fontWeight: 500 }}>Reports</span>
+                    <span style={{ color: '#6b7280', fontSize: 12, fontWeight: 500 }}>
+                      {usageSummary.reportsUsed} / {usageSummary.reportsLimit === -1 ? 'Unlimited' : usageSummary.reportsLimit}
+                    </span>
+                  </div>
+                  {usageSummary.reportsLimit !== -1 && (
+                    <div style={{ height: 5, background: '#f1f5f9', borderRadius: 999, overflow: 'hidden' }}>
+                      <div style={{
+                        height: '100%', borderRadius: 999, background: '#7c3aed',
+                        width: `${Math.min(100, Math.round((usageSummary.reportsUsed / usageSummary.reportsLimit) * 100))}%`,
+                        transition: 'width 0.4s ease',
+                      }} />
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#94a3b8', fontSize: 11 }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                  Resets at start of next billing period
+                </div>
+              </>
+            ) : (
+              <div style={{ color: '#94a3b8', fontSize: 12.5 }}>Loading usage data...</div>
+            )}
           </div>
 
           {/* Need Help */}
