@@ -109,6 +109,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -119,6 +120,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setSidebarOpen(false);
   }, [pathname]);
+
+  // Check admin role
+  useEffect(() => {
+    if (user) {
+      fetch('/api/admin/stats')
+        .then((r) => { if (r.ok) setIsAdmin(true); })
+        .catch(() => {});
+    }
+  }, [user]);
 
   const handleSignOut = async () => {
     setSigningOut(true);
@@ -307,6 +317,18 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   {item.label}
                 </Link>
               ))}
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className="ie-nav-item"
+                  style={{ marginTop: 4, color: '#6366f1' }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
+                  Admin Panel
+                </Link>
+              )}
             </div>
 
             {/* Help */}
