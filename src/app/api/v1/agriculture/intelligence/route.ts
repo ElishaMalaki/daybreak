@@ -239,7 +239,7 @@ export async function POST(request: NextRequest) {
   if (aiResponse.success) {
     const creditsUsed = enforcementResult.creditsRequired ?? 1;
 
-    recordAICreditsUsed(
+    Promise.resolve(recordAICreditsUsed(
       userId,
       creditsUsed,
       normalizedRequestType,
@@ -248,7 +248,7 @@ export async function POST(request: NextRequest) {
       aiResponse.inputTokens || 0,
       aiResponse.outputTokens || 0,
       processingTimeMs
-    ).catch(() => {});
+    )).catch(() => {});
 
     // Record external API usage (non-blocking)
     supabase.rpc('record_api_key_usage', {
