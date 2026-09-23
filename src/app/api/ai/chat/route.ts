@@ -2,12 +2,28 @@ import { createClient } from '@/lib/supabase/server';
 import { getAIRouter } from '@/lib/ai/router';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import type { AIRequestType } from '@/lib/ai/types';
+import type { AIMessage, AIRequestType } from '@/lib/ai/types';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
 
 const DAILY_REQUEST_LIMIT = 50;
+const VALID_REQUEST_TYPES: AIRequestType[] = [
+  'market_analysis',
+  'farm_data_analysis',
+  'decision_support',
+  'risk_assessment',
+  'research',
+  'general',
+];
+
+function isAIRequestType(value: string): value is AIRequestType {
+  return VALID_REQUEST_TYPES.includes(value as AIRequestType);
+}
+
+function isAIMessageRole(value: string): value is AIMessage['role'] {
+  return value === 'user' || value === 'assistant' || value === 'system';
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -63,17 +79,24 @@ export async function POST(request: NextRequest) {
 
     const { messages, requestType = 'general', conversationId, contextData } = body;
 
+    if (!isAIRequestType(requestType)) {
+      return NextResponse.json({ error: 'Invalid request type' }, { status: 400 });
+    }
+
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json({ error: 'Messages are required' }, { status: 400 });
     }
+
+    const normalizedMessages: AIMessage[] = [];
 
     for (const msg of messages) {
       if (!msg.role || !msg.content || typeof msg.content !== 'string') {
         return NextResponse.json({ error: 'Invalid message format' }, { status: 400 });
       }
-      if (!['user', 'assistant', 'system'].includes(msg.role)) {
+      if (!isAIMessageRole(msg.role)) {
         return NextResponse.json({ error: 'Invalid message role' }, { status: 400 });
       }
+      normalizedMessages.push({ role: msg.role, content: msg.content.trim() });
     }
 
     if (conversationId) {
@@ -91,8 +114,8 @@ export async function POST(request: NextRequest) {
 
     const router = getAIRouter();
     const aiResponse = await router.route({
-      messages: messages as Array<{ role: 'user' | 'assistant' | 'system'; content: string }>,
-      requestType: requestType as AIRequestType,
+      messages: normalizedMessages,
+      requestType,
       userId: user.id,
       contextData,
     });
@@ -110,7 +133,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (conversationId && aiResponse.success) {
-      const lastUserMessage = messages.filter((m) => m.role === 'user').pop();
+      const lastUserMessage = normalizedMessages.filter((m) => m.role === 'user').pop();
 
       if (lastUserMessage) {
         await supabase.from('messages').insert({
