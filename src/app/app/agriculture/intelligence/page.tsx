@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { createClient } from '@/lib/supabase/client';
 import { useSearchParams } from 'next/navigation';
@@ -32,7 +32,7 @@ const REQUEST_TYPES = [
   { value: 'research', label: 'Research' },
 ];
 
-export default function IntelligencePage() {
+function IntelligenceContent() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -525,5 +525,30 @@ export default function IntelligencePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function IntelligenceFallback() {
+  return (
+    <div
+      style={{
+        height: 'calc(100vh - 112px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'rgba(255,255,255,0.45)',
+        fontSize: 13,
+      }}
+    >
+      Loading Intelligence E...
+    </div>
+  );
+}
+
+export default function IntelligencePage() {
+  return (
+    <Suspense fallback={<IntelligenceFallback />}>
+      <IntelligenceContent />
+    </Suspense>
   );
 }
