@@ -27,8 +27,8 @@ const timeConfigs: TimeOfDay[] = [
   period: '12:00 AM – 4:59 AM',
   headline: 'AI that never sleeps.\nWorking while the world rests.',
   subline: 'Earth AI\'s intelligence engines run around the clock — monitoring crops, tracking markets, and delivering insights before dawn.',
-  image: "https://images.unsplash.com/photo-1720948744617-5b2fe92d78e2",
-  imageAlt: 'Stunning night sky filled with stars and the Milky Way over a dark landscape',
+  image: "https://images.unsplash.com/photo-1724252015627-6c5f2f5f7c42",
+  imageAlt: 'Breathtaking Milky Way galaxy arching over a dark landscape with thousands of stars filling the night sky',
   overlayGradient: 'linear-gradient(180deg, rgba(5,8,20,0.25) 0%, rgba(5,8,20,0.10) 50%, rgba(5,8,20,0.45) 100%)',
   textColor: '#F2F6FF',
   linkColor: 'rgba(220,230,255,0.75)',
@@ -43,8 +43,8 @@ const timeConfigs: TimeOfDay[] = [
   period: '5:00 AM – 5:59 AM',
   headline: 'Before the market opens,\nour AI is already watching.',
   subline: 'Earth AI Finance Intelligence scans global signals in the quiet hours — so your decisions are backed by data, not guesswork.',
-  image: "https://images.unsplash.com/photo-1698684001896-cc7998ca1cf2",
-  imageAlt: 'Pre-dawn sky with deep blue and purple hues just before sunrise over the horizon',
+  image: "https://images.unsplash.com/photo-1642510029345-c1b476318461",
+  imageAlt: 'Deep blue pre-dawn sky filled with stars and a faint glow on the horizon before sunrise',
   overlayGradient: 'linear-gradient(180deg, rgba(10,12,35,0.20) 0%, rgba(10,12,35,0.05) 50%, rgba(10,12,35,0.35) 100%)',
   textColor: '#EAF0FF',
   linkColor: 'rgba(200,215,255,0.75)',
@@ -59,8 +59,8 @@ const timeConfigs: TimeOfDay[] = [
   period: '6:00 AM – 7:59 AM',
   headline: 'A new growing season\nbegins with smarter AI.',
   subline: 'Earth AI Agriculture Intelligence helps farmers plan, predict, and optimize — from soil health to harvest yield.',
-  image: "https://images.unsplash.com/photo-1720934176426-95b299a3e8cd",
-  imageAlt: 'Breathtaking sunrise with golden and orange light bursting over the horizon with clouds',
+  image: "https://images.unsplash.com/photo-1664568053803-7ec409b70100",
+  imageAlt: 'Spectacular golden sunrise with vivid orange and pink rays bursting over the horizon illuminating the sky',
   overlayGradient: 'linear-gradient(180deg, rgba(20,15,5,0.15) 0%, rgba(20,15,5,0.05) 50%, rgba(20,15,5,0.30) 100%)',
   textColor: '#1A1008',
   linkColor: 'rgba(30,20,10,0.65)',
@@ -75,8 +75,8 @@ const timeConfigs: TimeOfDay[] = [
   period: '8:00 AM – 10:59 AM',
   headline: 'Specialized AI.\nBuilt for the real world.',
   subline: 'Earth AI delivers domain-specific intelligence for agriculture and finance — two industries where precision changes everything.',
-  image: "https://images.unsplash.com/photo-1539643973272-3c845cfb223a",
-  imageAlt: 'Bright clear blue morning sky with soft white clouds and sunlight',
+  image: "https://images.unsplash.com/photo-1721555714983-2cbef58504e9",
+  imageAlt: 'Radiant morning sunrise with golden light streaming through clouds over a peaceful landscape',
   overlayGradient: 'linear-gradient(180deg, rgba(10,40,90,0.10) 0%, rgba(10,40,90,0.02) 50%, rgba(10,40,90,0.20) 100%)',
   textColor: '#0B0E14',
   linkColor: 'rgba(15,25,60,0.60)',
@@ -91,8 +91,8 @@ const timeConfigs: TimeOfDay[] = [
   period: '11:00 AM – 1:59 PM',
   headline: 'Peak performance.\nPowered by Earth AI.',
   subline: 'At the height of the trading day or the growing season, our AI products deliver clarity, speed, and actionable intelligence.',
-  image: "https://images.unsplash.com/photo-1666068510008-f44c3637d3c5",
-  imageAlt: 'Brilliant midday blue sky with dramatic white cumulus clouds and bright sunlight',
+  image: "https://images.unsplash.com/photo-1683189868668-562f58a357e0",
+  imageAlt: 'Brilliant midday sun casting warm golden light over a lush green landscape under a blue sky',
   overlayGradient: 'linear-gradient(180deg, rgba(5,30,80,0.12) 0%, rgba(5,30,80,0.03) 50%, rgba(5,30,80,0.22) 100%)',
   textColor: '#0B0E14',
   linkColor: 'rgba(15,25,60,0.60)',
@@ -107,8 +107,8 @@ const timeConfigs: TimeOfDay[] = [
   period: '2:00 PM – 4:59 PM',
   headline: 'Finance intelligence\nthat sees further ahead.',
   subline: 'Earth AI Finance reads market patterns, risk signals, and economic trends — giving you the edge before others see it coming.',
-  image: "https://images.unsplash.com/photo-1682852928580-658315746b4f",
-  imageAlt: 'Warm afternoon sky with golden sunlight filtering through clouds over a landscape',
+  image: "https://images.unsplash.com/photo-1601978711492-e8da8f5b8ba3",
+  imageAlt: 'Warm afternoon golden light with dramatic clouds and rich colors over a sweeping landscape',
   overlayGradient: 'linear-gradient(180deg, rgba(15,20,50,0.12) 0%, rgba(15,20,50,0.03) 50%, rgba(15,20,50,0.25) 100%)',
   textColor: '#0B0E14',
   linkColor: 'rgba(15,25,60,0.60)',
@@ -123,8 +123,8 @@ const timeConfigs: TimeOfDay[] = [
   period: '5:00 PM – 6:59 PM',
   headline: 'From field to forecast,\nEarth AI has you covered.',
   subline: 'Agriculture Intelligence monitors weather, soil, and crop data in real time — turning nature\'s complexity into clear, confident decisions.',
-  image: "https://images.unsplash.com/photo-1580662603788-b0548c665e78",
-  imageAlt: 'Spectacular sunset with vivid orange, red and purple colors blazing across the sky',
+  image: "https://images.unsplash.com/photo-1650117956973-911fa54547b7",
+  imageAlt: 'Magnificent sunset with blazing orange, red and crimson colors painting the entire sky over the horizon',
   overlayGradient: 'linear-gradient(180deg, rgba(20,10,5,0.15) 0%, rgba(20,10,5,0.05) 50%, rgba(20,10,5,0.35) 100%)',
   textColor: '#1A0A05',
   linkColor: 'rgba(30,15,5,0.65)',
@@ -139,8 +139,8 @@ const timeConfigs: TimeOfDay[] = [
   period: '7:00 PM – 8:59 PM',
   headline: 'Intelligence shaped\nby the Earth itself.',
   subline: 'Earth AI is built on the belief that the most powerful AI is the kind that understands the world it operates in.',
-  image: "https://images.unsplash.com/photo-1506630536165-474191c19cb4",
-  imageAlt: 'Beautiful evening sky with deep purple and pink hues as the sun sets below the horizon',
+  image: "https://images.unsplash.com/photo-1575568337541-e2114e005867",
+  imageAlt: 'Stunning evening twilight with deep purple and rose hues glowing across the sky after sunset',
   overlayGradient: 'linear-gradient(180deg, rgba(15,8,30,0.20) 0%, rgba(15,8,30,0.08) 50%, rgba(15,8,30,0.40) 100%)',
   textColor: '#F0EAFF',
   linkColor: 'rgba(220,210,255,0.75)',
@@ -155,8 +155,8 @@ const timeConfigs: TimeOfDay[] = [
   period: '9:00 PM – 10:59 PM',
   headline: 'Two products.\nOne powerful platform.',
   subline: 'Earth AI Agriculture and Earth AI Finance — specialized intelligence products designed for the industries that feed and fund the world.',
-  image: "https://images.unsplash.com/photo-1561104740-2c5b39dfd2b6",
-  imageAlt: 'Deep blue dusk sky with the last traces of light fading on the horizon',
+  image: "https://images.unsplash.com/photo-1695432946512-ecb7d5077dfe",
+  imageAlt: 'Majestic night sky with the Milky Way galaxy and countless stars visible over a dark silhouetted landscape',
   overlayGradient: 'linear-gradient(180deg, rgba(8,10,28,0.22) 0%, rgba(8,10,28,0.08) 50%, rgba(8,10,28,0.40) 100%)',
   textColor: '#E8EEFF',
   linkColor: 'rgba(210,220,255,0.75)',
@@ -171,8 +171,8 @@ const timeConfigs: TimeOfDay[] = [
   period: '11:00 PM – 11:59 PM',
   headline: 'The future of intelligence\nis grounded in Earth.',
   subline: 'While the world sleeps, Earth AI continues learning — processing data, refining models, and preparing insights for tomorrow.',
-  image: "https://images.unsplash.com/photo-1518066000714-58c45f1a2c0a",
-  imageAlt: 'Deep night sky with countless stars and the Milky Way galaxy visible in full splendor',
+  image: "https://images.unsplash.com/photo-1695432946512-ecb7d5077dfe",
+  imageAlt: 'Awe-inspiring night sky with dense star clusters and the Milky Way glowing brilliantly over a dark landscape',
   overlayGradient: 'linear-gradient(180deg, rgba(5,8,20,0.25) 0%, rgba(5,8,20,0.10) 50%, rgba(5,8,20,0.45) 100%)',
   textColor: '#F2F6FF',
   linkColor: 'rgba(220,230,255,0.75)',
@@ -567,17 +567,17 @@ export default function HomePage() {
           className="sky-bg sky-bg-current"
           style={{ backgroundImage: `url(${activeConfig.image})` }}
           role="img"
-          aria-label={activeConfig.imageAlt}
-        />
+          aria-label={activeConfig.imageAlt} />
+        
 
         {/* Next background (for transition) */}
-        {isTransitioning && (
-          <div
-            className={`sky-bg sky-bg-next ${isTransitioning ? 'transitioning' : ''}`}
-            style={{ backgroundImage: `url(${nextConfig.image})` }}
-            aria-hidden="true"
-          />
-        )}
+        {isTransitioning &&
+        <div
+          className={`sky-bg sky-bg-next ${isTransitioning ? 'transitioning' : ''}`}
+          style={{ backgroundImage: `url(${nextConfig.image})` }}
+          aria-hidden="true" />
+
+        }
 
         {/* Overlay gradient */}
         <div className="sky-overlay" style={{ background: activeConfig.overlayGradient }} aria-hidden="true" />
@@ -597,23 +597,23 @@ export default function HomePage() {
                 alt="Earth AI logo"
                 width={28}
                 height={28}
-                className="nav-logo-img"
-              />
+                className="nav-logo-img" />
+              
               <span>Earth AI</span>
             </a>
 
             <div className="nav-spacer" />
 
-            {mounted && (
-              <span
-                className="nav-time"
-                style={{ color: activeConfig.logoColor }}
-                aria-live="polite"
-                aria-label={`Current time: ${currentTime}`}
-              >
+            {mounted &&
+            <span
+              className="nav-time"
+              style={{ color: activeConfig.logoColor }}
+              aria-live="polite"
+              aria-label={`Current time: ${currentTime}`}>
+              
                 {currentTime}
               </span>
-            )}
+            }
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginRight: '12px' }}>
               <a
@@ -622,10 +622,10 @@ export default function HomePage() {
                   fontSize: '13px', fontWeight: 600, textDecoration: 'none',
                   padding: '6px 12px', borderRadius: '999px',
                   color: activeConfig.logoColor, opacity: 0.75,
-                  transition: 'opacity 0.2s',
+                  transition: 'opacity 0.2s'
                 }}
-                aria-label="About Earth AI"
-              >
+                aria-label="About Earth AI">
+                
                 About
               </a>
               <a
@@ -634,10 +634,10 @@ export default function HomePage() {
                   fontSize: '13px', fontWeight: 600, textDecoration: 'none',
                   padding: '6px 12px', borderRadius: '999px',
                   color: activeConfig.logoColor, opacity: 0.75,
-                  transition: 'opacity 0.2s',
+                  transition: 'opacity 0.2s'
                 }}
-                aria-label="Agriculture Intelligence"
-              >
+                aria-label="Agriculture Intelligence">
+                
                 Agriculture
               </a>
               <a
@@ -646,10 +646,10 @@ export default function HomePage() {
                   fontSize: '13px', fontWeight: 600, textDecoration: 'none',
                   padding: '6px 12px', borderRadius: '999px',
                   color: activeConfig.logoColor, opacity: 0.75,
-                  transition: 'opacity 0.2s',
+                  transition: 'opacity 0.2s'
                 }}
-                aria-label="Finance Intelligence"
-              >
+                aria-label="Finance Intelligence">
+                
                 Finance
               </a>
               <a
@@ -658,10 +658,10 @@ export default function HomePage() {
                   fontSize: '13px', fontWeight: 600, textDecoration: 'none',
                   padding: '6px 12px', borderRadius: '999px',
                   color: activeConfig.logoColor, opacity: 0.75,
-                  transition: 'opacity 0.2s',
+                  transition: 'opacity 0.2s'
                 }}
-                aria-label="Help and Documentation"
-              >
+                aria-label="Help and Documentation">
+                
                 Help
               </a>
             </div>
@@ -671,10 +671,10 @@ export default function HomePage() {
               className="nav-btn"
               style={{
                 background: 'rgba(34,197,94,0.85)',
-                color: '#fff',
+                color: '#fff'
               }}
-              aria-label="Try Intelligence E Agriculture"
-            >
+              aria-label="Try Intelligence E Agriculture">
+              
               Try Intelligence E Now
             </a>
           </div>
@@ -694,8 +694,8 @@ export default function HomePage() {
                 href="/login"
                 className="cta-btn"
                 style={{ background: activeConfig.buttonBg, color: activeConfig.buttonText }}
-                aria-label="Try Intelligence E Agriculture"
-              >
+                aria-label="Try Intelligence E Agriculture">
+                
                 <span>Try Intelligence E Now</span>
                 <span className="cta-arrow" aria-hidden="true">
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: '1.05em', height: '1.05em' }}>
@@ -720,24 +720,24 @@ export default function HomePage() {
           </div>
 
           {/* Period indicator — display only, no manual override */}
-          {mounted && (
-            <div
-              className="period-pill"
-              style={{ background: activeConfig.badgeBg, color: activeConfig.badgeText }}
-              aria-label={`Current period: ${activeConfig.label}`}
-            >
+          {mounted &&
+          <div
+            className="period-pill"
+            style={{ background: activeConfig.badgeBg, color: activeConfig.badgeText }}
+            aria-label={`Current period: ${activeConfig.label}`}>
+            
               <span
-                className="period-dot"
-                style={{
-                  background: activeConfig.buttonBg === '#F2F6FF' || activeConfig.buttonBg === '#EAF0FF' || activeConfig.buttonBg === '#E8EEFF' || activeConfig.buttonBg === '#F0EAFF' ?'rgba(150,170,255,0.8)' : activeConfig.buttonBg
-                }}
-                aria-hidden="true"
-              />
+              className="period-dot"
+              style={{
+                background: activeConfig.buttonBg === '#F2F6FF' || activeConfig.buttonBg === '#EAF0FF' || activeConfig.buttonBg === '#E8EEFF' || activeConfig.buttonBg === '#F0EAFF' ? 'rgba(150,170,255,0.8)' : activeConfig.buttonBg
+              }}
+              aria-hidden="true" />
+            
               <span>{activeConfig.label}</span>
             </div>
-          )}
+          }
         </div>
       </div>
-    </>
-  );
+    </>);
+
 }
