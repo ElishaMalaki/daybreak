@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import BackgroundAnimation from '@/components/ui/BackgroundAnimation';
 
@@ -19,6 +19,44 @@ interface TimeOfDay {
   badgeBg: string;
   badgeText: string;
   logoColor: string;
+}
+
+// Pool of beautiful cloud & sunset photos — one is picked randomly on mount
+const daytimePhotoPool: {url: string;alt: string;}[] = [
+{ url: "https://images.unsplash.com/photo-1675210266448-5d6f08ee26b9", alt: 'Dramatic golden sunset with towering cumulus clouds lit from below in vivid orange and pink hues' },
+{ url: "https://images.unsplash.com/photo-1593358934220-ff87120a32c6", alt: 'Breathtaking sunset over rolling hills with fiery red and amber clouds stretching across the sky' },
+{ url: "https://images.unsplash.com/photo-1656245606916-e9316100126c", alt: 'Majestic sunset reflecting on a calm lake with brilliant orange and purple clouds mirrored in the water' },
+{ url: "https://images.unsplash.com/photo-1694369878451-743f58c824da", alt: 'Stunning golden hour sky with layered clouds glowing in shades of orange, gold and deep crimson' },
+{ url: "https://images.unsplash.com/photo-1632913762226-81f4ec3cca83", alt: 'Epic mountain sunset with dramatic storm clouds illuminated in brilliant orange and violet tones' },
+{ url: "https://images.unsplash.com/photo-1530178408322-35e0956c6944", alt: 'Beautiful soft pastel sunrise with wispy cirrus clouds painted in pink and lavender over the horizon' },
+{ url: "https://images.unsplash.com/photo-1555225432-a8313e60bae2", alt: 'Spectacular sunset with massive cumulonimbus clouds glowing deep orange and red against a blue sky' },
+{ url: "https://images.unsplash.com/photo-1732604792721-fe8accd402dc", alt: 'Golden sunrise with rays of light breaking through dramatic clouds over a misty landscape' },
+{ url: "https://images.unsplash.com/photo-1463697515689-6e2f2322dcd3", alt: 'Vivid sunset sky with streaks of crimson, amber and gold clouds fanning out from the horizon' },
+{ url: "https://images.unsplash.com/photo-1696788729583-69a21eb20e1d", alt: 'Peaceful sunset over open fields with soft pink and orange clouds drifting across a wide sky' },
+{ url: "https://images.unsplash.com/photo-1693181663619-bf707de7bafc", alt: 'Dramatic sunset with large billowing clouds in deep orange and purple tones over a silhouetted landscape' },
+{ url: "https://images.unsplash.com/photo-1622083257240-8ee01fc91d7d", alt: 'Magnificent alpine sunset with glowing clouds in shades of rose, gold and violet above mountain peaks' },
+{ url: "https://images.unsplash.com/photo-1643615498592-e569505b3129", alt: 'Warm golden afternoon sky with fluffy cumulus clouds casting long shadows over a sunlit landscape' },
+{ url: "https://images.unsplash.com/photo-1626888965246-8268b2fce221", alt: 'Brilliant sunset with layers of cloud in deep red, orange and yellow stretching to the horizon' },
+{ url: "https://images.unsplash.com/photo-1638150927499-23c630720c5f", alt: 'Stunning cloudscape at golden hour with towering clouds lit in warm amber and peach tones' },
+{ url: "https://images.unsplash.com/photo-1609504042921-8f1d598da22a", alt: 'Serene sunrise with soft pink and gold clouds reflected in still water below a glowing horizon' },
+{ url: "https://images.unsplash.com/photo-1725482429069-8b01c950d79e", alt: 'Fiery sunset with dramatic cloud formations in deep orange, red and purple hues filling the sky' },
+{ url: "https://images.unsplash.com/photo-1669988022776-d3349a323b4a", alt: 'Beautiful midday sky with large white cumulus clouds against a vivid blue backdrop over open land' },
+{ url: "https://images.unsplash.com/photo-1636630511807-1dc962efed8a", alt: 'Glorious sunset with streaks of gold and crimson light breaking through layered clouds on the horizon' },
+{ url: "https://images.unsplash.com/photo-1661771268191-9e8aa921ab47", alt: 'Warm sunset sky with scattered clouds glowing in rich amber and rose tones above a calm landscape' },
+{ url: "https://images.unsplash.com/photo-1690994641245-a896a5219917", alt: 'Spectacular ocean sunset with blazing orange and red clouds reflected on the shimmering water surface' },
+{ url: "https://images.unsplash.com/photo-1670460388929-58bffa6d090a", alt: 'Dramatic cloudscape with towering storm clouds lit in gold and orange at the edge of sunset' },
+{ url: "https://images.unsplash.com/photo-1660153842172-61cb1a32fbed", alt: 'Breathtaking sunrise with rays of light piercing through dramatic clouds over a misty mountain valley' },
+{ url: "https://images.unsplash.com/photo-1694369878451-743f58c824da", alt: 'Vivid golden hour sky with layered clouds in shades of amber, peach and deep rose at dusk' },
+{ url: "https://images.unsplash.com/photo-1455162897425-52c78ac32377", alt: 'Peaceful countryside sunset with soft orange and pink clouds drifting over rolling green hills' },
+{ url: "https://images.unsplash.com/photo-1586822685447-0061795e6ff5", alt: 'Stunning sunset with large cumulus clouds glowing in brilliant orange and gold against a deep blue sky' },
+{ url: "https://images.unsplash.com/photo-1632913762226-81f4ec3cca83", alt: 'Epic mountain cloudscape with dramatic clouds lit in vivid orange and purple tones at golden hour' },
+{ url: "https://images.unsplash.com/photo-1628334704271-2d51238d9387", alt: 'Beautiful sunset with streaks of crimson and amber light breaking through layered clouds on the horizon' },
+{ url: "https://images.unsplash.com/photo-1536199027427-bcefd3969db3", alt: 'Bright midday sky with large fluffy white clouds casting dramatic shadows over a sunlit landscape' },
+{ url: "https://images.unsplash.com/photo-1568919428400-32bcc0d0db1d", alt: 'Warm afternoon light with golden clouds and long shadows stretching across an open field at sunset' }];
+
+
+function pickDaytimePhoto(seed: number): {url: string;alt: string;} {
+  return daytimePhotoPool[seed % daytimePhotoPool.length];
 }
 
 const timeConfigs: TimeOfDay[] = [
@@ -59,8 +97,8 @@ const timeConfigs: TimeOfDay[] = [
   period: '6:00 AM – 7:59 AM',
   headline: 'A new growing season\nbegins with smarter AI.',
   subline: 'Earth AI Agriculture Intelligence helps farmers plan, predict, and optimize — from soil health to harvest yield.',
-  image: "https://images.unsplash.com/photo-1664568053803-7ec409b70100",
-  imageAlt: 'Spectacular golden sunrise with vivid orange and pink rays bursting over the horizon illuminating the sky',
+  image: '',
+  imageAlt: '',
   overlayGradient: 'linear-gradient(180deg, rgba(20,15,5,0.15) 0%, rgba(20,15,5,0.05) 50%, rgba(20,15,5,0.30) 100%)',
   textColor: '#1A1008',
   linkColor: 'rgba(30,20,10,0.65)',
@@ -75,8 +113,8 @@ const timeConfigs: TimeOfDay[] = [
   period: '8:00 AM – 10:59 AM',
   headline: 'Specialized AI.\nBuilt for the real world.',
   subline: 'Earth AI delivers domain-specific intelligence for agriculture and finance — two industries where precision changes everything.',
-  image: "https://images.unsplash.com/photo-1721555714983-2cbef58504e9",
-  imageAlt: 'Radiant morning sunrise with golden light streaming through clouds over a peaceful landscape',
+  image: '',
+  imageAlt: '',
   overlayGradient: 'linear-gradient(180deg, rgba(10,40,90,0.10) 0%, rgba(10,40,90,0.02) 50%, rgba(10,40,90,0.20) 100%)',
   textColor: '#0B0E14',
   linkColor: 'rgba(15,25,60,0.60)',
@@ -91,8 +129,8 @@ const timeConfigs: TimeOfDay[] = [
   period: '11:00 AM – 1:59 PM',
   headline: 'Peak performance.\nPowered by Earth AI.',
   subline: 'At the height of the trading day or the growing season, our AI products deliver clarity, speed, and actionable intelligence.',
-  image: "https://images.unsplash.com/photo-1683189868668-562f58a357e0",
-  imageAlt: 'Brilliant midday sun casting warm golden light over a lush green landscape under a blue sky',
+  image: '',
+  imageAlt: '',
   overlayGradient: 'linear-gradient(180deg, rgba(5,30,80,0.12) 0%, rgba(5,30,80,0.03) 50%, rgba(5,30,80,0.22) 100%)',
   textColor: '#0B0E14',
   linkColor: 'rgba(15,25,60,0.60)',
@@ -107,8 +145,8 @@ const timeConfigs: TimeOfDay[] = [
   period: '2:00 PM – 4:59 PM',
   headline: 'Finance intelligence\nthat sees further ahead.',
   subline: 'Earth AI Finance reads market patterns, risk signals, and economic trends — giving you the edge before others see it coming.',
-  image: "https://images.unsplash.com/photo-1601978711492-e8da8f5b8ba3",
-  imageAlt: 'Warm afternoon golden light with dramatic clouds and rich colors over a sweeping landscape',
+  image: '',
+  imageAlt: '',
   overlayGradient: 'linear-gradient(180deg, rgba(15,20,50,0.12) 0%, rgba(15,20,50,0.03) 50%, rgba(15,20,50,0.25) 100%)',
   textColor: '#0B0E14',
   linkColor: 'rgba(15,25,60,0.60)',
@@ -123,8 +161,8 @@ const timeConfigs: TimeOfDay[] = [
   period: '5:00 PM – 6:59 PM',
   headline: 'From field to forecast,\nEarth AI has you covered.',
   subline: 'Agriculture Intelligence monitors weather, soil, and crop data in real time — turning nature\'s complexity into clear, confident decisions.',
-  image: "https://images.unsplash.com/photo-1650117956973-911fa54547b7",
-  imageAlt: 'Magnificent sunset with blazing orange, red and crimson colors painting the entire sky over the horizon',
+  image: '',
+  imageAlt: '',
   overlayGradient: 'linear-gradient(180deg, rgba(20,10,5,0.15) 0%, rgba(20,10,5,0.05) 50%, rgba(20,10,5,0.35) 100%)',
   textColor: '#1A0A05',
   linkColor: 'rgba(30,15,5,0.65)',
@@ -183,6 +221,8 @@ const timeConfigs: TimeOfDay[] = [
   logoColor: '#F2F6FF'
 }];
 
+// Daytime period labels that should use the dynamic photo pool
+const DAYTIME_LABELS = new Set(['Sunrise', 'Morning', 'Midday', 'Afternoon', 'Sunset']);
 
 function getTimeConfig(hour: number): TimeOfDay {
   if (hour >= 0 && hour < 5) return timeConfigs[0]; // Night
@@ -203,11 +243,21 @@ export default function HomePage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [currentTime, setCurrentTime] = useState('');
   const [mounted, setMounted] = useState(false);
+  // Dynamic photo index — changes every 8 seconds for daytime periods
+  const [photoIndex, setPhotoIndex] = useState(0);
+  const photoTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Resolve the actual image URL for a config — uses pool for daytime, static for night
+  function resolveImage(config: TimeOfDay, idx: number): {url: string;alt: string;} {
+    if (DAYTIME_LABELS.has(config.label)) {
+      return pickDaytimePhoto(idx);
+    }
+    return { url: config.image, alt: config.imageAlt };
+  }
 
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-      // Use browser's local time — automatically respects the visitor's device timezone
       const hour = now.getHours();
       const config = getTimeConfig(hour);
       const timeStr = now.toLocaleTimeString('en-US', {
@@ -238,13 +288,29 @@ export default function HomePage() {
     setCurrentConfig(config);
     setNextConfig(config);
     setCurrentTime(timeStr);
+    // Seed initial photo index with current seconds so each visitor gets a different starting photo
+    setPhotoIndex(now.getSeconds() % daytimePhotoPool.length);
     setMounted(true);
 
     const interval = setInterval(updateTime, 60000);
     return () => clearInterval(interval);
   }, []);
 
+  // Rotate through daytime photos every 8 seconds
+  useEffect(() => {
+    if (!mounted) return;
+    if (photoTimerRef.current) clearInterval(photoTimerRef.current);
+    photoTimerRef.current = setInterval(() => {
+      setPhotoIndex((prev) => (prev + 1) % daytimePhotoPool.length);
+    }, 8000);
+    return () => {
+      if (photoTimerRef.current) clearInterval(photoTimerRef.current);
+    };
+  }, [mounted]);
+
   const activeConfig = mounted ? currentConfig : timeConfigs[3];
+  const currentPhoto = resolveImage(activeConfig, photoIndex);
+  const nextPhoto = resolveImage(nextConfig, photoIndex);
 
   return (
     <>
@@ -565,16 +631,16 @@ export default function HomePage() {
         {/* Current background */}
         <div
           className="sky-bg sky-bg-current"
-          style={{ backgroundImage: `url(${activeConfig.image})` }}
+          style={{ backgroundImage: `url(${currentPhoto.url})` }}
           role="img"
-          aria-label={activeConfig.imageAlt} />
+          aria-label={currentPhoto.alt} />
         
 
         {/* Next background (for transition) */}
         {isTransitioning &&
         <div
           className={`sky-bg sky-bg-next ${isTransitioning ? 'transitioning' : ''}`}
-          style={{ backgroundImage: `url(${nextConfig.image})` }}
+          style={{ backgroundImage: `url(${nextPhoto.url})` }}
           aria-hidden="true" />
 
         }
