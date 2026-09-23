@@ -17,9 +17,18 @@ interface AIProvider {
   updated_at: string;
 }
 
+type EditableProviderNumberKey = 'priority' | 'daily_request_limit' | 'monthly_request_limit' | 'max_tokens_per_request';
+
 const providerColors: Record<string, string> = {
   gemini: '#4285f4', openai: '#10b981', anthropic: '#f59e0b', perplexity: '#8b5cf6', other: '#64748b',
 };
+
+const editableProviderNumberFields: Array<{ label: string; key: EditableProviderNumberKey; type: 'number' }> = [
+  { label: 'Priority (lower = higher priority)', key: 'priority', type: 'number' },
+  { label: 'Daily Request Limit (blank = unlimited)', key: 'daily_request_limit', type: 'number' },
+  { label: 'Monthly Request Limit (blank = unlimited)', key: 'monthly_request_limit', type: 'number' },
+  { label: 'Max Tokens Per Request', key: 'max_tokens_per_request', type: 'number' },
+];
 
 export default function AdminAIProvidersPage() {
   const [providers, setProviders] = useState<AIProvider[]>([]);
@@ -187,17 +196,12 @@ export default function AdminAIProvidersPage() {
             </h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {[
-                { label: 'Priority (lower = higher priority)', key: 'priority', type: 'number' },
-                { label: 'Daily Request Limit (blank = unlimited)', key: 'daily_request_limit', type: 'number' },
-                { label: 'Monthly Request Limit (blank = unlimited)', key: 'monthly_request_limit', type: 'number' },
-                { label: 'Max Tokens Per Request', key: 'max_tokens_per_request', type: 'number' },
-              ].map((field) => (
+              {editableProviderNumberFields.map((field) => (
                 <div key={field.key}>
                   <label style={{ display: 'block', color: '#374151', fontSize: 12, fontWeight: 600, marginBottom: 6 }}>{field.label}</label>
                   <input
                     type={field.type}
-                    value={(editProvider as Record<string, unknown>)[field.key] as string || ''}
+                    value={editProvider[field.key] ?? ''}
                     onChange={(e) => setEditProvider({ ...editProvider, [field.key]: e.target.value ? Number(e.target.value) : null })}
                     style={{ width: '100%', height: 38, padding: '0 10px', border: '1px solid #e2e8f0', borderRadius: 8, background: '#fff', color: '#1e293b', fontSize: 13, fontFamily: 'inherit', outline: 'none' }}
                   />
