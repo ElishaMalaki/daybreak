@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
       const creditsUsed = enforcementResult.creditsRequired ?? 1;
 
       // Record credits and provider usage (non-blocking)
-      recordAICreditsUsed(
+      Promise.resolve(recordAICreditsUsed(
         user.id,
         creditsUsed,
         requestType,
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
         aiResponse.inputTokens || 0,
         aiResponse.outputTokens || 0,
         aiResponse.processingTimeMs
-      ).catch(() => {});
+      )).catch(() => {});
 
       // Also update legacy usage_records for backward compatibility
       supabase.rpc('increment_usage', {
