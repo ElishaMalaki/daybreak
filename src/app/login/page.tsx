@@ -5,6 +5,16 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
+const DEFAULT_AUTH_REDIRECT = '/app/agriculture';
+
+function getSafeRedirect(searchParams: ReturnType<typeof useSearchParams>) {
+  const redirect = searchParams?.get('redirect');
+  if (!redirect || !redirect.startsWith('/app/')) {
+    return DEFAULT_AUTH_REDIRECT;
+  }
+  return redirect;
+}
+
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -24,8 +34,7 @@ function LoginContent() {
 
   useEffect(() => {
     if (mounted && !loading && user) {
-      const redirect = searchParams?.get('redirect') || '/app/agriculture';
-      router.replace(redirect);
+      router.replace(getSafeRedirect(searchParams));
     }
   }, [user, loading, mounted, router, searchParams]);
 
@@ -35,13 +44,13 @@ function LoginContent() {
     setSubmitting(true);
 
     try {
+      const redirectTo = getSafeRedirect(searchParams);
       if (mode === 'signin') {
         await signIn(email, password);
-        router.replace('/app/agriculture');
       } else {
         await signUp(email, password, { fullName });
-        router.replace('/app/agriculture');
       }
+      router.replace(redirectTo);
     } catch (err: any) {
       setError(err?.message || 'Authentication failed. Please try again.');
     } finally {
@@ -98,7 +107,7 @@ function LoginContent() {
               </div>
               <div>
                 <div style={{ color: '#fff', fontWeight: 700, fontSize: 16, letterSpacing: '-0.02em', lineHeight: 1.2 }}>Earth AI</div>
-                <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Intelligence E · Agriculture</div>
+                <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Intelligence E</div>
               </div>
             </Link>
           </div>
