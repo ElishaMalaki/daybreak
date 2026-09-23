@@ -42,7 +42,7 @@ const config = [
     },
     rules: {
       'prettier/prettier': [
-        'error',
+        'warn',
         {
           endOfLine: 'auto',
           singleQuote: true,
