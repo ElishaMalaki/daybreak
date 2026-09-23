@@ -7,9 +7,10 @@ import type { AIRequestType } from '@/lib/ai/types';
 export const runtime = 'nodejs';
 export const maxDuration = 30;
 
+const DAILY_REQUEST_LIMIT = 50;
+
 export async function POST(request: NextRequest) {
   try {
-    // Authenticate user
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
@@ -17,7 +18,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Parse request body
+    const { data: usageData, error: usageError } = await supabase.rpc('get_user_daily_usage', {
+      p_user_id: user.id,
+    });
+
+    if (usageError) {
+      return NextResponse.json({ error: 'Unable to verify usage limits' }, { status: 503 });
+    }
+
+    const usage = usageData?.[0] || { request_count: 0, token_count: 0 };
+    const requestCount = usage.request_count || 0;
+
+    if (requestCount >= DAILY_REQUEST_LIMIT) {
+      return NextResponse.json(
+        {
+          content: 'You have reached your daily request limit for Intelligence E. Your limit will reset tomorrow.',
+          provider: 'system',
+          model: 'none',
+          tokens: 0,
+          processingTimeMs: 0,
+          success: false,
+          error: 'RATE_LIMIT_EXCEEDED',
+          rateLimitRemaining: 0,
+        },
+        { status: 429 }
+      );
+    }
+
     let body: {
       messages?: Array<{ role: string; content: string }>;
       requestType?: string;
@@ -37,7 +64,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Messages are required' }, { status: 400 });
     }
 
-    // Validate message structure
     for (const msg of messages) {
       if (!msg.role || !msg.content || typeof msg.content !== 'string') {
         return NextResponse.json({ error: 'Invalid message format' }, { status: 400 });
@@ -47,7 +73,19 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Route through AI abstraction layer
+    if (conversationId) {
+      const { data: conversation, error: conversationError } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('id', conversationId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (conversationError || !conversation) {
+        return NextResponse.json({ error: 'Conversation not found' }, { status: 404 });
+      }
+    }
+
     const router = getAIRouter();
     const aiResponse = await router.route({
       messages: messages as Array<{ role: 'user' | 'assistant' | 'system'; content: string }>,
@@ -56,7 +94,6 @@ export async function POST(request: NextRequest) {
       contextData,
     });
 
-    // Track usage in database (non-blocking)
     if (aiResponse.success && aiResponse.totalTokens) {
       supabase.rpc('increment_usage', {
         p_user_id: user.id,
@@ -66,12 +103,10 @@ export async function POST(request: NextRequest) {
       }).then(() => {}).catch(() => {});
     }
 
-    // Persist message to conversation if conversationId provided
     if (conversationId && aiResponse.success) {
       const lastUserMessage = messages.filter((m) => m.role === 'user').pop();
 
       if (lastUserMessage) {
-        // Save user message
         await supabase.from('messages').insert({
           conversation_id: conversationId,
           user_id: user.id,
@@ -80,7 +115,6 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      // Save assistant response
       await supabase.from('messages').insert({
         conversation_id: conversationId,
         user_id: user.id,
@@ -92,7 +126,6 @@ export async function POST(request: NextRequest) {
         processing_time_ms: aiResponse.processingTimeMs,
       });
 
-      // Update conversation metadata
       await supabase
         .from('conversations')
         .update({
@@ -111,7 +144,7 @@ export async function POST(request: NextRequest) {
       processingTimeMs: aiResponse.processingTimeMs,
       success: aiResponse.success,
       error: aiResponse.error,
-      rateLimitRemaining: aiResponse.rateLimitRemaining,
+      rateLimitRemaining: Math.max(0, DAILY_REQUEST_LIMIT - requestCount - 1),
     });
   } catch (error) {
     console.error('[AI API] Unhandled error:', error);
