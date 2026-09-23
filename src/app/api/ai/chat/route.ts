@@ -16,6 +16,8 @@ const VALID_REQUEST_TYPES: AIRequestType[] = [
   'research',
   'general',
 ];
+const VALID_AI_PROVIDERS = ['gemini', 'openai', 'anthropic', 'perplexity', 'other'] as const;
+type PersistedAIProvider = (typeof VALID_AI_PROVIDERS)[number];
 
 function isAIRequestType(value: string): value is AIRequestType {
   return VALID_REQUEST_TYPES.includes(value as AIRequestType);
@@ -23,6 +25,12 @@ function isAIRequestType(value: string): value is AIRequestType {
 
 function isAIMessageRole(value: string): value is AIMessage['role'] {
   return value === 'user' || value === 'assistant' || value === 'system';
+}
+
+function normalizeProvider(value: string): PersistedAIProvider {
+  return VALID_AI_PROVIDERS.includes(value as PersistedAIProvider)
+    ? (value as PersistedAIProvider)
+    : 'other';
 }
 
 export async function POST(request: NextRequest) {
@@ -134,6 +142,7 @@ export async function POST(request: NextRequest) {
 
     if (conversationId && aiResponse.success) {
       const lastUserMessage = normalizedMessages.filter((m) => m.role === 'user').pop();
+      const persistedProvider = normalizeProvider(aiResponse.provider);
 
       if (lastUserMessage) {
         await supabase.from('messages').insert({
@@ -149,7 +158,7 @@ export async function POST(request: NextRequest) {
         user_id: user.id,
         role: 'assistant',
         content: aiResponse.content,
-        ai_provider: aiResponse.provider as any,
+        ai_provider: persistedProvider,
         model_used: aiResponse.model,
         tokens_used: aiResponse.totalTokens || 0,
         processing_time_ms: aiResponse.processingTimeMs,
