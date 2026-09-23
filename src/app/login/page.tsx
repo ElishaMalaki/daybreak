@@ -4,16 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-
-const DEFAULT_AUTH_REDIRECT = '/app/agriculture';
-
-function getSafeRedirect(searchParams: ReturnType<typeof useSearchParams>) {
-  const redirect = searchParams?.get('redirect');
-  if (!redirect || !redirect.startsWith('/app/')) {
-    return DEFAULT_AUTH_REDIRECT;
-  }
-  return redirect;
-}
+import Image from 'next/image';
 
 function LoginContent() {
   const router = useRouter();
@@ -27,6 +18,9 @@ function LoginContent() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [resetSent, setResetSent] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -34,7 +28,8 @@ function LoginContent() {
 
   useEffect(() => {
     if (mounted && !loading && user) {
-      router.replace(getSafeRedirect(searchParams));
+      const redirect = searchParams?.get('redirect') || '/app/agriculture';
+      router.replace(redirect);
     }
   }, [user, loading, mounted, router, searchParams]);
 
@@ -44,13 +39,13 @@ function LoginContent() {
     setSubmitting(true);
 
     try {
-      const redirectTo = getSafeRedirect(searchParams);
       if (mode === 'signin') {
         await signIn(email, password);
+        router.replace('/app/agriculture');
       } else {
         await signUp(email, password, { fullName });
+        router.replace('/app/agriculture');
       }
-      router.replace(redirectTo);
     } catch (err: any) {
       setError(err?.message || 'Authentication failed. Please try again.');
     } finally {
@@ -58,14 +53,75 @@ function LoginContent() {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError('Enter your email address above, then click Forgot password.');
+      return;
+    }
+    setResetLoading(true);
+    setError('');
+    try {
+      const { createClient } = await import('@/lib/supabase/client');
+      const supabase = createClient();
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      });
+      if (resetError) throw resetError;
+      setResetSent(true);
+    } catch (err: any) {
+      setError(err?.message || 'Failed to send reset email. Please try again.');
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   if (!mounted || loading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0B0E14', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: 32, height: 32, border: '2px solid rgba(255,255,255,0.1)', borderTopColor: 'rgba(255,255,255,0.6)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(180deg, #151926 0%, #1c2538 56%, #25344d 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        <div style={{
+          width: 28,
+          height: 28,
+          border: '2px solid rgba(255,255,255,0.08)',
+          borderTopColor: 'rgba(255,255,255,0.6)',
+          borderRadius: '50%',
+          animation: 'spin 0.8s linear infinite',
+        }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
+
+  const inputShellStyle = (fieldName: string): React.CSSProperties => ({
+    display: 'flex',
+    alignItems: 'center',
+    height: 46,
+    borderRadius: 10,
+    border: focusedField === fieldName
+      ? '1px solid rgba(255,255,255,0.5)'
+      : '1px solid rgba(255,255,255,0.36)',
+    background: '#0c0f17',
+    padding: '0 14px',
+    transition: 'border-color 0.15s',
+    gap: 0,
+  });
+
+  const inputStyle: React.CSSProperties = {
+    flex: 1,
+    height: '100%',
+    background: 'transparent',
+    border: 'none',
+    outline: 'none',
+    color: '#f6f7fb',
+    fontSize: 14.5,
+    fontFamily: 'inherit',
+    letterSpacing: '-0.005em',
+  };
 
   return (
     <>
@@ -74,160 +130,601 @@ function LoginContent() {
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { height: 100%; font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes earthAuthFadeUp {
+          from { opacity: 0; transform: translateY(18px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.2; transform: scale(0.8); }
+          50% { opacity: 1; transform: scale(1.2); }
+        }
+        @keyframes twinkleSlow {
+          0%, 100% { opacity: 0.1; transform: scale(0.9); }
+          50% { opacity: 0.8; transform: scale(1.1); }
+        }
+        @keyframes shootingStar {
+          0% { transform: translateX(0) translateY(0) rotate(-35deg); opacity: 1; width: 0; }
+          30% { width: 120px; opacity: 1; }
+          100% { transform: translateX(400px) translateY(200px) rotate(-35deg); opacity: 0; width: 120px; }
+        }
+        @keyframes auroraShift {
+          0%, 100% { opacity: 0.12; transform: scaleX(1) scaleY(1); }
+          50% { opacity: 0.22; transform: scaleX(1.08) scaleY(1.12); }
+        }
+        @keyframes moonGlow {
+          0%, 100% { box-shadow: 0 0 40px 12px rgba(200,220,255,0.18), 0 0 80px 30px rgba(160,190,255,0.10); }
+          50% { box-shadow: 0 0 60px 20px rgba(200,220,255,0.28), 0 0 120px 50px rgba(160,190,255,0.16); }
+        }
+        .earth-auth-input::placeholder { color: rgba(246,247,251,0.38); }
+        .earth-auth-input:-webkit-autofill,
+        .earth-auth-input:-webkit-autofill:hover,
+        .earth-auth-input:-webkit-autofill:focus {
+          -webkit-box-shadow: 0 0 0 1000px #0c0f17 inset !important;
+          -webkit-text-fill-color: #f6f7fb !important;
+          caret-color: #f6f7fb;
+        }
+        .earth-auth-tab {
+          flex: 1;
+          padding: 7px 0;
+          border-radius: 7px;
+          border: none;
+          cursor: pointer;
+          font-family: inherit;
+          font-size: 13.5px;
+          font-weight: 500;
+          letter-spacing: -0.005em;
+          transition: all 0.18s;
+          background: transparent;
+          color: rgba(246,247,251,0.42);
+        }
+        .earth-auth-tab.active {
+          background: rgba(255,255,255,0.08);
+          color: #f6f7fb;
+        }
+        .earth-auth-tab:hover:not(.active) {
+          color: rgba(246,247,251,0.7);
+        }
+        .earth-auth-primary-btn {
+          width: 100%;
+          height: 46px;
+          border-radius: 10px;
+          border: none;
+          background: #f4f6fa;
+          color: #0b0e14;
+          font-family: inherit;
+          font-size: 14.5px;
+          font-weight: 600;
+          letter-spacing: -0.005em;
+          cursor: pointer;
+          transition: background 0.15s, box-shadow 0.15s;
+          box-shadow: 0 12px 30px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.65);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+        .earth-auth-primary-btn:hover:not(:disabled) {
+          background: #ffffff;
+        }
+        .earth-auth-primary-btn:disabled {
+          opacity: 0.65;
+          cursor: not-allowed;
+        }
+        .earth-auth-back-link {
+          color: rgba(246,247,251,0.42);
+          text-decoration: none;
+          font-size: 13px;
+          font-weight: 500;
+          letter-spacing: -0.005em;
+          transition: color 0.15s;
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+        }
+        .earth-auth-back-link:hover {
+          color: rgba(246,247,251,0.72);
+        }
+        .earth-auth-terms-link {
+          color: rgba(246,247,251,0.82);
+          text-decoration: underline;
+          text-decoration-color: rgba(246,247,251,0.32);
+          text-underline-offset: 2px;
+          text-decoration-thickness: 1px;
+          font-weight: 500;
+        }
+        .earth-auth-terms-link:hover {
+          color: #f6f7fb;
+          text-decoration-color: rgba(246,247,251,0.6);
+        }
+        .earth-auth-switch-btn {
+          background: none;
+          border: none;
+          cursor: pointer;
+          font-family: inherit;
+          font-size: 13px;
+          font-weight: 600;
+          color: rgba(246,247,251,0.82);
+          text-decoration: underline;
+          text-underline-offset: 2px;
+          text-decoration-color: rgba(246,247,251,0.32);
+          padding: 0;
+          transition: color 0.15s;
+        }
+        .earth-auth-switch-btn:hover {
+          color: #f6f7fb;
+        }
       `}</style>
+
       <div style={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #0B0E14 0%, #0f1520 50%, #0B0E14 100%)',
+        background: 'linear-gradient(180deg, #020510 0%, #060c1a 30%, #0a1228 60%, #0d1830 100%)',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '24px',
+        padding: 'max(28px, env(safe-area-inset-top)) 24px max(28px, env(safe-area-inset-bottom))',
+        fontFamily: "'Plus Jakarta Sans', -apple-system, sans-serif",
         position: 'relative',
         overflow: 'hidden',
       }}>
+        {/* Night sky stars layer */}
+        <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
+          {/* Static star field */}
+          {[
+            { top: '4%', left: '8%', size: 2, delay: '0s', dur: '3.2s' },
+            { top: '7%', left: '22%', size: 1.5, delay: '0.4s', dur: '2.8s' },
+            { top: '3%', left: '38%', size: 2.5, delay: '1.1s', dur: '4s' },
+            { top: '9%', left: '55%', size: 1, delay: '0.7s', dur: '3.5s' },
+            { top: '5%', left: '70%', size: 2, delay: '1.8s', dur: '2.6s' },
+            { top: '2%', left: '85%', size: 1.5, delay: '0.3s', dur: '3.8s' },
+            { top: '12%', left: '14%', size: 1, delay: '2.1s', dur: '3s' },
+            { top: '15%', left: '30%', size: 2, delay: '0.9s', dur: '4.2s' },
+            { top: '11%', left: '48%', size: 1.5, delay: '1.5s', dur: '2.9s' },
+            { top: '18%', left: '62%', size: 2.5, delay: '0.2s', dur: '3.6s' },
+            { top: '13%', left: '78%', size: 1, delay: '1.3s', dur: '2.7s' },
+            { top: '20%', left: '92%', size: 2, delay: '2.4s', dur: '3.3s' },
+            { top: '25%', left: '5%', size: 1.5, delay: '0.6s', dur: '4.1s' },
+            { top: '28%', left: '18%', size: 1, delay: '1.7s', dur: '3s' },
+            { top: '22%', left: '35%', size: 2, delay: '0.8s', dur: '2.5s' },
+            { top: '30%', left: '52%', size: 1.5, delay: '2.2s', dur: '3.7s' },
+            { top: '26%', left: '68%', size: 2.5, delay: '0.5s', dur: '4.4s' },
+            { top: '32%', left: '82%', size: 1, delay: '1.9s', dur: '3.1s' },
+            { top: '38%', left: '10%', size: 2, delay: '1.2s', dur: '2.8s' },
+            { top: '35%', left: '25%', size: 1.5, delay: '0.1s', dur: '3.9s' },
+            { top: '42%', left: '42%', size: 1, delay: '2.6s', dur: '3.4s' },
+            { top: '40%', left: '58%', size: 2, delay: '0.4s', dur: '2.6s' },
+            { top: '45%', left: '75%', size: 1.5, delay: '1.4s', dur: '4s' },
+            { top: '48%', left: '88%', size: 2.5, delay: '0.7s', dur: '3.2s' },
+            { top: '55%', left: '3%', size: 1, delay: '2s', dur: '2.9s' },
+            { top: '52%', left: '20%', size: 2, delay: '1.6s', dur: '3.6s' },
+            { top: '58%', left: '37%', size: 1.5, delay: '0.3s', dur: '4.3s' },
+            { top: '60%', left: '55%', size: 1, delay: '2.3s', dur: '3s' },
+            { top: '56%', left: '72%', size: 2, delay: '0.9s', dur: '2.7s' },
+            { top: '62%', left: '90%', size: 1.5, delay: '1.1s', dur: '3.8s' },
+            { top: '68%', left: '12%', size: 2.5, delay: '0.5s', dur: '4.1s' },
+            { top: '65%', left: '28%', size: 1, delay: '1.8s', dur: '3.3s' },
+            { top: '72%', left: '45%', size: 2, delay: '2.5s', dur: '2.8s' },
+            { top: '70%', left: '62%', size: 1.5, delay: '0.2s', dur: '3.5s' },
+            { top: '75%', left: '80%', size: 1, delay: '1.3s', dur: '4.2s' },
+            { top: '80%', left: '7%', size: 2, delay: '0.6s', dur: '3s' },
+            { top: '78%', left: '23%', size: 1.5, delay: '2.1s', dur: '2.6s' },
+            { top: '85%', left: '40%', size: 2.5, delay: '0.8s', dur: '3.7s' },
+            { top: '82%', left: '57%', size: 1, delay: '1.5s', dur: '4.4s' },
+            { top: '88%', left: '74%', size: 2, delay: '0.4s', dur: '3.1s' },
+            { top: '90%', left: '92%', size: 1.5, delay: '1.9s', dur: '2.9s' },
+            { top: '95%', left: '15%', size: 1, delay: '2.7s', dur: '3.6s' },
+            { top: '93%', left: '33%', size: 2, delay: '0.1s', dur: '4s' },
+            { top: '97%', left: '50%', size: 1.5, delay: '1.2s', dur: '3.3s' },
+            { top: '94%', left: '67%', size: 2.5, delay: '2.4s', dur: '2.7s' },
+            { top: '6%', left: '95%', size: 1, delay: '0.7s', dur: '3.9s' },
+            { top: '33%', left: '96%', size: 2, delay: '1.6s', dur: '3.2s' },
+            { top: '50%', left: '97%', size: 1.5, delay: '0.3s', dur: '4.1s' },
+            { top: '16%', left: '1%', size: 2, delay: '2.2s', dur: '2.8s' },
+            { top: '44%', left: '2%', size: 1, delay: '0.9s', dur: '3.5s' },
+          ].map((star, i) => (
+            <div
+              key={i}
+              style={{
+                position: 'absolute',
+                top: star.top,
+                left: star.left,
+                width: star.size,
+                height: star.size,
+                borderRadius: '50%',
+                background: i % 5 === 0 ? '#b8d4ff' : i % 3 === 0 ? '#e8f0ff' : '#ffffff',
+                animation: `${i % 2 === 0 ? 'twinkle' : 'twinkleSlow'} ${star.dur} ${star.delay} ease-in-out infinite`,
+              }}
+            />
+          ))}
+
+          {/* Moon */}
+          <div style={{
+            position: 'absolute',
+            top: '8%',
+            right: '12%',
+            width: 56,
+            height: 56,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle at 38% 38%, #f0f4ff 0%, #d8e4ff 40%, #b8ccff 100%)',
+            animation: 'moonGlow 6s ease-in-out infinite',
+          }}>
+            {/* Moon craters */}
+            <div style={{ position: 'absolute', top: '22%', left: '28%', width: 8, height: 8, borderRadius: '50%', background: 'rgba(160,180,220,0.35)' }} />
+            <div style={{ position: 'absolute', top: '55%', left: '55%', width: 5, height: 5, borderRadius: '50%', background: 'rgba(160,180,220,0.28)' }} />
+            <div style={{ position: 'absolute', top: '38%', left: '62%', width: 6, height: 6, borderRadius: '50%', background: 'rgba(160,180,220,0.22)' }} />
+          </div>
+
+          {/* Aurora borealis effect */}
+          <div style={{
+            position: 'absolute',
+            top: '15%',
+            left: '-10%',
+            width: '70%',
+            height: '25%',
+            background: 'radial-gradient(ellipse at center, rgba(32,178,120,0.18) 0%, rgba(32,100,200,0.12) 50%, transparent 80%)',
+            borderRadius: '50%',
+            filter: 'blur(40px)',
+            animation: 'auroraShift 8s ease-in-out infinite',
+          }} />
+          <div style={{
+            position: 'absolute',
+            top: '5%',
+            right: '-5%',
+            width: '50%',
+            height: '20%',
+            background: 'radial-gradient(ellipse at center, rgba(80,60,200,0.15) 0%, rgba(140,60,200,0.10) 50%, transparent 80%)',
+            borderRadius: '50%',
+            filter: 'blur(50px)',
+            animation: 'auroraShift 10s 2s ease-in-out infinite',
+          }} />
+
+          {/* Shooting star */}
+          <div style={{
+            position: 'absolute',
+            top: '18%',
+            left: '10%',
+            height: 1.5,
+            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent)',
+            borderRadius: 2,
+            animation: 'shootingStar 8s 3s ease-in infinite',
+          }} />
+          <div style={{
+            position: 'absolute',
+            top: '35%',
+            left: '60%',
+            height: 1,
+            background: 'linear-gradient(90deg, transparent, rgba(200,220,255,0.8), transparent)',
+            borderRadius: 2,
+            animation: 'shootingStar 12s 7s ease-in infinite',
+          }} />
+
+          {/* Milky way subtle band */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'linear-gradient(125deg, transparent 20%, rgba(100,120,200,0.04) 40%, rgba(140,160,240,0.07) 50%, rgba(100,120,200,0.04) 60%, transparent 80%)',
+          }} />
+        </div>
+
+        {/* Subtle radial vignette overlay */}
         <div style={{
-          position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.04,
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")`,
-          backgroundSize: '300px 300px',
+          position: 'fixed',
+          inset: 0,
+          pointerEvents: 'none',
+          background: 'radial-gradient(circle at 50% 52%, rgba(8,10,17,0) 0%, rgba(8,10,17,0.12) 38%, rgba(8,10,17,0.62) 100%), linear-gradient(180deg, rgba(7,9,18,0.05) 0%, rgba(7,9,18,0.56) 100%)',
+          zIndex: 0,
         }} />
 
-        <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 420, animation: 'fadeUp 0.6s cubic-bezier(0.23,1,0.32,1) both' }}>
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-              <div style={{
-                width: 40, height: 40, borderRadius: 10,
-                background: 'linear-gradient(135deg, #22c55e, #16a34a)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/>
-                  <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                </svg>
-              </div>
-              <div>
-                <div style={{ color: '#fff', fontWeight: 700, fontSize: 16, letterSpacing: '-0.02em', lineHeight: 1.2 }}>Earth AI</div>
-                <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Intelligence E</div>
-              </div>
+        {/* Auth card */}
+        <div style={{
+          position: 'relative',
+          zIndex: 1,
+          width: 'min(100%, 420px)',
+          animation: 'earthAuthFadeUp 0.5s cubic-bezier(0.23,1,0.32,1) both',
+        }}>
+          {/* Logo orb */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            marginBottom: 16,
+          }}>
+            <Link href="/" style={{ display: 'inline-flex', borderRadius: 8, textDecoration: 'none' }} aria-label="Back to Earth AI home">
+              <Image
+                src="/assets/images/h9O7B-1789370942958.jpg"
+                alt="Earth AI logo"
+                width={64}
+                height={64}
+                priority
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                  display: 'block',
+                  filter: 'drop-shadow(0 18px 38px rgba(0,0,0,0.24))',
+                }}
+              />
             </Link>
           </div>
 
+          {/* Heading */}
+          <div style={{ textAlign: 'center', marginBottom: 28 }}>
+            <h1 style={{
+              margin: 0,
+              color: '#f6f7fb',
+              fontSize: 28,
+              fontWeight: 600,
+              letterSpacing: 0,
+              lineHeight: 1.15,
+            }}>
+              {mode === 'signin' ? 'Sign in to Earth AI' : 'Create your account'}
+            </h1>
+            <p style={{
+              margin: '10px 0 0',
+              color: 'rgba(246,247,251,0.58)',
+              fontSize: 15,
+              lineHeight: 1.45,
+              letterSpacing: 0,
+              fontWeight: 400,
+            }}>
+              {mode === 'signin' ?'Intelligence E Agriculture platform' :'Start using Intelligence E Agriculture'}
+            </p>
+          </div>
+
+          {/* Card */}
           <div style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.10)',
+            position: 'relative',
+            width: '100%',
+            border: '1px solid rgba(255,255,255,0.08)',
             borderRadius: 20,
-            padding: '32px 28px',
-            backdropFilter: 'blur(20px)',
+            background: '#10141d',
+            color: '#f6f7fb',
+            boxShadow: '0 24px 70px rgba(0,0,0,0.26)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            padding: '32px 28px 28px',
           }}>
-            <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: 10, padding: 3, marginBottom: 28 }}>
-              {(['signin', 'signup'] as const).map((m) => (
-                <button
-                  key={m}
-                  onClick={() => { setMode(m); setError(''); }}
-                  style={{
-                    flex: 1, padding: '8px 0', borderRadius: 8, border: 'none', cursor: 'pointer',
-                    fontFamily: 'inherit', fontSize: 13, fontWeight: 600,
-                    background: mode === m ? 'rgba(255,255,255,0.10)' : 'transparent',
-                    color: mode === m ? '#fff' : 'rgba(255,255,255,0.45)',
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  {m === 'signin' ? 'Sign In' : 'Create Account'}
-                </button>
-              ))}
+            {/* Tab switcher */}
+            <div style={{
+              display: 'flex',
+              width: '100%',
+              background: 'rgba(255,255,255,0.04)',
+              borderRadius: 10,
+              padding: 3,
+              marginBottom: 24,
+              gap: 2,
+            }}>
+              <button
+                type="button"
+                className={`earth-auth-tab${mode === 'signin' ? ' active' : ''}`}
+                onClick={() => { setMode('signin'); setError(''); }}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                className={`earth-auth-tab${mode === 'signup' ? ' active' : ''}`}
+                onClick={() => { setMode('signup'); setError(''); }}
+              >
+                Create Account
+              </button>
             </div>
 
-            <form onSubmit={handleSubmit}>
+            {/* Form */}
+            <form onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
               {mode === 'signup' && (
-                <div style={{ marginBottom: 16 }}>
-                  <label style={{ display: 'block', color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 6 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <label style={{
+                    color: '#f6f7fb',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    letterSpacing: '-0.005em',
+                  }}>
                     Full Name
                   </label>
-                  <input
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Your full name"
-                    required
-                    style={{
-                      width: '100%', padding: '10px 14px', borderRadius: 10,
-                      background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
-                      color: '#fff', fontSize: 14, fontFamily: 'inherit', outline: 'none',
-                    }}
-                  />
+                  <div style={inputShellStyle('fullName')}>
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      onFocus={() => setFocusedField('fullName')}
+                      onBlur={() => setFocusedField(null)}
+                      placeholder="Your full name"
+                      required
+                      autoComplete="name"
+                      className="earth-auth-input"
+                      style={inputStyle}
+                    />
+                  </div>
                 </div>
               )}
 
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 6 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label style={{
+                  color: '#f6f7fb',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  letterSpacing: '-0.005em',
+                }}>
                   Email
                 </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  required
-                  style={{
-                    width: '100%', padding: '10px 14px', borderRadius: 10,
-                    background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
-                    color: '#fff', fontSize: 14, fontFamily: 'inherit', outline: 'none',
-                  }}
-                />
+                <div style={inputShellStyle('email')}>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onFocus={() => setFocusedField('email')}
+                    onBlur={() => setFocusedField(null)}
+                    placeholder="you@example.com"
+                    required
+                    autoComplete="email"
+                    inputMode="email"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    className="earth-auth-input"
+                    style={inputStyle}
+                  />
+                </div>
               </div>
 
-              <div style={{ marginBottom: 24 }}>
-                <label style={{ display: 'block', color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 6 }}>
-                  Password
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  minLength={8}
-                  style={{
-                    width: '100%', padding: '10px 14px', borderRadius: 10,
-                    background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
-                    color: '#fff', fontSize: 14, fontFamily: 'inherit', outline: 'none',
-                  }}
-                />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <label style={{
+                    color: '#f6f7fb',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    letterSpacing: '-0.005em',
+                  }}>
+                    Password
+                  </label>
+                  {mode === 'signin' && (
+                    <button
+                      type="button"
+                      onClick={handleForgotPassword}
+                      disabled={resetLoading}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: resetLoading ? 'not-allowed' : 'pointer',
+                        color: resetSent ? '#4ade80' : 'rgba(246,247,251,0.42)',
+                        fontSize: 12,
+                        fontWeight: 500,
+                        letterSpacing: '-0.005em',
+                        padding: 0,
+                        fontFamily: 'inherit',
+                        transition: 'color 0.15s',
+                      }}
+                    >
+                      {resetLoading ? 'Sending...' : resetSent ? 'Reset email sent' : 'Forgot password?'}
+                    </button>
+                  )}
+                </div>
+                <div style={inputShellStyle('password')}>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onFocus={() => setFocusedField('password')}
+                    onBlur={() => setFocusedField(null)}
+                    placeholder="Password"
+                    required
+                    minLength={8}
+                    autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+                    className="earth-auth-input"
+                    style={inputStyle}
+                  />
+                </div>
               </div>
 
               {error && (
                 <div style={{
-                  background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)',
-                  borderRadius: 10, padding: '10px 14px', marginBottom: 16,
-                  color: '#fca5a5', fontSize: 13, lineHeight: 1.5,
+                  borderRadius: 8,
+                  border: '1px solid rgba(202,57,42,0.28)',
+                  background: 'rgba(202,57,42,0.10)',
+                  padding: '10px 14px',
+                  color: '#f87171',
+                  fontSize: 13,
+                  lineHeight: 1.5,
+                  letterSpacing: '-0.005em',
                 }}>
                   {error}
                 </div>
               )}
 
-              <button
-                type="submit"
-                disabled={submitting}
-                style={{
-                  width: '100%', padding: '12px 0', borderRadius: 10, border: 'none',
-                  background: submitting ? 'rgba(34,197,94,0.5)' : '#22c55e',
-                  color: '#fff', fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
-                  cursor: submitting ? 'not-allowed' : 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  transition: 'all 0.2s',
-                }}
-              >
-                {submitting && (
-                  <div style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                )}
-                {submitting ? 'Please wait...' : mode === 'signin' ? 'Sign In' : 'Create Account'}
-              </button>
+              <div style={{ marginTop: 4 }}>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="earth-auth-primary-btn"
+                >
+                  {submitting && (
+                    <div style={{
+                      width: 15,
+                      height: 15,
+                      border: '2px solid rgba(11,14,20,0.25)',
+                      borderTopColor: '#0b0e14',
+                      borderRadius: '50%',
+                      animation: 'spin 0.8s linear infinite',
+                      flexShrink: 0,
+                    }} />
+                  )}
+                  {submitting
+                    ? 'Please wait...'
+                    : mode === 'signin' ?'Sign In' :'Create Account'}
+                </button>
+              </div>
+
+              {/* Divider */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 14,
+                padding: '4px 0',
+              }}>
+                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
+                <span style={{
+                  color: 'rgba(246,247,251,0.38)',
+                  fontSize: 12.5,
+                  fontWeight: 500,
+                  letterSpacing: '0.02em',
+                }}>
+                  or
+                </span>
+                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
+              </div>
+
+              {/* Switch mode */}
+              <div style={{ textAlign: 'center' }}>
+                <span style={{
+                  color: 'rgba(246,247,251,0.42)',
+                  fontSize: 13,
+                  fontWeight: 400,
+                  letterSpacing: '-0.005em',
+                }}>
+                  {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
+                </span>
+                <button
+                  type="button"
+                  className="earth-auth-switch-btn"
+                  onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); }}
+                >
+                  {mode === 'signin' ? 'Create one' : 'Sign in'}
+                </button>
+              </div>
             </form>
+
+            {/* Terms */}
+            <p style={{
+              marginTop: 20,
+              color: 'rgba(246,247,251,0.38)',
+              fontSize: 11.5,
+              fontWeight: 400,
+              lineHeight: 1.55,
+              textAlign: 'center',
+              letterSpacing: '-0.005em',
+              maxWidth: 320,
+            }}>
+              By continuing, you agree to Earth AI's{' '}
+              <Link href="/terms" className="earth-auth-terms-link">Terms of Service</Link>
+              {' '}and acknowledge the{' '}
+              <Link href="/privacy" className="earth-auth-terms-link">Privacy Policy</Link>.
+            </p>
           </div>
 
-          <p style={{ textAlign: 'center', marginTop: 20, color: 'rgba(255,255,255,0.35)', fontSize: 12 }}>
-            <Link href="/" style={{ color: 'rgba(255,255,255,0.45)', textDecoration: 'none' }}>← Back to Earth AI</Link>
-          </p>
+          {/* Back link */}
+          <div style={{ textAlign: 'center', marginTop: 22 }}>
+            <Link href="/" className="earth-auth-back-link">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              Back to Earth AI
+            </Link>
+          </div>
         </div>
       </div>
     </>
@@ -237,8 +734,21 @@ function LoginContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div style={{ minHeight: '100vh', background: '#0B0E14', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: 32, height: 32, border: '2px solid rgba(255,255,255,0.1)', borderTopColor: 'rgba(255,255,255,0.6)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(180deg, #151926 0%, #1c2538 56%, #25344d 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        <div style={{
+          width: 28,
+          height: 28,
+          border: '2px solid rgba(255,255,255,0.08)',
+          borderTopColor: 'rgba(255,255,255,0.6)',
+          borderRadius: '50%',
+          animation: 'spin 0.8s linear infinite',
+        }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     }>

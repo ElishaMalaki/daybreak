@@ -1,7 +1,7 @@
 // ============================================================
 // Intelligence E — AI Router
 // Routes requests to the best available provider.
-// Handles fallback and provider selection.
+// Handles fallback, rate limiting, and usage tracking.
 // NEVER exposes provider details to the frontend.
 // ============================================================
 
@@ -10,6 +10,11 @@ import { GeminiAdapter } from './providers/gemini';
 import { OpenAIAdapter } from './providers/openai';
 import { AnthropicAdapter } from './providers/anthropic';
 
+// Per-user in-memory rate limiting (resets on server restart)
+// For production, use Redis or database-backed rate limiting
+const userRequestCounts = new Map<string, { count: number; resetAt: number }>();
+
+const DAILY_REQUEST_LIMIT = 50; // free tier limit per user per day
 const MAX_INPUT_LENGTH = 8000; // characters
 const MAX_RETRY_ATTEMPTS = 1; // max fallback attempts
 
@@ -51,6 +56,7 @@ export class AIRouter {
   constructor() {
     this.providers = new Map();
 
+    // Register all providers
     const gemini = new GeminiAdapter();
     const openai = new OpenAIAdapter();
     const anthropic = new AnthropicAdapter();
@@ -58,6 +64,24 @@ export class AIRouter {
     this.providers.set('gemini', gemini);
     this.providers.set('openai', openai);
     this.providers.set('anthropic', anthropic);
+  }
+
+  private checkRateLimit(userId: string): { allowed: boolean; remaining: number } {
+    const now = Date.now();
+    const dayMs = 24 * 60 * 60 * 1000;
+    const userRecord = userRequestCounts.get(userId);
+
+    if (!userRecord || now > userRecord.resetAt) {
+      userRequestCounts.set(userId, { count: 1, resetAt: now + dayMs });
+      return { allowed: true, remaining: DAILY_REQUEST_LIMIT - 1 };
+    }
+
+    if (userRecord.count >= DAILY_REQUEST_LIMIT) {
+      return { allowed: false, remaining: 0 };
+    }
+
+    userRecord.count += 1;
+    return { allowed: true, remaining: DAILY_REQUEST_LIMIT - userRecord.count };
   }
 
   private validateInput(request: AIRequest): string | null {
@@ -92,7 +116,22 @@ export class AIRouter {
     return ordered;
   }
 
-  async route(request: AIRequest): Promise<AIResponse> {
+  async route(request: AIRequest): Promise<AIResponse & { rateLimitRemaining?: number }> {
+    // Rate limit check
+    const rateLimit = this.checkRateLimit(request.userId);
+    if (!rateLimit.allowed) {
+      return {
+        content: 'You have reached your daily request limit for Intelligence E. Your limit will reset tomorrow.',
+        provider: 'system',
+        model: 'none',
+        processingTimeMs: 0,
+        success: false,
+        error: 'RATE_LIMIT_EXCEEDED',
+        rateLimitRemaining: 0,
+      };
+    }
+
+    // Input validation
     const validationError = this.validateInput(request);
     if (validationError) {
       return {
@@ -102,14 +141,17 @@ export class AIRouter {
         processingTimeMs: 0,
         success: false,
         error: validationError,
+        rateLimitRemaining: rateLimit.remaining,
       };
     }
 
+    // Inject agricultural system prompt
     const enrichedRequest: AIRequest = {
       ...request,
       systemPrompt: request.systemPrompt || AGRICULTURAL_SYSTEM_PROMPT,
     };
 
+    // Get ordered providers for this request type
     const orderedProviders = this.getOrderedProviders(request.requestType);
 
     if (orderedProviders.length === 0) {
@@ -120,9 +162,11 @@ export class AIRouter {
         processingTimeMs: 0,
         success: false,
         error: 'NO_PROVIDERS_AVAILABLE',
+        rateLimitRemaining: rateLimit.remaining,
       };
     }
 
+    // Try providers in order with fallback
     let lastError = '';
     let attempts = 0;
 
@@ -133,11 +177,19 @@ export class AIRouter {
       const response = await provider.generateResponse(enrichedRequest);
 
       if (response.success && response.content) {
-        return response;
+        return {
+          ...response,
+          rateLimitRemaining: rateLimit.remaining,
+        };
       }
 
       lastError = response.error || 'Unknown error';
 
+      // Do not retry on authentication errors — a bad key won't succeed on retry
+      const isAuthError = (response as AIResponse & { isAuthError?: boolean }).isAuthError === true;
+      if (isAuthError) break;
+
+      // Don't retry on configuration errors
       if (lastError.includes('not configured')) continue;
     }
 
@@ -148,6 +200,7 @@ export class AIRouter {
       processingTimeMs: 0,
       success: false,
       error: lastError || 'All providers failed',
+      rateLimitRemaining: rateLimit.remaining,
     };
   }
 
@@ -173,6 +226,7 @@ export class AIRouter {
   }
 }
 
+// Singleton router instance
 let routerInstance: AIRouter | null = null;
 
 export function getAIRouter(): AIRouter {

@@ -1,28 +1,10 @@
+
 'use client';
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import type { ReactNode } from 'react';
-import type { Session, User } from '@supabase/supabase-js';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
-type SignUpMetadata = {
-  fullName?: string;
-  avatarUrl?: string;
-};
-
-type AuthContextValue = {
-  user: User | null;
-  session: Session | null;
-  loading: boolean;
-  signUp: (email: string, password: string, metadata?: SignUpMetadata) => Promise<unknown>;
-  signIn: (email: string, password: string) => Promise<unknown>;
-  signOut: () => Promise<void>;
-  getCurrentUser: () => Promise<User | null>;
-  isEmailVerified: () => boolean;
-  getUserProfile: () => Promise<unknown | null>;
-};
-
-const AuthContext = createContext<AuthContextValue | null>(null);
+const AuthContext = createContext<any>({});
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -32,21 +14,23 @@ export const useAuth = () => {
   return context;
 };
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<any>(null);
+  const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = useMemo(() => createClient(), []);
+  const supabase = createClient();
 
   useEffect(() => {
+    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
+    // Listen for auth changes
     const {
-      data: { subscription },
+      data: { subscription }
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -54,75 +38,76 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase]);
+  }, []);
 
-  const value = useMemo<AuthContextValue>(() => {
-    const signUp = async (email: string, password: string, metadata: SignUpMetadata = {}) => {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: metadata.fullName || '',
-            avatar_url: metadata.avatarUrl || '',
-          },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+  // Email/Password Sign Up
+  const signUp = async (email: string, password: string, metadata = {}) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: metadata?.fullName || '',
+          avatar_url: metadata?.avatarUrl || ''
         },
-      });
-      if (error) throw error;
-      return data;
-    };
+        emailRedirectTo: `${window.location.origin}/auth/callback`
+      }
+    });
+    if (error) throw error;
+    return data;
+  };
 
-    const signIn = async (email: string, password: string) => {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) throw error;
-      return data;
-    };
+  // Email/Password Sign In
+  const signIn = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+    if (error) throw error;
+    return data;
+  };
 
-    const signOut = async () => {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-    };
+  // Sign Out
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+  };
 
-    const getCurrentUser = async () => {
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser();
-      if (error) throw error;
-      return user;
-    };
+  // Get Current User
+  const getCurrentUser = async () => {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error) throw error;
+    return user;
+  };
 
-    const isEmailVerified = () => {
-      return Boolean(user?.email_confirmed_at);
-    };
+  // Check if Email is Verified
+  const isEmailVerified = () => {
+    return user?.email_confirmed_at !== null;
+  };
 
-    const getUserProfile = async () => {
-      if (!user) return null;
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-      if (error) throw error;
-      return data;
-    };
+  // Get User Profile from Database
+  const getUserProfile = async () => {
+    if (!user) return null;
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+    if (error) throw error;
+    return data;
+  };
 
-    return {
-      user,
-      session,
-      loading,
-      signUp,
-      signIn,
-      signOut,
-      getCurrentUser,
-      isEmailVerified,
-      getUserProfile,
-    };
-  }, [loading, session, supabase, user]);
+  const value = {
+    user,
+    session,
+    loading,
+    signUp,
+    signIn,
+    signOut,
+    getCurrentUser,
+    isEmailVerified,
+    getUserProfile
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

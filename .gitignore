@@ -1,10 +1,6 @@
-# Dependencies
+# Node modules
 node_modules/
-
-# Environment files
-.env
-.env.*
-!.env.example
+package-lock.json
 
 # Next.js build output
 .next/
@@ -26,17 +22,16 @@ Thumbs.db
 # Vercel deployment
 .vercel/
 
-# TypeScript
+# Optional: if using TypeScript
 *.tsbuildinfo
 
-# Testing
+# Optional: if using testing tools
 coverage/
 jest-test-results.json
 
-# IDEs
+# Optional: if using IDEs
 .vscode/
 .idea/
 
-# Turborepo
-.turbo/
+# Optional: if using TurboRepo or monorepo
 turbo/
