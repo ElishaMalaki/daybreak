@@ -93,7 +93,7 @@ export default function IntelligencePage() {
 
   // Handle URL param for conversation
   useEffect(() => {
-    let convId = searchParams?.get('conv');
+    const convId = searchParams?.get('conv');
     if (convId) {
       setActiveConvId(convId);
     }
@@ -111,13 +111,15 @@ export default function IntelligencePage() {
     }
 
     setLoadingMessages(true);
-    supabase
-      .from('messages')
-      .select('id, role, content, ai_provider, model_used, created_at')
-      .eq('conversation_id', activeConvId)
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: true })
-      .then(({ data }) => {
+    const loadMessages = async () => {
+      try {
+        const { data } = await supabase
+          .from('messages')
+          .select('id, role, content, ai_provider, model_used, created_at')
+          .eq('conversation_id', activeConvId)
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: true });
+
         setMessages(
           (data || []).map((m) => ({
             id: m.id,
@@ -128,9 +130,12 @@ export default function IntelligencePage() {
             createdAt: m.created_at,
           }))
         );
+      } finally {
         setLoadingMessages(false);
-      })
-      .catch(() => setLoadingMessages(false));
+      }
+    };
+
+    void loadMessages();
   }, [activeConvId, user]);
 
   // Auto-scroll
