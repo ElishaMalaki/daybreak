@@ -4,7 +4,7 @@
 // API key stays server-side only.
 // ============================================================
 
-import type { AIProvider, AIRequest, AIResponse, ProviderHealth, AnalysisCapability } from './types';
+import type { AIProvider, AIRequest, AIResponse, ProviderHealth, AnalysisCapability } from '../types';
 
 export class GeminiAdapter implements AIProvider {
   readonly name = 'gemini';
