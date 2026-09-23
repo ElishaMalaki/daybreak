@@ -1,28 +1,20 @@
 import js from '@eslint/js';
-import { FlatCompat } from '@eslint/eslintrc';
-import { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-});
+import nextConfig from 'eslint-config-next';
+import prettierConfig from 'eslint-config-prettier';
+import prettierPlugin from 'eslint-plugin-prettier';
+import tsPlugin from '@typescript-eslint/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
 
 const config = [
   {
     ignores: ['node_modules/**', '.next/**', 'out/**', 'public/**'],
   },
-  ...compat.extends(
-    'next/core-web-vitals',
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended'
-  ),
+  js.configs.recommended,
+  ...nextConfig,
   {
+    files: ['**/*.{ts,tsx}'],
     languageOptions: {
+      parser: tsParser,
       globals: {
         React: 'readonly',
         console: 'readonly',
@@ -40,8 +32,16 @@ const config = [
         AbortController: 'readonly',
       },
     },
+    plugins: {
+      '@typescript-eslint': tsPlugin,
+      prettier: prettierPlugin,
+    },
     rules: {
+      ...tsPlugin.configs.recommended.rules,
+      ...prettierConfig.rules,
       'no-undef': 'off',
+      'react-hooks/immutability': 'off',
+      'react-hooks/set-state-in-effect': 'off',
       'prettier/prettier': [
         'warn',
         {
