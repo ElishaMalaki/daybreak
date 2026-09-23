@@ -41,6 +41,7 @@ const config = [
       },
     },
     rules: {
+      'no-undef': 'off',
       'prettier/prettier': [
         'warn',
         {
