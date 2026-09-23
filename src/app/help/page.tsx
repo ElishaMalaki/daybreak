@@ -220,6 +220,27 @@ export default function HelpPage() {
           from { opacity: 0; transform: translateY(12px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.2; transform: scale(0.8); }
+          50% { opacity: 1; transform: scale(1.2); }
+        }
+        @keyframes twinkleSlow {
+          0%, 100% { opacity: 0.1; transform: scale(0.9); }
+          50% { opacity: 0.8; transform: scale(1.1); }
+        }
+        @keyframes auroraShift {
+          0%, 100% { opacity: 0.10; transform: scaleX(1) scaleY(1); }
+          50% { opacity: 0.20; transform: scaleX(1.08) scaleY(1.12); }
+        }
+        @keyframes moonGlow {
+          0%, 100% { box-shadow: 0 0 40px 12px rgba(200,220,255,0.18), 0 0 80px 30px rgba(160,190,255,0.10); }
+          50% { box-shadow: 0 0 60px 20px rgba(200,220,255,0.28), 0 0 120px 50px rgba(160,190,255,0.16); }
+        }
+        @keyframes shootingStar {
+          0% { transform: translateX(0) translateY(0) rotate(-35deg); opacity: 1; width: 0; }
+          30% { width: 100px; opacity: 1; }
+          100% { transform: translateX(350px) translateY(180px) rotate(-35deg); opacity: 0; width: 100px; }
+        }
         .help-nav-item {
           display: flex;
           align-items: center;
@@ -300,10 +321,153 @@ export default function HelpPage() {
 
       <div style={{
         minHeight: '100vh',
-        background: '#0A0C10',
+        background: 'linear-gradient(180deg, #020510 0%, #060c1a 30%, #0a1228 60%, #0d1830 100%)',
         fontFamily: "'Plus Jakarta Sans', -apple-system, sans-serif",
         color: '#f6f7fb',
+        position: 'relative',
+        overflow: 'hidden',
       }}>
+        {/* Night sky background layer */}
+        <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
+          {/* Stars */}
+          {[
+            { top: '3%', left: '6%', size: 2, delay: '0s', dur: '3.2s' },
+            { top: '6%', left: '20%', size: 1.5, delay: '0.4s', dur: '2.8s' },
+            { top: '2%', left: '36%', size: 2.5, delay: '1.1s', dur: '4s' },
+            { top: '8%', left: '53%', size: 1, delay: '0.7s', dur: '3.5s' },
+            { top: '4%', left: '68%', size: 2, delay: '1.8s', dur: '2.6s' },
+            { top: '1%', left: '84%', size: 1.5, delay: '0.3s', dur: '3.8s' },
+            { top: '11%', left: '12%', size: 1, delay: '2.1s', dur: '3s' },
+            { top: '14%', left: '28%', size: 2, delay: '0.9s', dur: '4.2s' },
+            { top: '10%', left: '46%', size: 1.5, delay: '1.5s', dur: '2.9s' },
+            { top: '17%', left: '60%', size: 2.5, delay: '0.2s', dur: '3.6s' },
+            { top: '12%', left: '76%', size: 1, delay: '1.3s', dur: '2.7s' },
+            { top: '19%', left: '91%', size: 2, delay: '2.4s', dur: '3.3s' },
+            { top: '24%', left: '4%', size: 1.5, delay: '0.6s', dur: '4.1s' },
+            { top: '27%', left: '17%', size: 1, delay: '1.7s', dur: '3s' },
+            { top: '21%', left: '33%', size: 2, delay: '0.8s', dur: '2.5s' },
+            { top: '29%', left: '50%', size: 1.5, delay: '2.2s', dur: '3.7s' },
+            { top: '25%', left: '66%', size: 2.5, delay: '0.5s', dur: '4.4s' },
+            { top: '31%', left: '80%', size: 1, delay: '1.9s', dur: '3.1s' },
+            { top: '37%', left: '9%', size: 2, delay: '1.2s', dur: '2.8s' },
+            { top: '34%', left: '24%', size: 1.5, delay: '0.1s', dur: '3.9s' },
+            { top: '41%', left: '41%', size: 1, delay: '2.6s', dur: '3.4s' },
+            { top: '39%', left: '57%', size: 2, delay: '0.4s', dur: '2.6s' },
+            { top: '44%', left: '73%', size: 1.5, delay: '1.4s', dur: '4s' },
+            { top: '47%', left: '87%', size: 2.5, delay: '0.7s', dur: '3.2s' },
+            { top: '54%', left: '2%', size: 1, delay: '2s', dur: '2.9s' },
+            { top: '51%', left: '19%', size: 2, delay: '1.6s', dur: '3.6s' },
+            { top: '57%', left: '36%', size: 1.5, delay: '0.3s', dur: '4.3s' },
+            { top: '59%', left: '54%', size: 1, delay: '2.3s', dur: '3s' },
+            { top: '55%', left: '71%', size: 2, delay: '0.9s', dur: '2.7s' },
+            { top: '61%', left: '89%', size: 1.5, delay: '1.1s', dur: '3.8s' },
+            { top: '67%', left: '11%', size: 2.5, delay: '0.5s', dur: '4.1s' },
+            { top: '64%', left: '27%', size: 1, delay: '1.8s', dur: '3.3s' },
+            { top: '71%', left: '44%', size: 2, delay: '2.5s', dur: '2.8s' },
+            { top: '69%', left: '61%', size: 1.5, delay: '0.2s', dur: '3.5s' },
+            { top: '74%', left: '79%', size: 1, delay: '1.3s', dur: '4.2s' },
+            { top: '79%', left: '6%', size: 2, delay: '0.6s', dur: '3s' },
+            { top: '77%', left: '22%', size: 1.5, delay: '2.1s', dur: '2.6s' },
+            { top: '84%', left: '39%', size: 2.5, delay: '0.8s', dur: '3.7s' },
+            { top: '81%', left: '56%', size: 1, delay: '1.5s', dur: '4.4s' },
+            { top: '87%', left: '73%', size: 2, delay: '0.4s', dur: '3.1s' },
+            { top: '89%', left: '91%', size: 1.5, delay: '1.9s', dur: '2.9s' },
+            { top: '94%', left: '14%', size: 1, delay: '2.7s', dur: '3.6s' },
+            { top: '92%', left: '32%', size: 2, delay: '0.1s', dur: '4s' },
+            { top: '96%', left: '49%', size: 1.5, delay: '1.2s', dur: '3.3s' },
+            { top: '93%', left: '66%', size: 2.5, delay: '2.4s', dur: '2.7s' },
+            { top: '5%', left: '94%', size: 1, delay: '0.7s', dur: '3.9s' },
+            { top: '32%', left: '95%', size: 2, delay: '1.6s', dur: '3.2s' },
+            { top: '49%', left: '96%', size: 1.5, delay: '0.3s', dur: '4.1s' },
+            { top: '15%', left: '0.5%', size: 2, delay: '2.2s', dur: '2.8s' },
+            { top: '43%', left: '1.5%', size: 1, delay: '0.9s', dur: '3.5s' },
+          ].map((star, i) => (
+            <div
+              key={i}
+              style={{
+                position: 'absolute',
+                top: star.top,
+                left: star.left,
+                width: star.size,
+                height: star.size,
+                borderRadius: '50%',
+                background: i % 5 === 0 ? '#b8d4ff' : i % 3 === 0 ? '#e8f0ff' : '#ffffff',
+                animation: `${i % 2 === 0 ? 'twinkle' : 'twinkleSlow'} ${star.dur} ${star.delay} ease-in-out infinite`,
+              }}
+            />
+          ))}
+
+          {/* Moon */}
+          <div style={{
+            position: 'absolute',
+            top: '6%',
+            right: '8%',
+            width: 48,
+            height: 48,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle at 38% 38%, #f0f4ff 0%, #d8e4ff 40%, #b8ccff 100%)',
+            animation: 'moonGlow 6s ease-in-out infinite',
+          }}>
+            <div style={{ position: 'absolute', top: '22%', left: '28%', width: 7, height: 7, borderRadius: '50%', background: 'rgba(160,180,220,0.35)' }} />
+            <div style={{ position: 'absolute', top: '55%', left: '55%', width: 4, height: 4, borderRadius: '50%', background: 'rgba(160,180,220,0.28)' }} />
+            <div style={{ position: 'absolute', top: '38%', left: '62%', width: 5, height: 5, borderRadius: '50%', background: 'rgba(160,180,220,0.22)' }} />
+          </div>
+
+          {/* Aurora borealis */}
+          <div style={{
+            position: 'absolute',
+            top: '10%',
+            left: '-10%',
+            width: '65%',
+            height: '22%',
+            background: 'radial-gradient(ellipse at center, rgba(32,178,120,0.15) 0%, rgba(32,100,200,0.10) 50%, transparent 80%)',
+            borderRadius: '50%',
+            filter: 'blur(45px)',
+            animation: 'auroraShift 9s ease-in-out infinite',
+          }} />
+          <div style={{
+            position: 'absolute',
+            top: '3%',
+            right: '-5%',
+            width: '45%',
+            height: '18%',
+            background: 'radial-gradient(ellipse at center, rgba(80,60,200,0.12) 0%, rgba(140,60,200,0.08) 50%, transparent 80%)',
+            borderRadius: '50%',
+            filter: 'blur(55px)',
+            animation: 'auroraShift 11s 2s ease-in-out infinite',
+          }} />
+
+          {/* Shooting stars */}
+          <div style={{
+            position: 'absolute',
+            top: '15%',
+            left: '8%',
+            height: 1.5,
+            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent)',
+            borderRadius: 2,
+            animation: 'shootingStar 9s 4s ease-in infinite',
+          }} />
+          <div style={{
+            position: 'absolute',
+            top: '40%',
+            left: '55%',
+            height: 1,
+            background: 'linear-gradient(90deg, transparent, rgba(200,220,255,0.8), transparent)',
+            borderRadius: 2,
+            animation: 'shootingStar 13s 8s ease-in infinite',
+          }} />
+
+          {/* Milky way band */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'linear-gradient(125deg, transparent 20%, rgba(100,120,200,0.03) 40%, rgba(140,160,240,0.06) 50%, rgba(100,120,200,0.03) 60%, transparent 80%)',
+          }} />
+        </div>
+
         {/* Top navigation bar */}
         <div style={{
           height: 56,
@@ -312,7 +476,9 @@ export default function HelpPage() {
           alignItems: 'center',
           padding: '0 24px',
           gap: 16,
-          background: '#0D1017',
+          background: 'rgba(6,12,26,0.85)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
           position: 'sticky',
           top: 0,
           zIndex: 40,
@@ -351,7 +517,7 @@ export default function HelpPage() {
           </div>
         </div>
 
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px 80px' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px 80px', position: 'relative', zIndex: 1 }}>
           {/* Page header */}
           <div style={{ marginBottom: 40, animation: 'helpFadeIn 0.5s cubic-bezier(0.23,1,0.32,1) both' }}>
             <div style={{
@@ -401,7 +567,9 @@ export default function HelpPage() {
             height: 48,
             borderRadius: 12,
             border: searchFocused ? '1px solid rgba(255,255,255,0.36)' : '1px solid rgba(255,255,255,0.1)',
-            background: '#0D1017',
+            background: 'rgba(13,16,23,0.85)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
             padding: '0 16px',
             marginBottom: 40,
             transition: 'border-color 0.15s',
@@ -465,7 +633,8 @@ export default function HelpPage() {
                   fontSize: 14,
                   border: '1px solid rgba(255,255,255,0.06)',
                   borderRadius: 14,
-                  background: '#0D1017',
+                  background: 'rgba(13,16,23,0.75)',
+                  backdropFilter: 'blur(8px)',
                 }}>
                   No articles found. Try a different search term.
                 </div>
@@ -477,7 +646,8 @@ export default function HelpPage() {
                       style={{
                         border: '1px solid rgba(255,255,255,0.07)',
                         borderRadius: 12,
-                        background: '#0D1017',
+                        background: 'rgba(13,16,23,0.80)',
+                        backdropFilter: 'blur(8px)',
                         padding: '18px 20px',
                       }}
                     >
@@ -535,7 +705,9 @@ export default function HelpPage() {
                 top: 80,
                 border: '1px solid rgba(255,255,255,0.06)',
                 borderRadius: 14,
-                background: '#0D1017',
+                background: 'rgba(13,16,23,0.80)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
                 padding: '12px 8px',
               }}>
                 <div style={{
@@ -628,7 +800,8 @@ export default function HelpPage() {
                           style={{
                             border: '1px solid rgba(255,255,255,0.07)',
                             borderRadius: 12,
-                            background: '#0D1017',
+                            background: 'rgba(13,16,23,0.80)',
+                            backdropFilter: 'blur(8px)',
                             overflow: 'hidden',
                             transition: 'border-color 0.15s',
                           }}
@@ -747,7 +920,8 @@ export default function HelpPage() {
                           style={{
                             border: '1px solid rgba(255,255,255,0.07)',
                             borderRadius: 14,
-                            background: '#0D1017',
+                            background: 'rgba(13,16,23,0.80)',
+                            backdropFilter: 'blur(8px)',
                             padding: '20px',
                           }}
                         >
@@ -801,6 +975,7 @@ export default function HelpPage() {
                       borderRadius: 12,
                       border: '1px solid rgba(34,197,94,0.15)',
                       background: 'rgba(34,197,94,0.05)',
+                      backdropFilter: 'blur(8px)',
                       display: 'flex',
                       alignItems: 'center',
                       gap: 12,
@@ -866,7 +1041,8 @@ export default function HelpPage() {
                           style={{
                             border: '1px solid rgba(255,255,255,0.07)',
                             borderRadius: 12,
-                            background: '#0D1017',
+                            background: 'rgba(13,16,23,0.80)',
+                            backdropFilter: 'blur(8px)',
                             overflow: 'hidden',
                           }}
                         >

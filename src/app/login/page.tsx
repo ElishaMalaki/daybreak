@@ -134,6 +134,27 @@ function LoginContent() {
           from { opacity: 0; transform: translateY(18px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.2; transform: scale(0.8); }
+          50% { opacity: 1; transform: scale(1.2); }
+        }
+        @keyframes twinkleSlow {
+          0%, 100% { opacity: 0.1; transform: scale(0.9); }
+          50% { opacity: 0.8; transform: scale(1.1); }
+        }
+        @keyframes shootingStar {
+          0% { transform: translateX(0) translateY(0) rotate(-35deg); opacity: 1; width: 0; }
+          30% { width: 120px; opacity: 1; }
+          100% { transform: translateX(400px) translateY(200px) rotate(-35deg); opacity: 0; width: 120px; }
+        }
+        @keyframes auroraShift {
+          0%, 100% { opacity: 0.12; transform: scaleX(1) scaleY(1); }
+          50% { opacity: 0.22; transform: scaleX(1.08) scaleY(1.12); }
+        }
+        @keyframes moonGlow {
+          0%, 100% { box-shadow: 0 0 40px 12px rgba(200,220,255,0.18), 0 0 80px 30px rgba(160,190,255,0.10); }
+          50% { box-shadow: 0 0 60px 20px rgba(200,220,255,0.28), 0 0 120px 50px rgba(160,190,255,0.16); }
+        }
         .earth-auth-input::placeholder { color: rgba(246,247,251,0.38); }
         .earth-auth-input:-webkit-autofill,
         .earth-auth-input:-webkit-autofill:hover,
@@ -236,7 +257,7 @@ function LoginContent() {
 
       <div style={{
         minHeight: '100vh',
-        background: 'linear-gradient(180deg, #151926 0%, #1c2538 56%, #25344d 100%)',
+        background: 'linear-gradient(180deg, #020510 0%, #060c1a 30%, #0a1228 60%, #0d1830 100%)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -246,6 +267,148 @@ function LoginContent() {
         position: 'relative',
         overflow: 'hidden',
       }}>
+        {/* Night sky stars layer */}
+        <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
+          {/* Static star field */}
+          {[
+            { top: '4%', left: '8%', size: 2, delay: '0s', dur: '3.2s' },
+            { top: '7%', left: '22%', size: 1.5, delay: '0.4s', dur: '2.8s' },
+            { top: '3%', left: '38%', size: 2.5, delay: '1.1s', dur: '4s' },
+            { top: '9%', left: '55%', size: 1, delay: '0.7s', dur: '3.5s' },
+            { top: '5%', left: '70%', size: 2, delay: '1.8s', dur: '2.6s' },
+            { top: '2%', left: '85%', size: 1.5, delay: '0.3s', dur: '3.8s' },
+            { top: '12%', left: '14%', size: 1, delay: '2.1s', dur: '3s' },
+            { top: '15%', left: '30%', size: 2, delay: '0.9s', dur: '4.2s' },
+            { top: '11%', left: '48%', size: 1.5, delay: '1.5s', dur: '2.9s' },
+            { top: '18%', left: '62%', size: 2.5, delay: '0.2s', dur: '3.6s' },
+            { top: '13%', left: '78%', size: 1, delay: '1.3s', dur: '2.7s' },
+            { top: '20%', left: '92%', size: 2, delay: '2.4s', dur: '3.3s' },
+            { top: '25%', left: '5%', size: 1.5, delay: '0.6s', dur: '4.1s' },
+            { top: '28%', left: '18%', size: 1, delay: '1.7s', dur: '3s' },
+            { top: '22%', left: '35%', size: 2, delay: '0.8s', dur: '2.5s' },
+            { top: '30%', left: '52%', size: 1.5, delay: '2.2s', dur: '3.7s' },
+            { top: '26%', left: '68%', size: 2.5, delay: '0.5s', dur: '4.4s' },
+            { top: '32%', left: '82%', size: 1, delay: '1.9s', dur: '3.1s' },
+            { top: '38%', left: '10%', size: 2, delay: '1.2s', dur: '2.8s' },
+            { top: '35%', left: '25%', size: 1.5, delay: '0.1s', dur: '3.9s' },
+            { top: '42%', left: '42%', size: 1, delay: '2.6s', dur: '3.4s' },
+            { top: '40%', left: '58%', size: 2, delay: '0.4s', dur: '2.6s' },
+            { top: '45%', left: '75%', size: 1.5, delay: '1.4s', dur: '4s' },
+            { top: '48%', left: '88%', size: 2.5, delay: '0.7s', dur: '3.2s' },
+            { top: '55%', left: '3%', size: 1, delay: '2s', dur: '2.9s' },
+            { top: '52%', left: '20%', size: 2, delay: '1.6s', dur: '3.6s' },
+            { top: '58%', left: '37%', size: 1.5, delay: '0.3s', dur: '4.3s' },
+            { top: '60%', left: '55%', size: 1, delay: '2.3s', dur: '3s' },
+            { top: '56%', left: '72%', size: 2, delay: '0.9s', dur: '2.7s' },
+            { top: '62%', left: '90%', size: 1.5, delay: '1.1s', dur: '3.8s' },
+            { top: '68%', left: '12%', size: 2.5, delay: '0.5s', dur: '4.1s' },
+            { top: '65%', left: '28%', size: 1, delay: '1.8s', dur: '3.3s' },
+            { top: '72%', left: '45%', size: 2, delay: '2.5s', dur: '2.8s' },
+            { top: '70%', left: '62%', size: 1.5, delay: '0.2s', dur: '3.5s' },
+            { top: '75%', left: '80%', size: 1, delay: '1.3s', dur: '4.2s' },
+            { top: '80%', left: '7%', size: 2, delay: '0.6s', dur: '3s' },
+            { top: '78%', left: '23%', size: 1.5, delay: '2.1s', dur: '2.6s' },
+            { top: '85%', left: '40%', size: 2.5, delay: '0.8s', dur: '3.7s' },
+            { top: '82%', left: '57%', size: 1, delay: '1.5s', dur: '4.4s' },
+            { top: '88%', left: '74%', size: 2, delay: '0.4s', dur: '3.1s' },
+            { top: '90%', left: '92%', size: 1.5, delay: '1.9s', dur: '2.9s' },
+            { top: '95%', left: '15%', size: 1, delay: '2.7s', dur: '3.6s' },
+            { top: '93%', left: '33%', size: 2, delay: '0.1s', dur: '4s' },
+            { top: '97%', left: '50%', size: 1.5, delay: '1.2s', dur: '3.3s' },
+            { top: '94%', left: '67%', size: 2.5, delay: '2.4s', dur: '2.7s' },
+            { top: '6%', left: '95%', size: 1, delay: '0.7s', dur: '3.9s' },
+            { top: '33%', left: '96%', size: 2, delay: '1.6s', dur: '3.2s' },
+            { top: '50%', left: '97%', size: 1.5, delay: '0.3s', dur: '4.1s' },
+            { top: '16%', left: '1%', size: 2, delay: '2.2s', dur: '2.8s' },
+            { top: '44%', left: '2%', size: 1, delay: '0.9s', dur: '3.5s' },
+          ].map((star, i) => (
+            <div
+              key={i}
+              style={{
+                position: 'absolute',
+                top: star.top,
+                left: star.left,
+                width: star.size,
+                height: star.size,
+                borderRadius: '50%',
+                background: i % 5 === 0 ? '#b8d4ff' : i % 3 === 0 ? '#e8f0ff' : '#ffffff',
+                animation: `${i % 2 === 0 ? 'twinkle' : 'twinkleSlow'} ${star.dur} ${star.delay} ease-in-out infinite`,
+              }}
+            />
+          ))}
+
+          {/* Moon */}
+          <div style={{
+            position: 'absolute',
+            top: '8%',
+            right: '12%',
+            width: 56,
+            height: 56,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle at 38% 38%, #f0f4ff 0%, #d8e4ff 40%, #b8ccff 100%)',
+            animation: 'moonGlow 6s ease-in-out infinite',
+          }}>
+            {/* Moon craters */}
+            <div style={{ position: 'absolute', top: '22%', left: '28%', width: 8, height: 8, borderRadius: '50%', background: 'rgba(160,180,220,0.35)' }} />
+            <div style={{ position: 'absolute', top: '55%', left: '55%', width: 5, height: 5, borderRadius: '50%', background: 'rgba(160,180,220,0.28)' }} />
+            <div style={{ position: 'absolute', top: '38%', left: '62%', width: 6, height: 6, borderRadius: '50%', background: 'rgba(160,180,220,0.22)' }} />
+          </div>
+
+          {/* Aurora borealis effect */}
+          <div style={{
+            position: 'absolute',
+            top: '15%',
+            left: '-10%',
+            width: '70%',
+            height: '25%',
+            background: 'radial-gradient(ellipse at center, rgba(32,178,120,0.18) 0%, rgba(32,100,200,0.12) 50%, transparent 80%)',
+            borderRadius: '50%',
+            filter: 'blur(40px)',
+            animation: 'auroraShift 8s ease-in-out infinite',
+          }} />
+          <div style={{
+            position: 'absolute',
+            top: '5%',
+            right: '-5%',
+            width: '50%',
+            height: '20%',
+            background: 'radial-gradient(ellipse at center, rgba(80,60,200,0.15) 0%, rgba(140,60,200,0.10) 50%, transparent 80%)',
+            borderRadius: '50%',
+            filter: 'blur(50px)',
+            animation: 'auroraShift 10s 2s ease-in-out infinite',
+          }} />
+
+          {/* Shooting star */}
+          <div style={{
+            position: 'absolute',
+            top: '18%',
+            left: '10%',
+            height: 1.5,
+            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent)',
+            borderRadius: 2,
+            animation: 'shootingStar 8s 3s ease-in infinite',
+          }} />
+          <div style={{
+            position: 'absolute',
+            top: '35%',
+            left: '60%',
+            height: 1,
+            background: 'linear-gradient(90deg, transparent, rgba(200,220,255,0.8), transparent)',
+            borderRadius: 2,
+            animation: 'shootingStar 12s 7s ease-in infinite',
+          }} />
+
+          {/* Milky way subtle band */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'linear-gradient(125deg, transparent 20%, rgba(100,120,200,0.04) 40%, rgba(140,160,240,0.07) 50%, rgba(100,120,200,0.04) 60%, transparent 80%)',
+          }} />
+        </div>
+
         {/* Subtle radial vignette overlay */}
         <div style={{
           position: 'fixed',
