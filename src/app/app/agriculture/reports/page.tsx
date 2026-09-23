@@ -150,8 +150,14 @@ This is for agricultural professionals and businesses. Be specific, evidence-bas
         .eq('id', reportId)
         .eq('user_id', user.id);
 
+      if (!reportId) {
+        throw new Error('Report record was not created.');
+      }
+
+      const createdReportId = reportId;
+
       const newReport: Report = {
-        id: reportId,
+        id: createdReportId,
         title: reportTitle,
         reportType: selectedType,
         status: 'completed',
