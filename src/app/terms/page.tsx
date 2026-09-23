@@ -111,7 +111,7 @@ export default function TermsPage() {
     if (photoTimerRef.current) clearInterval(photoTimerRef.current);
     photoTimerRef.current = setInterval(() => {
       setPhotoIndex((prev) => (prev + 1) % daytimePhotoPool.length);
-    }, 8000);
+    }, 25000);
     return () => {
       if (photoTimerRef.current) clearInterval(photoTimerRef.current);
     };
@@ -129,7 +129,7 @@ export default function TermsPage() {
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
         .tc-root { min-height: 100vh; position: relative; overflow-x: hidden; }
-        .tc-bg { position: fixed; inset: 0; z-index: 0; background-size: cover; background-position: center; background-repeat: no-repeat; }
+        .tc-bg { position: fixed; inset: 0; z-index: 0; background-size: cover; background-position: center; background-repeat: no-repeat; transition: background-image 3s ease-in-out; }
         .tc-overlay { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
         .tc-grain { position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0.07; mix-blend-mode: overlay; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E"); background-size: 300px 300px; }
         .tc-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 40; padding: 18px 4vw 8px; display: flex; align-items: center; }

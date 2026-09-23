@@ -184,7 +184,7 @@ export default function AboutPage() {
     if (photoTimerRef.current) clearInterval(photoTimerRef.current);
     photoTimerRef.current = setInterval(() => {
       setPhotoIndex((prev) => (prev + 1) % daytimePhotoPool.length);
-    }, 8000);
+    }, 25000);
     return () => {
       if (photoTimerRef.current) clearInterval(photoTimerRef.current);
     };
@@ -205,10 +205,7 @@ export default function AboutPage() {
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
         .ab-root { min-height: 100vh; position: relative; overflow-x: hidden; }
-        .ab-bg {
-          position: fixed; inset: 0; z-index: 0;
-          background-size: cover; background-position: center; background-repeat: no-repeat;
-        }
+        .ab-bg { position: fixed; inset: 0; z-index: 0; background-size: cover; background-position: center; background-repeat: no-repeat; transition: background-image 3s ease-in-out; }
         .ab-overlay { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
         .ab-grain {
           position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0.07; mix-blend-mode: overlay;

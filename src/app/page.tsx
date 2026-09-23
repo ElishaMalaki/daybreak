@@ -302,7 +302,7 @@ export default function HomePage() {
     if (photoTimerRef.current) clearInterval(photoTimerRef.current);
     photoTimerRef.current = setInterval(() => {
       setPhotoIndex((prev) => (prev + 1) % daytimePhotoPool.length);
-    }, 8000);
+    }, 25000);
     return () => {
       if (photoTimerRef.current) clearInterval(photoTimerRef.current);
     };
@@ -342,7 +342,7 @@ export default function HomePage() {
           background-size: cover;
           background-position: center;
           background-repeat: no-repeat;
-          transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: opacity 3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .sky-bg-current {
