@@ -41,8 +41,8 @@
     "dev": "next dev -p 4028",
     "build": "npm run type-check && npm run lint && next build",
     "start": "next start -p 4028",
-    "lint": "next lint",
-    "lint:fix": "next lint --fix",
+    "lint": "eslint src --max-warnings=0",
+    "lint:fix": "eslint src --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,css,md,json}\"",
     "serve": "next start -p 4028",
     "type-check": "tsc --noEmit"
