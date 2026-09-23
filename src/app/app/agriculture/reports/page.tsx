@@ -10,6 +10,7 @@ interface Report {
   reportType: string;
   status: string;
   summary: string | null;
+  content: string | null;
   createdAt: string;
   completedAt: string | null;
 }
@@ -45,7 +46,7 @@ export default function ReportsPage() {
     try {
       const { data } = await supabase
         .from('reports')
-        .select('id, title, report_type, status, summary, created_at, completed_at')
+        .select('id, title, report_type, status, summary, content, created_at, completed_at')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(20);
@@ -57,12 +58,13 @@ export default function ReportsPage() {
           reportType: r.report_type,
           status: r.status,
           summary: r.summary,
+          content: r.content,
           createdAt: r.created_at,
           completedAt: r.completed_at,
         }))
       );
     } catch {
-      // silent
+      setError('Unable to load reports. Please refresh and try again.');
     } finally {
       setLoading(false);
     }
@@ -78,10 +80,9 @@ export default function ReportsPage() {
     setGenerating(true);
     setError('');
 
-    // Create report record
     let reportId: string | null = null;
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('reports')
         .insert({
           user_id: user.id,
@@ -92,9 +93,16 @@ export default function ReportsPage() {
         .select('id')
         .single();
 
-      reportId = data?.id || null;
-    } catch {
-      // non-critical
+      if (error || !data) {
+        setError(error?.message || 'Failed to create report record. Please try again.');
+        return;
+      }
+
+      reportId = data.id;
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to create report record. Please try again.');
+      setGenerating(false);
+      return;
     }
 
     try {
@@ -122,17 +130,15 @@ This is for agricultural professionals and businesses. Be specific, evidence-bas
 
       if (!response.ok || !data.success) {
         setError(data.error || 'Report generation failed. Please try again.');
-        if (reportId) {
-          await supabase.from('reports').update({ status: 'failed' }).eq('id', reportId);
-        }
+        await supabase.from('reports').update({ status: 'failed' }).eq('id', reportId).eq('user_id', user.id);
         return;
       }
 
-      // Extract summary (first paragraph)
       const summary = data.content.split('\n').find((line: string) => line.trim().length > 50) || data.content.slice(0, 200);
 
-      if (reportId) {
-        await supabase.from('reports').update({
+      await supabase
+        .from('reports')
+        .update({
           content: data.content,
           summary: summary.slice(0, 500),
           status: 'completed',
@@ -140,25 +146,28 @@ This is for agricultural professionals and businesses. Be specific, evidence-bas
           ai_provider: data.provider,
           model_used: data.model,
           tokens_used: data.tokens,
-        }).eq('id', reportId);
-      }
+        })
+        .eq('id', reportId)
+        .eq('user_id', user.id);
 
       const newReport: Report = {
-        id: reportId || `temp-${Date.now()}`,
+        id: reportId,
         title: reportTitle,
         reportType: selectedType,
         status: 'completed',
         summary: summary.slice(0, 500),
+        content: data.content,
         createdAt: new Date().toISOString(),
         completedAt: new Date().toISOString(),
       };
 
       setReports((prev) => [newReport, ...prev]);
-      setActiveReport({ ...newReport, summary: data.content });
+      setActiveReport(newReport);
       setShowForm(false);
       setReportTopic('');
     } catch {
       setError('Network error. Please try again.');
+      await supabase.from('reports').update({ status: 'failed' }).eq('id', reportId).eq('user_id', user.id);
     } finally {
       setGenerating(false);
     }
@@ -193,7 +202,6 @@ This is for agricultural professionals and businesses. Be specific, evidence-bas
         </button>
       </div>
 
-      {/* Generate Form */}
       {showForm && (
         <div style={{
           background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)',
@@ -279,7 +287,6 @@ This is for agricultural professionals and businesses. Be specific, evidence-bas
         </div>
       )}
 
-      {/* Active Report View */}
       {activeReport && (
         <div style={{
           background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
@@ -301,7 +308,7 @@ This is for agricultural professionals and businesses. Be specific, evidence-bas
             color: 'rgba(255,255,255,0.8)', fontSize: 13.5, lineHeight: 1.75,
             whiteSpace: 'pre-wrap', borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 14,
           }}>
-            {activeReport.summary}
+            {activeReport.content || activeReport.summary}
           </div>
           <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11, marginTop: 14 }}>
             Intelligence E reports are AI-generated based on available knowledge. Verify critical decisions with qualified agricultural professionals and current market data.
@@ -309,7 +316,6 @@ This is for agricultural professionals and businesses. Be specific, evidence-bas
         </div>
       )}
 
-      {/* Reports List */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: '48px', color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>Loading reports...</div>
       ) : reports.length === 0 ? (
