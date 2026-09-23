@@ -129,15 +129,12 @@ export async function POST(request: NextRequest) {
     });
 
     if (aiResponse.success) {
-      supabase
-        .rpc('increment_usage', {
-          p_user_id: user.id,
-          p_tokens: aiResponse.totalTokens || 0,
-          p_input_tokens: aiResponse.inputTokens || 0,
-          p_output_tokens: aiResponse.outputTokens || 0,
-        })
-        .then(() => {})
-        .catch(() => {});
+      await supabase.rpc('increment_usage', {
+        p_user_id: user.id,
+        p_tokens: aiResponse.totalTokens || 0,
+        p_input_tokens: aiResponse.inputTokens || 0,
+        p_output_tokens: aiResponse.outputTokens || 0,
+      });
     }
 
     if (conversationId && aiResponse.success) {
