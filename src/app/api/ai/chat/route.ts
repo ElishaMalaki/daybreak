@@ -12,7 +12,10 @@ const DAILY_REQUEST_LIMIT = 50;
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -94,13 +97,16 @@ export async function POST(request: NextRequest) {
       contextData,
     });
 
-    if (aiResponse.success && aiResponse.totalTokens) {
-      supabase.rpc('increment_usage', {
-        p_user_id: user.id,
-        p_tokens: aiResponse.totalTokens || 0,
-        p_input_tokens: aiResponse.inputTokens || 0,
-        p_output_tokens: aiResponse.outputTokens || 0,
-      }).then(() => {}).catch(() => {});
+    if (aiResponse.success) {
+      supabase
+        .rpc('increment_usage', {
+          p_user_id: user.id,
+          p_tokens: aiResponse.totalTokens || 0,
+          p_input_tokens: aiResponse.inputTokens || 0,
+          p_output_tokens: aiResponse.outputTokens || 0,
+        })
+        .then(() => {})
+        .catch(() => {});
     }
 
     if (conversationId && aiResponse.success) {
@@ -122,15 +128,21 @@ export async function POST(request: NextRequest) {
         content: aiResponse.content,
         ai_provider: aiResponse.provider as any,
         model_used: aiResponse.model,
-        tokens_used: aiResponse.totalTokens,
+        tokens_used: aiResponse.totalTokens || 0,
         processing_time_ms: aiResponse.processingTimeMs,
       });
+
+      const { count } = await supabase
+        .from('messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('conversation_id', conversationId)
+        .eq('user_id', user.id);
 
       await supabase
         .from('conversations')
         .update({
           last_message_at: new Date().toISOString(),
-          message_count: messages.length + 1,
+          message_count: count || 0,
         })
         .eq('id', conversationId)
         .eq('user_id', user.id);
@@ -140,7 +152,7 @@ export async function POST(request: NextRequest) {
       content: aiResponse.content,
       provider: aiResponse.provider,
       model: aiResponse.model,
-      tokens: aiResponse.totalTokens,
+      tokens: aiResponse.totalTokens || 0,
       processingTimeMs: aiResponse.processingTimeMs,
       success: aiResponse.success,
       error: aiResponse.error,
