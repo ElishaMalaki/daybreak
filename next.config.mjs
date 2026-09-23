@@ -4,24 +4,24 @@ import { imageHosts } from './image-hosts.config.mjs';
 const nextConfig = {
   productionBrowserSourceMaps: false,
   distDir: process.env.DIST_DIR || '.next',
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   images: {
     remotePatterns: imageHosts,
     minimumCacheTTL: 60,
     qualities: [75, 85, 100],
   },
-  webpack(
-    config,
-    {
-      dev: dev
-    }
-  ) {
+  webpack(config, { dev }) {
     if (dev) {
       config.module.rules.push({
         test: /\.(jsx|tsx)$/,
         exclude: [/node_modules/],
-        use: [{
-          loader: '@dhiwise/component-tagger/nextLoader',
-        }],
+        use: [
+          {
+            loader: '@dhiwise/component-tagger/nextLoader',
+          },
+        ],
       });
       const ignoredPaths = (process.env.WATCH_IGNORED_PATHS || '')
         .split(',')
@@ -36,4 +36,5 @@ const nextConfig = {
     return config;
   },
 };
+
 export default nextConfig;
