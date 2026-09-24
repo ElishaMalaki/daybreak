@@ -7,6 +7,7 @@
 
 import type { AIProvider, AIRequest, AIResponse, AIRequestType } from './types';
 import { GeminiAdapter } from './providers/gemini';
+import { GroqAdapter } from './providers/groq';
 import { OpenAIAdapter } from './providers/openai';
 import { AnthropicAdapter } from './providers/anthropic';
 
@@ -17,15 +18,17 @@ const userRequestCounts = new Map<string, { count: number; resetAt: number }>();
 const DAILY_REQUEST_LIMIT = 50; // free tier limit per user per day
 const MAX_INPUT_LENGTH = 8000; // characters
 const MAX_RETRY_ATTEMPTS = 1; // max fallback attempts
+export const PUBLIC_AI_PROVIDER_NAME = 'earthai';
+export const PUBLIC_AI_MODEL_NAME = 'EarthAI Meridian';
 
 // Provider priority by request type
 const PROVIDER_ROUTING: Record<AIRequestType, string[]> = {
-  market_analysis: ['gemini', 'openai', 'anthropic'],
-  farm_data_analysis: ['gemini', 'anthropic', 'openai'],
-  decision_support: ['gemini', 'anthropic', 'openai'],
-  risk_assessment: ['anthropic', 'gemini', 'openai'],
-  research: ['gemini', 'anthropic', 'openai'],
-  general: ['gemini', 'openai', 'anthropic'],
+  market_analysis: ['gemini', 'groq', 'openai', 'anthropic'],
+  farm_data_analysis: ['gemini', 'groq', 'anthropic', 'openai'],
+  decision_support: ['gemini', 'groq', 'anthropic', 'openai'],
+  risk_assessment: ['gemini', 'groq', 'anthropic', 'openai'],
+  research: ['gemini', 'groq', 'anthropic', 'openai'],
+  general: ['gemini', 'groq', 'openai', 'anthropic'],
 };
 
 // Agricultural system prompt
@@ -58,10 +61,12 @@ export class AIRouter {
 
     // Register all providers
     const gemini = new GeminiAdapter();
+    const groq = new GroqAdapter();
     const openai = new OpenAIAdapter();
     const anthropic = new AnthropicAdapter();
 
     this.providers.set('gemini', gemini);
+    this.providers.set('groq', groq);
     this.providers.set('openai', openai);
     this.providers.set('anthropic', anthropic);
   }
@@ -201,6 +206,18 @@ export class AIRouter {
       success: false,
       error: lastError || 'All providers failed',
       rateLimitRemaining: rateLimit.remaining,
+    };
+  }
+
+  toPublicResponse(response: AIResponse & { rateLimitRemaining?: number }): AIResponse & { rateLimitRemaining?: number } {
+    if (!response.success) {
+      return response;
+    }
+
+    return {
+      ...response,
+      provider: PUBLIC_AI_PROVIDER_NAME,
+      model: PUBLIC_AI_MODEL_NAME,
     };
   }
 
