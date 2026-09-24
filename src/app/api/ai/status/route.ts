@@ -14,7 +14,6 @@ export async function GET() {
     }
 
     const router = getAIRouter();
-    const providerStatus = router?.getProviderStatus();
     const configuredProviders = router?.getConfiguredProviders();
 
     // Get user's daily usage
@@ -25,12 +24,10 @@ export async function GET() {
     const usage = usageData?.[0] || { request_count: 0, token_count: 0 };
 
     return NextResponse?.json({
-      providers: Object.entries(providerStatus)?.map(([name, info]) => ({
-        name,
-        displayName: info?.displayName,
-        configured: info?.configured,
-        status: info?.configured ? 'ready' : 'not_configured',
-      })),
+      model: {
+        name: 'EarthAI Meridian',
+        status: configuredProviders?.length > 0 ? 'ready' : 'not_configured',
+      },
       configuredCount: configuredProviders?.length,
       dailyUsage: {
         requestCount: usage?.request_count,
