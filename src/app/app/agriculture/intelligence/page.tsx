@@ -131,7 +131,7 @@ function IntelligenceContent() {
   }, [activeConvId, user]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [messages]);
 
   const createNewConversation = async (): Promise<string | null> => {
@@ -252,12 +252,12 @@ function IntelligenceContent() {
   return (
     <>
       <style>{`
-        .intel-workspace { height: calc(100vh - 112px); min-height: 620px; display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 0; border: 1px solid #e5e7eb; border-radius: 12px; background: #fff; overflow: hidden; }
-        .intel-sidebar { background: #f7f7f8; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; min-width: 0; }
+        .intel-workspace { height: calc(100dvh - 154px); min-height: 520px; display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 0; border: 1px solid #e5e7eb; border-radius: 12px; background: #fff; overflow: hidden; }
+        .intel-sidebar { background: #f7f7f8; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
         .intel-sidebar-head { padding: 12px; border-bottom: 1px solid #e5e7eb; }
         .intel-new-button { width: 100%; min-height: 38px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; color: #111827; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
         .intel-new-button:hover { background: #f3f4f6; }
-        .intel-conversations { flex: 1; overflow-y: auto; padding: 8px; }
+        .intel-conversations { flex: 1; min-height: 0; overflow-y: auto; padding: 8px; }
         .intel-conversation { width: 100%; border: 0; border-radius: 8px; background: transparent; padding: 9px 10px; text-align: left; cursor: pointer; font-family: inherit; }
         .intel-conversation:hover { background: #ececf1; }
         .intel-conversation.active { background: #ececf1; }
@@ -267,13 +267,13 @@ function IntelligenceContent() {
         .intel-status-row { display: flex; align-items: center; gap: 7px; font-weight: 600; color: #374151; }
         .intel-dot { width: 7px; height: 7px; border-radius: 999px; background: #10a37f; }
         .intel-dot.off { background: #dc2626; }
-        .intel-chat { min-width: 0; display: flex; flex-direction: column; background: #fff; }
-        .intel-chat-head { min-height: 58px; display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid #e5e7eb; }
+        .intel-chat { min-width: 0; min-height: 0; display: flex; flex-direction: column; background: #fff; }
+        .intel-chat-head { min-height: 58px; display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid #e5e7eb; flex: 0 0 auto; }
         .intel-title { color: #111827; font-size: 15px; font-weight: 700; }
         .intel-subtitle { color: #6b7280; font-size: 12px; margin-top: 2px; }
         .intel-select { height: 36px; max-width: 240px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; color: #111827; font-family: inherit; font-size: 12px; padding: 0 10px; outline: none; }
         .intel-select:focus { border-color: #10a37f; box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.12); }
-        .intel-messages { flex: 1; overflow-y: auto; padding: 24px 0 10px; }
+        .intel-messages { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 24px 0 18px; overscroll-behavior: contain; }
         .intel-empty { max-width: 720px; margin: 0 auto; padding: 64px 24px 24px; text-align: center; }
         .intel-empty-logo { width: 42px; height: 42px; border-radius: 10px; object-fit: cover; margin: 0 auto 16px; border: 1px solid #e5e7eb; }
         .intel-empty h1 { color: #111827; font-size: 22px; line-height: 1.25; font-weight: 700; margin: 0 0 8px; }
@@ -281,27 +281,28 @@ function IntelligenceContent() {
         .intel-suggestions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 24px; }
         .intel-suggestion { min-height: 44px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; color: #374151; font-family: inherit; font-size: 12.5px; line-height: 1.35; padding: 9px 11px; text-align: left; cursor: pointer; }
         .intel-suggestion:hover { background: #f7f7f8; }
-        .intel-row { display: flex; gap: 12px; max-width: 820px; margin: 0 auto 18px; padding: 0 24px; }
+        .intel-row { display: flex; gap: 12px; width: 100%; max-width: 900px; margin: 0 auto 18px; padding: 0 24px; }
         .intel-row.user { flex-direction: row-reverse; }
         .intel-avatar { width: 30px; height: 30px; border-radius: 8px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; border: 1px solid #e5e7eb; background: #fff; color: #4b5563; font-size: 12px; font-weight: 700; overflow: hidden; }
         .intel-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .intel-message-wrap { max-width: min(72%, 680px); min-width: 0; }
-        .intel-bubble { border-radius: 12px; padding: 11px 14px; color: #111827; font-size: 14px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+        .intel-message-wrap { min-width: 0; max-width: calc(100% - 42px); }
+        .intel-row.user .intel-message-wrap { max-width: min(78%, 680px); }
+        .intel-bubble { border-radius: 12px; padding: 11px 14px; color: #111827; font-size: 14px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; max-width: 100%; }
         .intel-row.user .intel-bubble { background: #f3f4f6; }
         .intel-row.assistant .intel-bubble { background: #fff; border: 1px solid #e5e7eb; }
         .intel-model { color: #6b7280; font-size: 11px; margin-top: 5px; padding-left: 2px; }
-        .intel-error { margin: 0 18px 10px; border: 1px solid #fecaca; border-radius: 8px; background: #fef2f2; color: #991b1b; padding: 9px 12px; font-size: 12.5px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .intel-error { margin: 0 18px 10px; border: 1px solid #fecaca; border-radius: 8px; background: #fef2f2; color: #991b1b; padding: 9px 12px; font-size: 12.5px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex: 0 0 auto; }
         .intel-error button { border: 0; background: transparent; color: #991b1b; cursor: pointer; font-size: 15px; }
-        .intel-composer { border-top: 1px solid #e5e7eb; padding: 14px 18px 12px; background: #fff; }
-        .intel-composer-box { display: flex; gap: 10px; align-items: flex-end; max-width: 820px; margin: 0 auto; }
+        .intel-composer { border-top: 1px solid #e5e7eb; padding: 14px 18px 12px; background: #fff; flex: 0 0 auto; }
+        .intel-composer-box { display: flex; gap: 10px; align-items: flex-end; max-width: 900px; margin: 0 auto; }
         .intel-textarea { flex: 1; min-height: 48px; max-height: 140px; resize: vertical; border: 1px solid #d1d5db; border-radius: 12px; background: #fff; color: #111827; font-family: inherit; font-size: 14px; line-height: 1.5; outline: none; padding: 12px 14px; }
         .intel-textarea:focus { border-color: #10a37f; box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.12); }
         .intel-send { width: 44px; height: 44px; border: 0; border-radius: 10px; flex: 0 0 auto; background: #111827; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .intel-send:disabled { background: #d1d5db; cursor: not-allowed; }
-        .intel-note { max-width: 820px; margin: 7px auto 0; color: #6b7280; font-size: 11px; }
+        .intel-note { max-width: 900px; margin: 7px auto 0; color: #6b7280; font-size: 11px; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        @media (max-width: 980px) { .intel-workspace { grid-template-columns: 220px minmax(0, 1fr); } .intel-message-wrap { max-width: 82%; } }
-        @media (max-width: 720px) { .intel-workspace { height: auto; min-height: calc(100vh - 100px); grid-template-columns: 1fr; } .intel-sidebar { max-height: 230px; border-right: 0; border-bottom: 1px solid #e5e7eb; } .intel-chat-head { align-items: flex-start; flex-direction: column; } .intel-select { width: 100%; max-width: none; } .intel-suggestions { grid-template-columns: 1fr; } .intel-row, .intel-row.user { flex-direction: column; padding: 0 16px; } .intel-message-wrap { max-width: 100%; } .intel-composer { padding: 12px; } }
+        @media (max-width: 980px) { .intel-workspace { grid-template-columns: 220px minmax(0, 1fr); height: calc(100dvh - 132px); } .intel-message-wrap { max-width: calc(100% - 42px); } }
+        @media (max-width: 720px) { .intel-workspace { height: auto; min-height: calc(100dvh - 112px); grid-template-columns: 1fr; overflow: visible; } .intel-sidebar { max-height: 230px; border-right: 0; border-bottom: 1px solid #e5e7eb; } .intel-chat { min-height: 640px; } .intel-chat-head { align-items: flex-start; flex-direction: column; } .intel-select { width: 100%; max-width: none; } .intel-suggestions { grid-template-columns: 1fr; } .intel-row, .intel-row.user { flex-direction: column; padding: 0 16px; } .intel-message-wrap, .intel-row.user .intel-message-wrap { max-width: 100%; } .intel-composer { padding: 12px; position: sticky; bottom: 0; } }
       `}</style>
 
       <div className="intel-workspace">
