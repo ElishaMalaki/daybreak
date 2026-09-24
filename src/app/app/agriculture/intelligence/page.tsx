@@ -91,13 +91,9 @@ function IntelligenceContent() {
 
   useEffect(() => {
     const convId = searchParams?.get('conv');
-    if (convId) {
-      setActiveConvId(convId);
-    }
+    if (convId) setActiveConvId(convId);
     const type = searchParams?.get('type');
-    if (type) {
-      setRequestType(type);
-    }
+    if (type) setRequestType(type);
   }, [searchParams]);
 
   useEffect(() => {
@@ -143,11 +139,7 @@ function IntelligenceContent() {
     try {
       const { data, error } = await supabase
         .from('conversations')
-        .insert({
-          user_id: user.id,
-          title: 'New Conversation',
-          analysis_type: requestType,
-        })
+        .insert({ user_id: user.id, title: 'New Conversation', analysis_type: requestType })
         .select('id')
         .single();
 
@@ -212,11 +204,7 @@ function IntelligenceContent() {
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: historyMessages,
-          requestType,
-          conversationId: convId,
-        }),
+        body: JSON.stringify({ messages: historyMessages, requestType, conversationId: convId }),
       });
 
       const data = await response.json();
@@ -231,25 +219,14 @@ function IntelligenceContent() {
       setMessages((prev) =>
         prev.map((m) => {
           if (m.id === tempAssistantMsg.id) {
-            return {
-              ...m,
-              id: `real-${Date.now()}`,
-              content: data.content,
-              provider: data.provider,
-              model: data.model,
-            };
+            return { ...m, id: `real-${Date.now()}`, content: data.content, provider: data.provider, model: data.model };
           }
-          if (m.id === tempUserMsg.id) {
-            return { ...m, id: `real-user-${Date.now()}` };
-          }
+          if (m.id === tempUserMsg.id) return { ...m, id: `real-user-${Date.now()}` };
           return m;
         })
       );
 
-      if (messages.length === 0) {
-        await updateConversationTitle(convId, userMessage);
-      }
-
+      if (messages.length === 0) await updateConversationTitle(convId, userMessage);
       loadConversations();
     } catch {
       setMessages((prev) => prev.filter((m) => m.id !== tempAssistantMsg.id));
@@ -273,255 +250,197 @@ function IntelligenceContent() {
   };
 
   return (
-    <div style={{ maxWidth: 1100, margin: '0 auto', height: 'calc(100vh - 112px)', display: 'flex', gap: 16, color: '#f8fafc' }}>
-      <div style={{
-        width: 240, flexShrink: 0,
-        background: '#111827', border: '1px solid rgba(148,163,184,0.22)',
-        borderRadius: 14, display: 'flex', flexDirection: 'column', overflow: 'hidden',
-      }}>
-        <div style={{ padding: '14px 12px 10px', borderBottom: '1px solid rgba(148,163,184,0.22)' }}>
-          <button
-            onClick={startNewConversation}
-            style={{
-              width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(34,197,94,0.25)',
-              background: 'rgba(34,197,94,0.16)', color: '#86efac', fontSize: 12.5, fontWeight: 700,
-              cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            }}
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            New Conversation
-          </button>
-        </div>
+    <>
+      <style>{`
+        .intel-workspace { height: calc(100vh - 112px); min-height: 620px; display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 0; border: 1px solid #e5e7eb; border-radius: 12px; background: #fff; overflow: hidden; }
+        .intel-sidebar { background: #f7f7f8; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; min-width: 0; }
+        .intel-sidebar-head { padding: 12px; border-bottom: 1px solid #e5e7eb; }
+        .intel-new-button { width: 100%; min-height: 38px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; color: #111827; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .intel-new-button:hover { background: #f3f4f6; }
+        .intel-conversations { flex: 1; overflow-y: auto; padding: 8px; }
+        .intel-conversation { width: 100%; border: 0; border-radius: 8px; background: transparent; padding: 9px 10px; text-align: left; cursor: pointer; font-family: inherit; }
+        .intel-conversation:hover { background: #ececf1; }
+        .intel-conversation.active { background: #ececf1; }
+        .intel-conversation-title { color: #202123; font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .intel-conversation-meta { color: #6b7280; font-size: 11px; margin-top: 3px; }
+        .intel-status { padding: 11px 12px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 11px; line-height: 1.45; }
+        .intel-status-row { display: flex; align-items: center; gap: 7px; font-weight: 600; color: #374151; }
+        .intel-dot { width: 7px; height: 7px; border-radius: 999px; background: #10a37f; }
+        .intel-dot.off { background: #dc2626; }
+        .intel-chat { min-width: 0; display: flex; flex-direction: column; background: #fff; }
+        .intel-chat-head { min-height: 58px; display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid #e5e7eb; }
+        .intel-title { color: #111827; font-size: 15px; font-weight: 700; }
+        .intel-subtitle { color: #6b7280; font-size: 12px; margin-top: 2px; }
+        .intel-select { height: 36px; max-width: 240px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; color: #111827; font-family: inherit; font-size: 12px; padding: 0 10px; outline: none; }
+        .intel-select:focus { border-color: #10a37f; box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.12); }
+        .intel-messages { flex: 1; overflow-y: auto; padding: 24px 0 10px; }
+        .intel-empty { max-width: 720px; margin: 0 auto; padding: 64px 24px 24px; text-align: center; }
+        .intel-empty-logo { width: 42px; height: 42px; border-radius: 10px; object-fit: cover; margin: 0 auto 16px; border: 1px solid #e5e7eb; }
+        .intel-empty h1 { color: #111827; font-size: 22px; line-height: 1.25; font-weight: 700; margin: 0 0 8px; }
+        .intel-empty p { color: #6b7280; font-size: 14px; line-height: 1.6; margin: 0 auto; max-width: 480px; }
+        .intel-suggestions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 24px; }
+        .intel-suggestion { min-height: 44px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; color: #374151; font-family: inherit; font-size: 12.5px; line-height: 1.35; padding: 9px 11px; text-align: left; cursor: pointer; }
+        .intel-suggestion:hover { background: #f7f7f8; }
+        .intel-row { display: flex; gap: 12px; max-width: 820px; margin: 0 auto 18px; padding: 0 24px; }
+        .intel-row.user { flex-direction: row-reverse; }
+        .intel-avatar { width: 30px; height: 30px; border-radius: 8px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; border: 1px solid #e5e7eb; background: #fff; color: #4b5563; font-size: 12px; font-weight: 700; overflow: hidden; }
+        .intel-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .intel-message-wrap { max-width: min(72%, 680px); min-width: 0; }
+        .intel-bubble { border-radius: 12px; padding: 11px 14px; color: #111827; font-size: 14px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+        .intel-row.user .intel-bubble { background: #f3f4f6; }
+        .intel-row.assistant .intel-bubble { background: #fff; border: 1px solid #e5e7eb; }
+        .intel-model { color: #6b7280; font-size: 11px; margin-top: 5px; padding-left: 2px; }
+        .intel-error { margin: 0 18px 10px; border: 1px solid #fecaca; border-radius: 8px; background: #fef2f2; color: #991b1b; padding: 9px 12px; font-size: 12.5px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .intel-error button { border: 0; background: transparent; color: #991b1b; cursor: pointer; font-size: 15px; }
+        .intel-composer { border-top: 1px solid #e5e7eb; padding: 14px 18px 12px; background: #fff; }
+        .intel-composer-box { display: flex; gap: 10px; align-items: flex-end; max-width: 820px; margin: 0 auto; }
+        .intel-textarea { flex: 1; min-height: 48px; max-height: 140px; resize: vertical; border: 1px solid #d1d5db; border-radius: 12px; background: #fff; color: #111827; font-family: inherit; font-size: 14px; line-height: 1.5; outline: none; padding: 12px 14px; }
+        .intel-textarea:focus { border-color: #10a37f; box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.12); }
+        .intel-send { width: 44px; height: 44px; border: 0; border-radius: 10px; flex: 0 0 auto; background: #111827; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .intel-send:disabled { background: #d1d5db; cursor: not-allowed; }
+        .intel-note { max-width: 820px; margin: 7px auto 0; color: #6b7280; font-size: 11px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 980px) { .intel-workspace { grid-template-columns: 220px minmax(0, 1fr); } .intel-message-wrap { max-width: 82%; } }
+        @media (max-width: 720px) { .intel-workspace { height: auto; min-height: calc(100vh - 100px); grid-template-columns: 1fr; } .intel-sidebar { max-height: 230px; border-right: 0; border-bottom: 1px solid #e5e7eb; } .intel-chat-head { align-items: flex-start; flex-direction: column; } .intel-select { width: 100%; max-width: none; } .intel-suggestions { grid-template-columns: 1fr; } .intel-row, .intel-row.user { flex-direction: column; padding: 0 16px; } .intel-message-wrap { max-width: 100%; } .intel-composer { padding: 12px; } }
+      `}</style>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '8px 8px' }}>
-          {loadingConvs ? (
-            <div style={{ padding: '16px', textAlign: 'center', color: '#cbd5e1', fontSize: 12 }}>Loading...</div>
-          ) : conversations.length === 0 ? (
-            <div style={{ padding: '16px 12px', textAlign: 'center', color: '#cbd5e1', fontSize: 12 }}>
-              No conversations yet
-            </div>
-          ) : (
-            conversations.map((conv) => (
-              <button
-                key={conv.id}
-                onClick={() => setActiveConvId(conv.id)}
-                style={{
-                  width: '100%', padding: '9px 10px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                  background: activeConvId === conv.id ? 'rgba(34,197,94,0.10)' : 'transparent',
-                  textAlign: 'left', marginBottom: 2, transition: 'all 0.15s', fontFamily: 'inherit',
-                }}
-              >
-                <div style={{
-                  color: activeConvId === conv.id ? '#86efac' : '#e5e7eb',
-                  fontSize: 12.5, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                }}>
-                  {conv.title}
-                </div>
-                <div style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>
-                  {conv.messageCount} messages
-                </div>
-              </button>
-            ))
-          )}
-        </div>
-
-        {aiStatus && (
-          <div style={{ padding: '10px 12px', borderTop: '1px solid rgba(148,163,184,0.22)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{
-                width: 6, height: 6, borderRadius: '50%',
-                background: aiStatus.configuredCount > 0 ? '#22c55e' : '#ef4444',
-              }} />
-              <span style={{ color: '#cbd5e1', fontSize: 11, fontWeight: 600 }}>
-                {aiStatus.configuredCount > 0
-                  ? 'EarthAI Meridian active'
-                  : 'EarthAI model not configured'}
-              </span>
-            </div>
-            {aiStatus.dailyUsage && (
-              <div style={{ color: '#94a3b8', fontSize: 10.5, marginTop: 3 }}>
-                {aiStatus.dailyUsage.requestCount}/{aiStatus.dailyUsage.limit} requests today
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      <div style={{
-        flex: 1, background: '#111827', border: '1px solid rgba(148,163,184,0.22)',
-        borderRadius: 14, display: 'flex', flexDirection: 'column', overflow: 'hidden',
-      }}>
-        <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(148,163,184,0.22)', display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ color: '#f8fafc', fontSize: 14, fontWeight: 800 }}>Intelligence E</div>
-            <div style={{ color: '#cbd5e1', fontSize: 11.5, fontWeight: 600 }}>Agricultural Intelligence Assistant</div>
-          </div>
-          <select
-            value={requestType}
-            onChange={(e) => setRequestType(e.target.value)}
-            style={{
-              background: '#1f2937', border: '1px solid rgba(148,163,184,0.32)',
-              borderRadius: 8, color: '#f8fafc', fontSize: 12, padding: '6px 10px',
-              fontFamily: 'inherit', cursor: 'pointer', outline: 'none',
-            }}
-          >
-            {REQUEST_TYPES.map((t) => (
-              <option key={t.value} value={t.value} style={{ background: '#1a1f2e' }}>{t.label}</option>
-            ))}
-          </select>
-        </div>
-
-        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 20px 8px' }}>
-          {loadingMessages ? (
-            <div style={{ textAlign: 'center', color: '#cbd5e1', fontSize: 13, paddingTop: 40 }}>Loading messages...</div>
-          ) : messages.length === 0 ? (
-            <div style={{ textAlign: 'center', paddingTop: 60 }}>
-              <div style={{ fontSize: 40, marginBottom: 16 }}>🌾</div>
-              <div style={{ color: '#f8fafc', fontSize: 16, fontWeight: 700, marginBottom: 8 }}>
-                Intelligence E Agriculture
-              </div>
-              <div style={{ color: '#cbd5e1', fontSize: 13, maxWidth: 400, margin: '0 auto', lineHeight: 1.6 }}>
-                Ask about crop markets, farm management, agricultural risks, decision support, or research topics.
-              </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 24 }}>
-                {[
-                  'What are current maize price trends in East Africa?',
-                  'How should I manage irrigation for drought-stressed crops?',
-                  'What are the main risks for smallholder farmers this season?',
-                  'Explain the impact of La Niña on agricultural production',
-                ].map((suggestion) => (
-                  <button
-                    key={suggestion}
-                    onClick={() => setInput(suggestion)}
-                    style={{
-                      padding: '7px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.10)',
-                      background: '#1f2937', color: '#e5e7eb',
-                      fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s',
-                    }}
-                  >
-                    {suggestion}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <>
-              {messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  style={{
-                    marginBottom: 16,
-                    display: 'flex',
-                    flexDirection: msg.role === 'user' ? 'row-reverse' : 'row',
-                    gap: 10,
-                    alignItems: 'flex-start',
-                  }}
-                >
-                  <div style={{
-                    width: 30, height: 30, borderRadius: 8, flexShrink: 0,
-                    background: msg.role === 'user' ? 'rgba(34,197,94,0.18)' : '#1f2937',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 13,
-                  }}>
-                    {msg.role === 'user' ? '👤' : '🌾'}
-                  </div>
-                  <div style={{ maxWidth: '75%' }}>
-                    <div style={{
-                      padding: '10px 14px', borderRadius: 12,
-                      background: msg.role === 'user' ? 'rgba(22,163,74,0.22)' : '#1f2937',
-                      border: `1px solid ${msg.role === 'user' ? 'rgba(134,239,172,0.34)' : 'rgba(148,163,184,0.28)'}`,
-                      color: msg.role === 'user' ? '#ecfdf5' : '#f8fafc',
-                      fontSize: 13.5, lineHeight: 1.65,
-                      whiteSpace: 'pre-wrap',
-                    }}>
-                      {msg.content === '...' ? (
-                        <span style={{ color: '#cbd5e1' }}>Intelligence E is thinking...</span>
-                      ) : msg.content}
-                    </div>
-                    {msg.provider && msg.provider !== 'system' && (
-                      <div style={{ color: '#94a3b8', fontSize: 10.5, marginTop: 4, paddingLeft: 4 }}>
-                        Powered by EarthAI Meridian
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-              <div ref={messagesEndRef} />
-            </>
-          )}
-        </div>
-
-        {error && (
-          <div style={{ padding: '8px 18px' }}>
-            <div style={{
-              background: 'rgba(239,68,68,0.10)', border: '1px solid rgba(239,68,68,0.20)',
-              borderRadius: 8, padding: '8px 12px', color: '#fca5a5', fontSize: 12.5,
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            }}>
-              <span>{error}</span>
-              <button onClick={() => setError('')} style={{ background: 'none', border: 'none', color: '#fca5a5', cursor: 'pointer', fontSize: 16, lineHeight: 1 }}>×</button>
-            </div>
-          </div>
-        )}
-
-        <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(148,163,184,0.22)' }}>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask Intelligence E about agriculture, markets, farm management, risks..."
-              rows={2}
-              style={{
-                flex: 1, padding: '10px 14px', borderRadius: 10,
-                background: '#1f2937', border: '1px solid rgba(148,163,184,0.32)',
-                color: '#f8fafc', fontSize: 13.5, fontFamily: 'inherit', outline: 'none',
-                resize: 'none', lineHeight: 1.5,
-              }}
-            />
-            <button
-              onClick={handleSend}
-              disabled={sending || !input.trim()}
-              style={{
-                width: 42, height: 42, borderRadius: 10, border: 'none', flexShrink: 0,
-                background: sending || !input.trim() ? 'rgba(34,197,94,0.3)' : '#22c55e',
-                color: '#fff', cursor: sending || !input.trim() ? 'not-allowed' : 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'all 0.15s',
-              }}
-            >
-              {sending ? (
-                <div style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-              ) : (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                </svg>
-              )}
+      <div className="intel-workspace">
+        <aside className="intel-sidebar" aria-label="Conversations">
+          <div className="intel-sidebar-head">
+            <button onClick={startNewConversation} className="intel-new-button">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              New Conversation
             </button>
           </div>
-          <div style={{ color: '#94a3b8', fontSize: 10.5, marginTop: 6, paddingLeft: 2 }}>
-            Press Enter to send · Shift+Enter for new line · Intelligence E provides agricultural guidance, not professional advice
+
+          <div className="intel-conversations">
+            {loadingConvs ? (
+              <div style={{ padding: 16, textAlign: 'center', color: '#6b7280', fontSize: 12 }}>Loading...</div>
+            ) : conversations.length === 0 ? (
+              <div style={{ padding: '16px 12px', textAlign: 'center', color: '#6b7280', fontSize: 12 }}>No conversations yet</div>
+            ) : (
+              conversations.map((conv) => (
+                <button
+                  key={conv.id}
+                  onClick={() => setActiveConvId(conv.id)}
+                  className={`intel-conversation${activeConvId === conv.id ? ' active' : ''}`}
+                >
+                  <div className="intel-conversation-title">{conv.title}</div>
+                  <div className="intel-conversation-meta">{conv.messageCount} messages</div>
+                </button>
+              ))
+            )}
           </div>
-        </div>
+
+          {aiStatus && (
+            <div className="intel-status">
+              <div className="intel-status-row">
+                <span className={`intel-dot${aiStatus.configuredCount > 0 ? '' : ' off'}`} />
+                {aiStatus.configuredCount > 0 ? 'EarthAI Meridian active' : 'EarthAI model not configured'}
+              </div>
+              {aiStatus.dailyUsage && (
+                <div style={{ marginTop: 3 }}>{aiStatus.dailyUsage.requestCount}/{aiStatus.dailyUsage.limit} requests today</div>
+              )}
+            </div>
+          )}
+        </aside>
+
+        <section className="intel-chat" aria-label="Intelligence E chat">
+          <div className="intel-chat-head">
+            <div style={{ flex: 1 }}>
+              <div className="intel-title">Intelligence E</div>
+              <div className="intel-subtitle">Agricultural Intelligence Assistant</div>
+            </div>
+            <select value={requestType} onChange={(e) => setRequestType(e.target.value)} className="intel-select">
+              {REQUEST_TYPES.map((t) => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="intel-messages">
+            {loadingMessages ? (
+              <div style={{ textAlign: 'center', color: '#6b7280', fontSize: 13, paddingTop: 40 }}>Loading messages...</div>
+            ) : messages.length === 0 ? (
+              <div className="intel-empty">
+                <img className="intel-empty-logo" src="/assets/images/h9O7B-1789370942958.jpg" alt="Earth AI" />
+                <h1>Intelligence E Agriculture</h1>
+                <p>Ask about crop markets, farm management, agricultural risks, decision support, or research topics.</p>
+                <div className="intel-suggestions">
+                  {[
+                    'What are current maize price trends in East Africa?',
+                    'How should I manage irrigation for drought-stressed crops?',
+                    'What are the main risks for smallholder farmers this season?',
+                    'Explain the impact of La Nina on agricultural production',
+                  ].map((suggestion) => (
+                    <button key={suggestion} onClick={() => setInput(suggestion)} className="intel-suggestion">
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <>
+                {messages.map((msg) => (
+                  <div key={msg.id} className={`intel-row ${msg.role}`}>
+                    <div className="intel-avatar">
+                      {msg.role === 'user' ? 'You' : <img src="/assets/images/h9O7B-1789370942958.jpg" alt="Earth AI" />}
+                    </div>
+                    <div className="intel-message-wrap">
+                      <div className="intel-bubble">
+                        {msg.content === '...' ? <span style={{ color: '#6b7280' }}>Intelligence E is thinking...</span> : msg.content}
+                      </div>
+                      {msg.provider && msg.provider !== 'system' && <div className="intel-model">Powered by EarthAI Meridian</div>}
+                    </div>
+                  </div>
+                ))}
+                <div ref={messagesEndRef} />
+              </>
+            )}
+          </div>
+
+          {error && (
+            <div className="intel-error">
+              <span>{error}</span>
+              <button onClick={() => setError('')} aria-label="Dismiss error">x</button>
+            </div>
+          )}
+
+          <div className="intel-composer">
+            <div className="intel-composer-box">
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask Intelligence E about agriculture, markets, farm management, risks..."
+                rows={2}
+                className="intel-textarea"
+              />
+              <button onClick={handleSend} disabled={sending || !input.trim()} className="intel-send" aria-label="Send message">
+                {sending ? (
+                  <div style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13" />
+                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                  </svg>
+                )}
+              </button>
+            </div>
+            <div className="intel-note">Intelligence E provides agricultural guidance, not professional advice.</div>
+          </div>
+        </section>
       </div>
-    </div>
+    </>
   );
 }
 
 function IntelligenceFallback() {
   return (
-    <div
-      style={{
-        height: 'calc(100vh - 112px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: '#cbd5e1',
-        fontSize: 13,
-      }}
-    >
+    <div style={{ height: 'calc(100vh - 112px)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b7280', fontSize: 13 }}>
       Loading Intelligence E...
     </div>
   );
