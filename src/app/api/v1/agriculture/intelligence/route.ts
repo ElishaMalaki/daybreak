@@ -257,16 +257,22 @@ export async function POST(request: NextRequest) {
     })();
 
     // Record external API usage (non-blocking)
-    supabase.rpc('record_api_key_usage', {
-      p_key_hash: keyHash,
-      p_endpoint: '/api/v1/agriculture/intelligence',
-      p_request_type: normalizedRequestType,
-      p_credits_used: creditsUsed,
-      p_response_status: 200,
-      p_processing_time_ms: processingTimeMs,
-      p_ip_address: request.headers.get('x-forwarded-for') || null,
-      p_user_agent: request.headers.get('user-agent') || null,
-    }).then(() => {}).catch(() => {});
+    void (async () => {
+      try {
+        await supabase.rpc('record_api_key_usage', {
+          p_key_hash: keyHash,
+          p_endpoint: '/api/v1/agriculture/intelligence',
+          p_request_type: normalizedRequestType,
+          p_credits_used: creditsUsed,
+          p_response_status: 200,
+          p_processing_time_ms: processingTimeMs,
+          p_ip_address: request.headers.get('x-forwarded-for') || null,
+          p_user_agent: request.headers.get('user-agent') || null,
+        });
+      } catch {
+        // API key usage logging must never block the API response.
+      }
+    })();
   }
 
   if (!aiResponse.success) {
