@@ -87,7 +87,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         html, body { min-height: 100%; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #ffffff; color: #111827; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .adm-sidebar { position: fixed; inset: 0 auto 0 0; width: 260px; background: #f7f7f8; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; z-index: 50; transition: transform 0.2s ease; }
-        .adm-main { margin-left: 260px; min-height: 100vh; background: #ffffff; }
+        .adm-main { margin-left: 260px; min-height: 100vh; background: #ffffff; min-width: 0; }
         .adm-topbar { height: 58px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; gap: 12px; padding: 0 24px; background: rgba(255,255,255,0.96); position: sticky; top: 0; z-index: 40; }
         .adm-nav-item { display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 8px 10px; border-radius: 8px; color: #4b5563; text-decoration: none; font-size: 14px; font-weight: 500; line-height: 1.2; }
         .adm-nav-item:hover { background: #ececf1; color: #111827; }
@@ -98,10 +98,37 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         .adm-menu-btn { display: none; }
         .adm-top-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff; color: #4b5563; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .adm-top-btn:hover { background: #f7f7f8; color: #111827; }
-        .adm-page-pad { padding: 24px 28px 56px; }
+        .adm-page-pad { padding: 24px 28px 56px; max-width: 100%; overflow-x: hidden; }
+        .adm-page-pad * { max-width: 100%; }
+        .adm-page-pad table { min-width: 680px; }
+        .adm-page-pad pre, .adm-page-pad code { white-space: pre-wrap; overflow-wrap: anywhere; }
+        .adm-page-pad p, .adm-page-pad div, .adm-page-pad span, .adm-page-pad a, .adm-page-pad td, .adm-page-pad th { overflow-wrap: anywhere; }
         .adm-mode { display: inline-flex; align-items: center; gap: 7px; min-height: 32px; padding: 0 10px; border: 1px solid #e5e7eb; border-radius: 8px; color: #374151; font-size: 12px; font-weight: 600; background: #fff; }
         .adm-mode-dot { width: 7px; height: 7px; border-radius: 999px; background: #111827; }
-        @media (max-width: 860px) { .adm-sidebar { transform: translateX(-100%); } .adm-sidebar.open { transform: translateX(0); } .adm-main { margin-left: 0; } .adm-mobile-overlay.open { display: block; } .adm-menu-btn { display: flex; } .adm-topbar { padding: 0 16px; } .adm-page-pad { padding: 18px 16px 40px; } }
+        @media (max-width: 1180px) {
+          .adm-page-pad [style*="grid-template-columns: repeat(5, 1fr)"],
+          .adm-page-pad [style*="grid-template-columns: repeat(4, 1fr)"],
+          .adm-page-pad [style*="grid-template-columns: repeat(3, 1fr)"] { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important; }
+          .adm-page-pad [style*="grid-template-columns: 1fr 300px"],
+          .adm-page-pad [style*="grid-template-columns: 1fr 320px"],
+          .adm-page-pad [style*="grid-template-columns: 1fr 340px"] { grid-template-columns: minmax(0, 1fr) !important; }
+        }
+        @media (max-width: 860px) {
+          .adm-sidebar { transform: translateX(-100%); }
+          .adm-sidebar.open { transform: translateX(0); }
+          .adm-main { margin-left: 0; }
+          .adm-mobile-overlay.open { display: block; }
+          .adm-menu-btn { display: flex; }
+          .adm-topbar { padding: 0 16px; }
+          .adm-page-pad { padding: 18px 16px 40px; }
+          .adm-page-pad [style*="grid-template-columns"] { grid-template-columns: minmax(0, 1fr) !important; }
+          .adm-page-pad [style*="display: flex"][style*="justify-content: space-between"] { flex-wrap: wrap; }
+        }
+        @media (max-width: 520px) {
+          .adm-topbar { gap: 8px; }
+          .adm-mode { display: none; }
+          .adm-page-pad { padding: 14px 12px 34px; }
+        }
       `}</style>
 
       <div style={{ display: 'flex', minHeight: '100vh' }}>
