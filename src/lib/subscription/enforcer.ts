@@ -4,7 +4,7 @@
 // ============================================================
 
 import { createClient } from '@/lib/supabase/server';
-import { getPlanLimits, getCreditCost, SERVER_LIMITS, type SubscriptionTier,  } from '@/lib/subscription/config';
+import { getPlanLimits, getCreditCost, SERVER_LIMITS, type SubscriptionTier } from '@/lib/subscription/config';
 
 export interface SubscriptionStatus {
   tier: SubscriptionTier;
@@ -33,6 +33,23 @@ export interface EnforcementResult {
   limitType?: string;
 }
 
+export interface AIUsageRequestOptions {
+  requiresImageAnalysis?: boolean;
+  requiresDocumentAnalysis?: boolean;
+  isAdvancedDocumentAnalysis?: boolean;
+}
+
+function getCurrentBillingPeriod(now = new Date()) {
+  const billingStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+  const billingEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999));
+
+  return {
+    billingStart,
+    billingEnd,
+    billingMonth: billingStart.toISOString().split('T')[0],
+  };
+}
+
 // ============================================================
 // Get authenticated user's subscription (server-side only)
 // ============================================================
@@ -40,7 +57,6 @@ export interface EnforcementResult {
 export async function getUserSubscription(userId: string): Promise<SubscriptionStatus> {
   const supabase = await createClient();
 
-  // Get active subscription
   const { data: sub } = await supabase
     .from('subscriptions')
     .select('tier, status, started_at, expires_at')
@@ -48,24 +64,18 @@ export async function getUserSubscription(userId: string): Promise<SubscriptionS
     .eq('status', 'active')
     .order('created_at', { ascending: false })
     .limit(1)
-    .single();
+    .maybeSingle();
 
-  // If no active subscription, treat as free
   const tier = (sub?.tier as SubscriptionTier) || 'free';
   const now = new Date();
 
-  // Check expiry
   let isActive = true;
   if (sub?.expires_at) {
     isActive = new Date(sub.expires_at) > now;
   }
 
-  // If expired paid plan, revert to free
   const effectiveTier: SubscriptionTier = isActive ? tier : 'free';
-
-  // Billing period: start of current month
-  const billingStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const billingEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  const { billingStart, billingEnd } = getCurrentBillingPeriod(now);
 
   return {
     tier: effectiveTier,
@@ -84,11 +94,10 @@ export async function getUserSubscription(userId: string): Promise<SubscriptionS
 
 export async function getUserMonthlyUsage(userId: string): Promise<UsageSummary> {
   const supabase = await createClient();
-  const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+  const { billingStart, billingEnd, billingMonth } = getCurrentBillingPeriod();
+  const monthStart = billingStart.toISOString().split('T')[0];
+  const monthEnd = billingEnd.toISOString().split('T')[0];
 
-  // AI credits and requests from usage_records (monthly aggregate)
   const { data: usageRows } = await supabase
     .from('usage_records')
     .select('request_count, token_count')
@@ -98,33 +107,29 @@ export async function getUserMonthlyUsage(userId: string): Promise<UsageSummary>
 
   const aiRequestsUsed = (usageRows || []).reduce((sum, r) => sum + (r.request_count || 0), 0);
 
-  // AI credits from monthly_ai_credits table (new)
   const { data: creditRow } = await supabase
     .from('monthly_ai_credits')
     .select('credits_used')
     .eq('user_id', userId)
-    .eq('billing_month', monthStart)
-    .single();
+    .eq('billing_month', billingMonth)
+    .maybeSingle();
 
   const aiCreditsUsed = creditRow?.credits_used || 0;
 
-  // Reports this month
   const { count: reportsUsed } = await supabase
     .from('reports')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
-    .gte('created_at', monthStart)
-    .lte('created_at', monthEnd + 'T23:59:59Z');
+    .gte('created_at', billingStart.toISOString())
+    .lte('created_at', billingEnd.toISOString());
 
-  // Research requests this month
   const { count: researchRequestsUsed } = await supabase
     .from('research_requests')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
-    .gte('created_at', monthStart)
-    .lte('created_at', monthEnd + 'T23:59:59Z');
+    .gte('created_at', billingStart.toISOString())
+    .lte('created_at', billingEnd.toISOString());
 
-  // Farms owned
   const { count: farmsCount } = await supabase
     .from('farms')
     .select('id', { count: 'exact', head: true })
@@ -137,7 +142,7 @@ export async function getUserMonthlyUsage(userId: string): Promise<UsageSummary>
     reportsUsed: reportsUsed || 0,
     researchRequestsUsed: researchRequestsUsed || 0,
     farmsCount: farmsCount || 0,
-    usersCount: 1, // single-user context for now
+    usersCount: 1,
   };
 }
 
@@ -147,7 +152,8 @@ export async function getUserMonthlyUsage(userId: string): Promise<UsageSummary>
 
 export async function checkAIRequestAllowed(
   userId: string,
-  requestType: string
+  requestType: string,
+  options: AIUsageRequestOptions = {}
 ): Promise<EnforcementResult> {
   const [subscription, usage] = await Promise.all([
     getUserSubscription(userId),
@@ -157,27 +163,54 @@ export async function checkAIRequestAllowed(
   const limits = getPlanLimits(subscription.tier);
   const creditsRequired = getCreditCost(requestType);
 
-  // Enterprise: unlimited (-1)
+  if (options.requiresImageAnalysis && !limits.imageAnalysis) {
+    return {
+      allowed: false,
+      reason: 'Image analysis is not included in your current plan. Upgrade your plan to analyze farm photos.',
+      creditsRequired,
+      creditsRemaining: limits.aiCredits === -1 ? -1 : Math.max(0, limits.aiCredits - usage.aiCreditsUsed),
+      limitType: 'image_analysis',
+    };
+  }
+
+  if (options.requiresDocumentAnalysis && !limits.documentAnalysis) {
+    return {
+      allowed: false,
+      reason: 'Document analysis is not included in your current plan. Upgrade your plan to analyze documents.',
+      creditsRequired,
+      creditsRemaining: limits.aiCredits === -1 ? -1 : Math.max(0, limits.aiCredits - usage.aiCreditsUsed),
+      limitType: 'document_analysis',
+    };
+  }
+
+  if (options.isAdvancedDocumentAnalysis && !limits.advancedDocumentAnalysis) {
+    return {
+      allowed: false,
+      reason: 'Advanced document intelligence is not included in your current plan.',
+      creditsRequired,
+      creditsRemaining: limits.aiCredits === -1 ? -1 : Math.max(0, limits.aiCredits - usage.aiCreditsUsed),
+      limitType: 'advanced_document_analysis',
+    };
+  }
+
   if (limits.aiCredits === -1) {
     return { allowed: true, creditsRequired, creditsRemaining: -1 };
   }
 
-  // Check AI credits
   if (usage.aiCreditsUsed + creditsRequired > limits.aiCredits) {
     return {
       allowed: false,
-      reason: `Your monthly AI allowance has been reached. Upgrade your plan to continue using Intelligence E.`,
+      reason: 'Your monthly AI allowance has been reached. Upgrade your plan to continue using Intelligence E.',
       creditsRequired,
       creditsRemaining: Math.max(0, limits.aiCredits - usage.aiCreditsUsed),
       limitType: 'ai_credits',
     };
   }
 
-  // Check AI requests
-  if (usage.aiRequestsUsed >= limits.aiRequests) {
+  if (limits.aiRequests !== -1 && usage.aiRequestsUsed >= limits.aiRequests) {
     return {
       allowed: false,
-      reason: `Your monthly AI request limit has been reached. Upgrade your plan to continue.`,
+      reason: 'Your monthly AI request limit has been reached. Upgrade your plan to continue.',
       creditsRequired,
       creditsRemaining: Math.max(0, limits.aiCredits - usage.aiCreditsUsed),
       limitType: 'ai_requests',
@@ -281,17 +314,14 @@ export async function recordAICreditsUsed(
   processingTimeMs: number
 ): Promise<void> {
   const supabase = await createClient();
-  const now = new Date();
-  const billingMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+  const { billingMonth } = getCurrentBillingPeriod();
 
-  // Upsert monthly credit record
   await supabase.rpc('increment_monthly_credits', {
     p_user_id: userId,
     p_billing_month: billingMonth,
     p_credits: creditsUsed,
   });
 
-  // Record detailed provider usage
   await supabase.rpc('increment_provider_usage', {
     p_user_id: userId,
     p_provider: provider,
