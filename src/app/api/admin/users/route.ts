@@ -124,7 +124,7 @@ export async function PATCH(request: NextRequest) {
   if (subscription_tier !== undefined) {
     const { data: existingSub, error: subSelectError } = await supabase!
       .from('subscriptions')
-      .select('id')
+      .select('id, tier, status')
       .eq('user_id', userId)
       .eq('status', 'active')
       .order('created_at', { ascending: false })
@@ -137,12 +137,26 @@ export async function PATCH(request: NextRequest) {
     }
 
     const subResult = existingSub
-      ? await supabase!.from('subscriptions').update({ tier: subscription_tier }).eq('id', existingSub.id)
-      : await supabase!.from('subscriptions').insert({ user_id: userId, tier: subscription_tier, status: 'active' });
+      ? await supabase!.from('subscriptions').update({ tier: subscription_tier }).eq('id', existingSub.id).select('id, tier, status').single()
+      : await supabase!.from('subscriptions').insert({ user_id: userId, tier: subscription_tier, status: 'active' }).select('id, tier, status').single();
 
     if (subResult.error) {
       console.error('[Admin Users] subscription update failed:', subResult.error.message);
       return NextResponse.json({ error: 'Unable to update subscription' }, { status: 500 });
+    }
+
+    const { error: historyError } = await supabase!.rpc('record_subscription_history', {
+      p_user_id: userId,
+      p_subscription_id: subResult.data.id,
+      p_previous_tier: existingSub?.tier || null,
+      p_new_tier: subscription_tier,
+      p_previous_status: existingSub?.status || null,
+      p_new_status: subResult.data.status || 'active',
+      p_change_reason: 'admin_subscription_update',
+    });
+
+    if (historyError) {
+      console.error('[Admin Users] subscription history write failed:', historyError.message);
     }
   }
 
