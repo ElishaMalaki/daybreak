@@ -68,6 +68,25 @@ function validateAttachments(value: unknown): { attachments: AIImageAttachment[]
   return { attachments };
 }
 
+function normalizeRequestType(requestType: string, hasAttachments: boolean): AIRequestType {
+  if (hasAttachments) return 'plant_photo_analysis';
+
+  const allowedTypes: AIRequestType[] = [
+    'market_analysis',
+    'farm_data_analysis',
+    'decision_support',
+    'risk_assessment',
+    'research',
+    'deep_research',
+    'crop_intelligence',
+    'pest_disease_analysis',
+    'basic_agriculture_guidance',
+    'general',
+  ];
+
+  return allowedTypes.includes(requestType as AIRequestType) ? (requestType as AIRequestType) : 'general';
+}
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
@@ -124,8 +143,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const effectiveRequestType = attachments.length > 0 ? 'farm_data_analysis' : requestType;
-    const enforcementResult = await checkAIRequestAllowed(user.id, effectiveRequestType);
+    const effectiveRequestType = normalizeRequestType(requestType, attachments.length > 0);
+    const enforcementResult = await checkAIRequestAllowed(user.id, effectiveRequestType, {
+      requiresImageAnalysis: attachments.length > 0,
+      requiresDocumentAnalysis: effectiveRequestType === 'document_analysis',
+      isAdvancedDocumentAnalysis: effectiveRequestType === 'document_analysis' && Boolean(contextData?.advanced),
+    });
 
     if (!enforcementResult.allowed) {
       return NextResponse.json(
@@ -143,7 +166,7 @@ export async function POST(request: NextRequest) {
     const router = getAIRouter();
     const aiResponse = await router.route({
       messages: messages as Array<{ role: 'user' | 'assistant' | 'system'; content: string }>,
-      requestType: effectiveRequestType as AIRequestType,
+      requestType: effectiveRequestType,
       userId: user.id,
       contextData,
       attachments,
