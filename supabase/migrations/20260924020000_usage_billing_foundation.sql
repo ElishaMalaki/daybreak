@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS public.ai_usage_controls (
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_ai_provider_usage_user_provider_model_date
-ON public.ai_provider_usage(user_id, provider, COALESCE(model_used, ''), date);
+ON public.ai_provider_usage(user_id, provider, model_used, date) NULLS NOT DISTINCT;
 
 CREATE INDEX IF NOT EXISTS idx_monthly_ai_credits_user_month ON public.monthly_ai_credits(user_id, billing_month DESC);
 CREATE INDEX IF NOT EXISTS idx_subscription_history_user_created ON public.subscription_history(user_id, created_at DESC);
@@ -211,7 +211,7 @@ BEGIN
         GREATEST(COALESCE(p_total_tokens, 0), 0),
         GREATEST(COALESCE(p_latency_ms, 0), 0)
     )
-    ON CONFLICT (user_id, provider, COALESCE(model_used, ''), date)
+    ON CONFLICT (user_id, provider, model_used, date)
     DO UPDATE SET
         request_count = public.ai_provider_usage.request_count + 1,
         input_tokens = public.ai_provider_usage.input_tokens + GREATEST(COALESCE(p_input_tokens, 0), 0),
