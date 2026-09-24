@@ -80,13 +80,13 @@ async function getEffectivePlanLimits(userId: string, tier: SubscriptionTier): P
   const baseLimits = getPlanLimits(tier);
   const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from('ai_usage_controls')
-    .select('ai_credit_limit_override, ai_request_limit_override, reports_limit_override, research_limit_override, is_ai_suspended, suspension_reason')
-    .or(`user_id.eq.${userId},tier.eq.${tier}`);
+  const { data, error } = await supabase.rpc('get_ai_usage_controls_for_enforcement', {
+    p_user_id: userId,
+    p_tier: tier,
+  });
 
   if (error) {
-    console.error('[Subscription Enforcer] usage controls query failed:', error.message);
+    console.error('[Subscription Enforcer] usage controls lookup failed:', error.message);
     return { limits: baseLimits, suspendedReason: null };
   }
 
