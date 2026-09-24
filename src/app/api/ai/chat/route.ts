@@ -72,16 +72,21 @@ function normalizeRequestType(requestType: string, hasAttachments: boolean): AIR
   if (hasAttachments) return 'plant_photo_analysis';
 
   const allowedTypes: AIRequestType[] = [
+    'general',
+    'basic_agriculture_guidance',
     'market_analysis',
     'farm_data_analysis',
+    'farm_recommendation',
+    'complex_farm_analysis',
     'decision_support',
     'risk_assessment',
-    'research',
-    'deep_research',
     'crop_intelligence',
     'pest_disease_analysis',
-    'basic_agriculture_guidance',
-    'general',
+    'plant_photo_analysis',
+    'image_analysis',
+    'document_analysis',
+    'research',
+    'deep_research',
   ];
 
   return allowedTypes.includes(requestType as AIRequestType) ? (requestType as AIRequestType) : 'general';
@@ -145,7 +150,7 @@ export async function POST(request: NextRequest) {
 
     const effectiveRequestType = normalizeRequestType(requestType, attachments.length > 0);
     const enforcementResult = await checkAIRequestAllowed(user.id, effectiveRequestType, {
-      requiresImageAnalysis: attachments.length > 0,
+      requiresImageAnalysis: attachments.length > 0 || effectiveRequestType === 'image_analysis' || effectiveRequestType === 'plant_photo_analysis',
       requiresDocumentAnalysis: effectiveRequestType === 'document_analysis',
       isAdvancedDocumentAnalysis: effectiveRequestType === 'document_analysis' && Boolean(contextData?.advanced),
     });
