@@ -4,7 +4,7 @@
 // ============================================================
 
 import { createClient } from '@/lib/supabase/server';
-import { getPlanLimits, getCreditCost, SERVER_LIMITS, type SubscriptionTier } from '@/lib/subscription/config';
+import { getPlanLimits, getCreditCost, SERVER_LIMITS, type PlanLimits, type SubscriptionTier } from '@/lib/subscription/config';
 
 export interface SubscriptionStatus {
   tier: SubscriptionTier;
@@ -39,6 +39,15 @@ export interface AIUsageRequestOptions {
   isAdvancedDocumentAnalysis?: boolean;
 }
 
+interface AIUsageControlRow {
+  ai_credit_limit_override: number | null;
+  ai_request_limit_override: number | null;
+  reports_limit_override: number | null;
+  research_limit_override: number | null;
+  is_ai_suspended: boolean | null;
+  suspension_reason: string | null;
+}
+
 function getCurrentBillingPeriod(now = new Date()) {
   const billingStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
   const billingEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999));
@@ -48,6 +57,40 @@ function getCurrentBillingPeriod(now = new Date()) {
     billingEnd,
     billingMonth: billingStart.toISOString().split('T')[0],
   };
+}
+
+function applyUsageControlOverrides(limits: PlanLimits, controls: AIUsageControlRow[]): { limits: PlanLimits; suspendedReason: string | null } {
+  const effectiveLimits: PlanLimits = { ...limits };
+  let suspendedReason: string | null = null;
+
+  for (const control of controls) {
+    if (control.is_ai_suspended) {
+      suspendedReason = control.suspension_reason || 'AI access is currently suspended for this account.';
+    }
+    if (typeof control.ai_credit_limit_override === 'number') effectiveLimits.aiCredits = control.ai_credit_limit_override;
+    if (typeof control.ai_request_limit_override === 'number') effectiveLimits.aiRequests = control.ai_request_limit_override;
+    if (typeof control.reports_limit_override === 'number') effectiveLimits.reports = control.reports_limit_override;
+    if (typeof control.research_limit_override === 'number') effectiveLimits.researchRequests = control.research_limit_override;
+  }
+
+  return { limits: effectiveLimits, suspendedReason };
+}
+
+async function getEffectivePlanLimits(userId: string, tier: SubscriptionTier): Promise<{ limits: PlanLimits; suspendedReason: string | null }> {
+  const baseLimits = getPlanLimits(tier);
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('ai_usage_controls')
+    .select('ai_credit_limit_override, ai_request_limit_override, reports_limit_override, research_limit_override, is_ai_suspended, suspension_reason')
+    .or(`user_id.eq.${userId},tier.eq.${tier}`);
+
+  if (error) {
+    console.error('[Subscription Enforcer] usage controls query failed:', error.message);
+    return { limits: baseLimits, suspendedReason: null };
+  }
+
+  return applyUsageControlOverrides(baseLimits, (data || []) as AIUsageControlRow[]);
 }
 
 // ============================================================
@@ -160,8 +203,18 @@ export async function checkAIRequestAllowed(
     getUserMonthlyUsage(userId),
   ]);
 
-  const limits = getPlanLimits(subscription.tier);
+  const { limits, suspendedReason } = await getEffectivePlanLimits(userId, subscription.tier);
   const creditsRequired = getCreditCost(requestType);
+
+  if (suspendedReason) {
+    return {
+      allowed: false,
+      reason: suspendedReason,
+      creditsRequired,
+      creditsRemaining: limits.aiCredits === -1 ? -1 : Math.max(0, limits.aiCredits - usage.aiCreditsUsed),
+      limitType: 'ai_suspended',
+    };
+  }
 
   if (options.requiresImageAnalysis && !limits.imageAnalysis) {
     return {
@@ -234,8 +287,8 @@ export async function checkFarmCreationAllowed(userId: string): Promise<Enforcem
     getUserMonthlyUsage(userId),
   ]);
 
-  const limits = getPlanLimits(subscription.tier);
-
+  const { limits, suspendedReason } = await getEffectivePlanLimits(userId, subscription.tier);
+  if (suspendedReason) return { allowed: false, reason: suspendedReason, limitType: 'ai_suspended' };
   if (limits.farms === -1) return { allowed: true };
 
   if (usage.farmsCount >= limits.farms) {
@@ -259,8 +312,8 @@ export async function checkReportAllowed(userId: string): Promise<EnforcementRes
     getUserMonthlyUsage(userId),
   ]);
 
-  const limits = getPlanLimits(subscription.tier);
-
+  const { limits, suspendedReason } = await getEffectivePlanLimits(userId, subscription.tier);
+  if (suspendedReason) return { allowed: false, reason: suspendedReason, limitType: 'ai_suspended' };
   if (limits.reports === -1) return { allowed: true };
 
   if (usage.reportsUsed >= limits.reports) {
@@ -284,8 +337,8 @@ export async function checkResearchAllowed(userId: string): Promise<EnforcementR
     getUserMonthlyUsage(userId),
   ]);
 
-  const limits = getPlanLimits(subscription.tier);
-
+  const { limits, suspendedReason } = await getEffectivePlanLimits(userId, subscription.tier);
+  if (suspendedReason) return { allowed: false, reason: suspendedReason, limitType: 'ai_suspended' };
   if (limits.researchRequests === -1) return { allowed: true };
 
   if (usage.researchRequestsUsed >= limits.researchRequests) {
