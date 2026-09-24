@@ -50,7 +50,6 @@ function IntelligenceContent() {
 
   const supabase = createClient();
 
-  // Load AI status
   useEffect(() => {
     fetch('/api/ai/status')
       .then((r) => r.json())
@@ -58,7 +57,6 @@ function IntelligenceContent() {
       .catch(() => {});
   }, []);
 
-  // Load conversations
   const loadConversations = useCallback(async () => {
     if (!user) return;
     setLoadingConvs(true);
@@ -91,7 +89,6 @@ function IntelligenceContent() {
     loadConversations();
   }, [loadConversations]);
 
-  // Handle URL param for conversation
   useEffect(() => {
     const convId = searchParams?.get('conv');
     if (convId) {
@@ -103,7 +100,6 @@ function IntelligenceContent() {
     }
   }, [searchParams]);
 
-  // Load messages for active conversation
   useEffect(() => {
     if (!activeConvId || !user) {
       setMessages([]);
@@ -138,7 +134,6 @@ function IntelligenceContent() {
     void loadMessages();
   }, [activeConvId, user]);
 
-  // Auto-scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -180,7 +175,6 @@ function IntelligenceContent() {
     setError('');
     setSending(true);
 
-    // Ensure we have a conversation
     let convId = activeConvId;
     if (!convId) {
       convId = await createNewConversation();
@@ -192,7 +186,6 @@ function IntelligenceContent() {
       setActiveConvId(convId);
     }
 
-    // Optimistic UI
     const tempUserMsg: Message = {
       id: `temp-user-${Date.now()}`,
       role: 'user',
@@ -208,7 +201,6 @@ function IntelligenceContent() {
 
     setMessages((prev) => [...prev, tempUserMsg, tempAssistantMsg]);
 
-    // Build message history for context
     const historyMessages = messages
       .filter((m) => !m.id.startsWith('temp-'))
       .slice(-10)
@@ -236,7 +228,6 @@ function IntelligenceContent() {
         return;
       }
 
-      // Replace temp messages with real ones
       setMessages((prev) =>
         prev.map((m) => {
           if (m.id === tempAssistantMsg.id) {
@@ -255,12 +246,10 @@ function IntelligenceContent() {
         })
       );
 
-      // Update conversation title if first message
       if (messages.length === 0) {
         await updateConversationTitle(convId, userMessage);
       }
 
-      // Refresh conversation list
       loadConversations();
     } catch {
       setMessages((prev) => prev.filter((m) => m.id !== tempAssistantMsg.id));
@@ -284,19 +273,18 @@ function IntelligenceContent() {
   };
 
   return (
-    <div style={{ maxWidth: 1100, margin: '0 auto', height: 'calc(100vh - 112px)', display: 'flex', gap: 16 }}>
-      {/* Sidebar: Conversation list */}
+    <div style={{ maxWidth: 1100, margin: '0 auto', height: 'calc(100vh - 112px)', display: 'flex', gap: 16, color: '#f8fafc' }}>
       <div style={{
         width: 240, flexShrink: 0,
-        background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
+        background: '#111827', border: '1px solid rgba(148,163,184,0.22)',
         borderRadius: 14, display: 'flex', flexDirection: 'column', overflow: 'hidden',
       }}>
-        <div style={{ padding: '14px 12px 10px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+        <div style={{ padding: '14px 12px 10px', borderBottom: '1px solid rgba(148,163,184,0.22)' }}>
           <button
             onClick={startNewConversation}
             style={{
               width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(34,197,94,0.25)',
-              background: 'rgba(34,197,94,0.10)', color: '#4ade80', fontSize: 12.5, fontWeight: 600,
+              background: 'rgba(34,197,94,0.16)', color: '#86efac', fontSize: 12.5, fontWeight: 700,
               cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
             }}
           >
@@ -309,9 +297,9 @@ function IntelligenceContent() {
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '8px 8px' }}>
           {loadingConvs ? (
-            <div style={{ padding: '16px', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 12 }}>Loading...</div>
+            <div style={{ padding: '16px', textAlign: 'center', color: '#cbd5e1', fontSize: 12 }}>Loading...</div>
           ) : conversations.length === 0 ? (
-            <div style={{ padding: '16px 12px', textAlign: 'center', color: 'rgba(255,255,255,0.25)', fontSize: 12 }}>
+            <div style={{ padding: '16px 12px', textAlign: 'center', color: '#cbd5e1', fontSize: 12 }}>
               No conversations yet
             </div>
           ) : (
@@ -326,12 +314,12 @@ function IntelligenceContent() {
                 }}
               >
                 <div style={{
-                  color: activeConvId === conv.id ? '#4ade80' : 'rgba(255,255,255,0.7)',
+                  color: activeConvId === conv.id ? '#86efac' : '#e5e7eb',
                   fontSize: 12.5, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                 }}>
                   {conv.title}
                 </div>
-                <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, marginTop: 2 }}>
+                <div style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>
                   {conv.messageCount} messages
                 </div>
               </button>
@@ -339,22 +327,21 @@ function IntelligenceContent() {
           )}
         </div>
 
-        {/* AI Status */}
         {aiStatus && (
-          <div style={{ padding: '10px 12px', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+          <div style={{ padding: '10px 12px', borderTop: '1px solid rgba(148,163,184,0.22)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <div style={{
                 width: 6, height: 6, borderRadius: '50%',
                 background: aiStatus.configuredCount > 0 ? '#22c55e' : '#ef4444',
               }} />
-              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11 }}>
+              <span style={{ color: '#cbd5e1', fontSize: 11, fontWeight: 600 }}>
                 {aiStatus.configuredCount > 0
-                  ? `${aiStatus.configuredCount} provider${aiStatus.configuredCount > 1 ? 's' : ''} active`
-                  : 'No AI providers configured'}
+                  ? 'EarthAI Meridian active'
+                  : 'EarthAI model not configured'}
               </span>
             </div>
             {aiStatus.dailyUsage && (
-              <div style={{ color: 'rgba(255,255,255,0.25)', fontSize: 10.5, marginTop: 3 }}>
+              <div style={{ color: '#94a3b8', fontSize: 10.5, marginTop: 3 }}>
                 {aiStatus.dailyUsage.requestCount}/{aiStatus.dailyUsage.limit} requests today
               </div>
             )}
@@ -362,23 +349,21 @@ function IntelligenceContent() {
         )}
       </div>
 
-      {/* Main chat area */}
       <div style={{
-        flex: 1, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
+        flex: 1, background: '#111827', border: '1px solid rgba(148,163,184,0.22)',
         borderRadius: 14, display: 'flex', flexDirection: 'column', overflow: 'hidden',
       }}>
-        {/* Header */}
-        <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(148,163,184,0.22)', display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ flex: 1 }}>
-            <div style={{ color: '#fff', fontSize: 14, fontWeight: 700 }}>Intelligence E</div>
-            <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 11.5 }}>Agricultural Intelligence Assistant</div>
+            <div style={{ color: '#f8fafc', fontSize: 14, fontWeight: 800 }}>Intelligence E</div>
+            <div style={{ color: '#cbd5e1', fontSize: 11.5, fontWeight: 600 }}>Agricultural Intelligence Assistant</div>
           </div>
           <select
             value={requestType}
             onChange={(e) => setRequestType(e.target.value)}
             style={{
-              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
-              borderRadius: 8, color: 'rgba(255,255,255,0.7)', fontSize: 12, padding: '6px 10px',
+              background: '#1f2937', border: '1px solid rgba(148,163,184,0.32)',
+              borderRadius: 8, color: '#f8fafc', fontSize: 12, padding: '6px 10px',
               fontFamily: 'inherit', cursor: 'pointer', outline: 'none',
             }}
           >
@@ -388,17 +373,16 @@ function IntelligenceContent() {
           </select>
         </div>
 
-        {/* Messages */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 20px 8px' }}>
           {loadingMessages ? (
-            <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 13, paddingTop: 40 }}>Loading messages...</div>
+            <div style={{ textAlign: 'center', color: '#cbd5e1', fontSize: 13, paddingTop: 40 }}>Loading messages...</div>
           ) : messages.length === 0 ? (
             <div style={{ textAlign: 'center', paddingTop: 60 }}>
               <div style={{ fontSize: 40, marginBottom: 16 }}>🌾</div>
-              <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 16, fontWeight: 600, marginBottom: 8 }}>
+              <div style={{ color: '#f8fafc', fontSize: 16, fontWeight: 700, marginBottom: 8 }}>
                 Intelligence E Agriculture
               </div>
-              <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, maxWidth: 400, margin: '0 auto', lineHeight: 1.6 }}>
+              <div style={{ color: '#cbd5e1', fontSize: 13, maxWidth: 400, margin: '0 auto', lineHeight: 1.6 }}>
                 Ask about crop markets, farm management, agricultural risks, decision support, or research topics.
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 24 }}>
@@ -413,7 +397,7 @@ function IntelligenceContent() {
                     onClick={() => setInput(suggestion)}
                     style={{
                       padding: '7px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.10)',
-                      background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.55)',
+                      background: '#1f2937', color: '#e5e7eb',
                       fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s',
                     }}
                   >
@@ -437,7 +421,7 @@ function IntelligenceContent() {
                 >
                   <div style={{
                     width: 30, height: 30, borderRadius: 8, flexShrink: 0,
-                    background: msg.role === 'user' ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.08)',
+                    background: msg.role === 'user' ? 'rgba(34,197,94,0.18)' : '#1f2937',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 13,
                   }}>
@@ -446,19 +430,19 @@ function IntelligenceContent() {
                   <div style={{ maxWidth: '75%' }}>
                     <div style={{
                       padding: '10px 14px', borderRadius: 12,
-                      background: msg.role === 'user' ? 'rgba(34,197,94,0.12)' : 'rgba(255,255,255,0.06)',
-                      border: `1px solid ${msg.role === 'user' ? 'rgba(34,197,94,0.20)' : 'rgba(255,255,255,0.08)'}`,
-                      color: msg.role === 'user' ? '#d1fae5' : 'rgba(255,255,255,0.85)',
+                      background: msg.role === 'user' ? 'rgba(22,163,74,0.22)' : '#1f2937',
+                      border: `1px solid ${msg.role === 'user' ? 'rgba(134,239,172,0.34)' : 'rgba(148,163,184,0.28)'}`,
+                      color: msg.role === 'user' ? '#ecfdf5' : '#f8fafc',
                       fontSize: 13.5, lineHeight: 1.65,
                       whiteSpace: 'pre-wrap',
                     }}>
                       {msg.content === '...' ? (
-                        <span style={{ opacity: 0.5 }}>Intelligence E is thinking...</span>
+                        <span style={{ color: '#cbd5e1' }}>Intelligence E is thinking...</span>
                       ) : msg.content}
                     </div>
                     {msg.provider && msg.provider !== 'system' && (
-                      <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 10.5, marginTop: 4, paddingLeft: 4 }}>
-                        via {msg.provider} · {msg.model}
+                      <div style={{ color: '#94a3b8', fontSize: 10.5, marginTop: 4, paddingLeft: 4 }}>
+                        Powered by EarthAI Meridian
                       </div>
                     )}
                   </div>
@@ -469,7 +453,6 @@ function IntelligenceContent() {
           )}
         </div>
 
-        {/* Error */}
         {error && (
           <div style={{ padding: '8px 18px' }}>
             <div style={{
@@ -483,8 +466,7 @@ function IntelligenceContent() {
           </div>
         )}
 
-        {/* Input */}
-        <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+        <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(148,163,184,0.22)' }}>
           <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
             <textarea
               value={input}
@@ -494,8 +476,8 @@ function IntelligenceContent() {
               rows={2}
               style={{
                 flex: 1, padding: '10px 14px', borderRadius: 10,
-                background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
-                color: '#fff', fontSize: 13.5, fontFamily: 'inherit', outline: 'none',
+                background: '#1f2937', border: '1px solid rgba(148,163,184,0.32)',
+                color: '#f8fafc', fontSize: 13.5, fontFamily: 'inherit', outline: 'none',
                 resize: 'none', lineHeight: 1.5,
               }}
             />
@@ -519,7 +501,7 @@ function IntelligenceContent() {
               )}
             </button>
           </div>
-          <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 10.5, marginTop: 6, paddingLeft: 2 }}>
+          <div style={{ color: '#94a3b8', fontSize: 10.5, marginTop: 6, paddingLeft: 2 }}>
             Press Enter to send · Shift+Enter for new line · Intelligence E provides agricultural guidance, not professional advice
           </div>
         </div>
@@ -536,7 +518,7 @@ function IntelligenceFallback() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: 'rgba(255,255,255,0.45)',
+        color: '#cbd5e1',
         fontSize: 13,
       }}
     >
