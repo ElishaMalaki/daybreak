@@ -1,8 +1,9 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vaidosdmzuexydbugsrk.supabase.co';
+const supabasePublishableKey =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_l-fvWnm8L4MXP6lIovn_YQ_K8ZVUt_F';
 
 function redirectToLogin(request: NextRequest) {
   const url = request.nextUrl.clone();
@@ -15,16 +16,8 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const supabaseResponse = NextResponse.next({ request });
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    if (pathname.startsWith('/app')) {
-      return redirectToLogin(request);
-    }
-
-    return supabaseResponse;
-  }
-
   try {
-    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+    const supabase = createServerClient(supabaseUrl, supabasePublishableKey, {
       cookies: {
         getAll() {
           return request.cookies.getAll();
