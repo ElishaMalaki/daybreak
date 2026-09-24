@@ -5,14 +5,32 @@
 // ============================================================
 
 export type AnalysisCapability =
-  | 'text_generation' |'structured_response' |'document_analysis' |'long_context' |'research' |'web_search';
+  | 'text_generation'
+  | 'structured_response'
+  | 'document_analysis'
+  | 'image_analysis'
+  | 'long_context'
+  | 'research'
+  | 'web_search';
 
 export type AIRequestType =
-  | 'market_analysis' |'farm_data_analysis' |'decision_support' |'risk_assessment' |'research' |'general';
+  | 'market_analysis'
+  | 'farm_data_analysis'
+  | 'decision_support'
+  | 'risk_assessment'
+  | 'research'
+  | 'general';
 
 export interface AIMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
+}
+
+export interface AIImageAttachment {
+  type: 'image';
+  mimeType: 'image/jpeg' | 'image/png' | 'image/webp';
+  data: string;
+  name?: string;
 }
 
 export interface AIRequest {
@@ -23,6 +41,7 @@ export interface AIRequest {
   temperature?: number;
   systemPrompt?: string;
   contextData?: Record<string, unknown>;
+  attachments?: AIImageAttachment[];
 }
 
 export interface AIResponse {
