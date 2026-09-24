@@ -7,26 +7,31 @@
 export type SubscriptionTier = 'free' | 'starter' | 'professional' | 'business' | 'enterprise';
 
 export interface PlanLimits {
-  farms: number;           // -1 = unlimited
-  users: number;           // -1 = unlimited
-  aiCredits: number;       // per billing period
-  aiRequests: number;      // per billing period
-  reports: number;         // per billing period
-  researchRequests: number; // per billing period
+  farms: number;           // -1 = unlimited/custom
+  users: number;           // -1 = unlimited/custom
+  aiCredits: number;       // per billing period; -1 = custom/unlimited
+  aiRequests: number;      // per billing period; -1 = custom/unlimited
+  reports: number;         // per billing period; -1 = custom/unlimited
+  researchRequests: number; // per billing period; -1 = custom/unlimited
+  imageAnalysis: boolean;
+  limitedImageAnalysis: boolean;
   documentAnalysis: boolean;
+  limitedDocumentAnalysis: boolean;
   advancedDocumentAnalysis: boolean;
   apiAccess: boolean;
+  dataExport: boolean;
+  teamCollaboration: boolean;
   priorityRouting: boolean;
 }
 
 export interface PlanPricing {
-  tzs: number | null;  // null = custom/contact
   usd: number | null;  // null = custom/contact
 }
 
 export interface Plan {
   id: SubscriptionTier;
   name: string;
+  audience: string;
   tagline: string;
   pricing: PlanPricing;
   limits: PlanLimits;
@@ -43,93 +48,126 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionTier, Plan> = {
   free: {
     id: 'free',
     name: 'Free',
-    tagline: 'Try Intelligence E Agriculture',
-    pricing: { tzs: 0, usd: 0 },
+    audience: 'For farmers exploring Intelligence E',
+    tagline: 'Basic agricultural intelligence for evaluation',
+    pricing: { usd: 0 },
     limits: {
       farms: 1,
       users: 1,
-      aiCredits: 10,
-      aiRequests: 10,
+      aiCredits: 25,
+      aiRequests: 25,
       reports: 2,
-      researchRequests: 2,
-      documentAnalysis: false,
+      researchRequests: 1,
+      imageAnalysis: true,
+      limitedImageAnalysis: true,
+      documentAnalysis: true,
+      limitedDocumentAnalysis: true,
       advancedDocumentAnalysis: false,
       apiAccess: false,
+      dataExport: false,
+      teamCollaboration: false,
       priorityRouting: false,
     },
     features: [
       '1 farm',
       '1 user',
-      '10 AI credits per month',
-      '10 AI requests per month',
-      '2 reports per month',
-      '2 research requests per month',
+      'Limited AI assistance',
       'Basic agricultural intelligence',
+      'Basic crop guidance',
       'Basic farm data',
+      'Limited pest & disease guidance',
+      'Limited image analysis',
+      'Limited document analysis',
+      '2 reports/month',
+      '1 research request/month',
+      'Saved AI conversations',
+      'Farm history',
     ],
   },
 
   starter: {
     id: 'starter',
     name: 'Starter',
-    tagline: 'For small farms and individual farmers',
-    pricing: { tzs: 29900, usd: 9.99 },
+    audience: 'For individual farmers and small farms',
+    tagline: 'Everyday intelligence for small farm operations',
+    pricing: { usd: 9.99 },
     limits: {
       farms: 3,
       users: 3,
-      aiCredits: 100,
-      aiRequests: 100,
+      aiCredits: 150,
+      aiRequests: 150,
       reports: 10,
-      researchRequests: 20,
+      researchRequests: 5,
+      imageAnalysis: true,
+      limitedImageAnalysis: false,
       documentAnalysis: true,
+      limitedDocumentAnalysis: true,
       advancedDocumentAnalysis: false,
       apiAccess: false,
+      dataExport: false,
+      teamCollaboration: false,
       priorityRouting: false,
     },
     features: [
       'Up to 3 farms',
       'Up to 3 users',
-      '100 AI credits per month',
-      '100 AI requests per month',
-      '10 reports per month',
-      '20 research requests per month',
-      'Basic and intermediate agricultural intelligence',
-      'Farm data intelligence',
-      'Agricultural decision support',
+      'AI assistance for everyday farming',
+      'Personalized farm recommendations',
+      'Crop intelligence',
+      'Pest & disease intelligence',
+      'Image analysis',
       'Basic document analysis',
+      'Farm history',
+      'Saved recommendations',
+      'AI conversation history',
+      '10 reports/month',
+      '5 research requests/month',
+      'Basic decision support',
     ],
   },
 
   professional: {
     id: 'professional',
     name: 'Professional',
-    tagline: 'For growing agricultural operations',
-    pricing: { tzs: 79900, usd: 24.99 },
+    audience: 'For growing agricultural operations',
+    tagline: 'Advanced intelligence for growing operations',
+    pricing: { usd: 24.99 },
     limits: {
       farms: 10,
       users: 10,
-      aiCredits: 500,
-      aiRequests: 500,
-      reports: 50,
-      researchRequests: 100,
+      aiCredits: 600,
+      aiRequests: 600,
+      reports: 30,
+      researchRequests: 10,
+      imageAnalysis: true,
+      limitedImageAnalysis: false,
       documentAnalysis: true,
+      limitedDocumentAnalysis: false,
       advancedDocumentAnalysis: true,
       apiAccess: false,
+      dataExport: false,
+      teamCollaboration: true,
       priorityRouting: true,
     },
     features: [
       'Up to 10 farms',
       'Up to 10 users',
-      '500 AI credits per month',
-      '500 AI requests per month',
-      '50 reports per month',
-      '100 research requests per month',
+      'Advanced AI assistance',
       'Advanced agricultural intelligence',
-      'Advanced decision support',
+      'Advanced crop intelligence',
+      'Advanced pest & disease intelligence',
+      'Image analysis',
+      'Advanced document analysis',
+      'Personalized decision support',
+      'Farm performance intelligence',
       'Risk intelligence',
-      'Advanced research',
-      'Document analysis',
-      'Priority AI routing',
+      'Advanced agricultural research',
+      'Farm history & analytics',
+      'Team collaboration',
+      '30 reports/month',
+      '10 research requests/month',
+      'Priority AI processing',
+      'Saved reports & recommendations',
     ],
     highlighted: true,
   },
@@ -137,42 +175,56 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionTier, Plan> = {
   business: {
     id: 'business',
     name: 'Business',
-    tagline: 'For large agricultural businesses',
-    pricing: { tzs: 199900, usd: 59.99 },
+    audience: 'For agricultural businesses, cooperatives and organizations',
+    tagline: 'High-volume intelligence for agricultural teams',
+    pricing: { usd: 59.99 },
     limits: {
       farms: 50,
       users: 50,
-      aiCredits: 2000,
-      aiRequests: 2000,
-      reports: 250,
-      researchRequests: 500,
+      aiCredits: 2500,
+      aiRequests: 2500,
+      reports: 100,
+      researchRequests: 30,
+      imageAnalysis: true,
+      limitedImageAnalysis: false,
       documentAnalysis: true,
+      limitedDocumentAnalysis: false,
       advancedDocumentAnalysis: true,
       apiAccess: true,
+      dataExport: true,
+      teamCollaboration: true,
       priorityRouting: true,
     },
     features: [
       'Up to 50 farms',
       'Up to 50 users',
-      '2,000 AI credits per month',
-      '2,000 AI requests per month',
-      '250 reports per month',
-      '500 research requests per month',
+      'High-volume AI assistance',
       'Advanced agricultural intelligence',
+      'Advanced crop intelligence',
+      'Advanced pest & disease intelligence',
+      'Advanced image analysis',
+      'Advanced document intelligence',
+      'Advanced decision support',
       'Advanced risk intelligence',
-      'Advanced document analysis',
+      'Multi-farm analytics',
+      'Organization-level intelligence',
       'Advanced reporting',
-      'Organization-level features',
+      'Team management',
+      '100 reports/month',
+      '30 research requests/month',
+      'Priority AI processing',
       'API access',
-      'Priority processing',
+      'Data export',
+      'Organization-wide farm insights',
     ],
   },
 
   enterprise: {
     id: 'enterprise',
     name: 'Enterprise',
-    tagline: 'Custom solutions for large organizations',
-    pricing: { tzs: null, usd: null },
+    audience: 'For large agricultural organizations',
+    tagline: 'Custom intelligence, security and scale',
+    pricing: { usd: null },
     limits: {
       farms: -1,
       users: -1,
@@ -180,18 +232,34 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionTier, Plan> = {
       aiRequests: -1,
       reports: -1,
       researchRequests: -1,
+      imageAnalysis: true,
+      limitedImageAnalysis: false,
       documentAnalysis: true,
+      limitedDocumentAnalysis: false,
       advancedDocumentAnalysis: true,
       apiAccess: true,
+      dataExport: true,
+      teamCollaboration: true,
       priorityRouting: true,
     },
     features: [
-      'Custom number of farms',
-      'Custom number of users',
-      'Custom AI limits',
+      'Custom farms',
+      'Custom users',
+      'Custom AI usage',
+      'Enterprise agricultural intelligence',
+      'Enterprise crop intelligence',
+      'Enterprise pest & disease intelligence',
+      'Advanced image & document intelligence',
+      'Enterprise decision support',
+      'Enterprise risk intelligence',
+      'Organization-wide analytics',
+      'Advanced reporting',
       'API integrations',
-      'Higher usage limits',
+      'Custom AI integrations',
+      'Custom permissions',
+      'Custom security configuration',
       'Dedicated configuration',
+      'Priority processing',
       'Enterprise support',
     ],
     contactSales: true,
@@ -205,26 +273,44 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionTier, Plan> = {
 // ============================================================
 
 export type AIRequestCreditType =
-  | 'simple_question' |'detailed_analysis' |'research' |'report_generation' |'document_analysis_small' |'document_analysis_large';
+  | 'simple_question'
+  | 'basic_guidance'
+  | 'detailed_analysis'
+  | 'research'
+  | 'deep_research'
+  | 'report_generation'
+  | 'image_analysis'
+  | 'document_analysis_small'
+  | 'document_analysis_large';
 
 export const AI_CREDIT_COSTS: Record<AIRequestCreditType, number> = {
   simple_question: 1,
+  basic_guidance: 2,
   detailed_analysis: 3,
   research: 5,
+  deep_research: 10,
   report_generation: 10,
-  document_analysis_small: 10,
-  document_analysis_large: 25,
+  image_analysis: 4,
+  document_analysis_small: 6,
+  document_analysis_large: 15,
 };
 
 // Map from AIRequestType to credit type
 export const REQUEST_TYPE_TO_CREDIT_TYPE: Record<string, AIRequestCreditType> = {
   general: 'simple_question',
+  basic_agriculture_guidance: 'basic_guidance',
+  crop_intelligence: 'detailed_analysis',
+  pest_disease_analysis: 'detailed_analysis',
   market_analysis: 'detailed_analysis',
   farm_data_analysis: 'detailed_analysis',
   decision_support: 'detailed_analysis',
   risk_assessment: 'detailed_analysis',
   research: 'research',
+  deep_research: 'deep_research',
   report: 'report_generation',
+  report_generation: 'report_generation',
+  image_analysis: 'image_analysis',
+  plant_photo_analysis: 'image_analysis',
   document_analysis: 'document_analysis_small',
 };
 
@@ -235,7 +321,9 @@ export const REQUEST_TYPE_TO_CREDIT_TYPE: Record<string, AIRequestCreditType> = 
 export const SERVER_LIMITS = {
   maxInputCharacters: 8000,
   maxOutputTokens: 4096,
-  maxDocumentSizeBytes: 10 * 1024 * 1024, // 10 MB
+  maxImageAttachments: 2,
+  maxImageSizeBytes: 4 * 1024 * 1024,
+  maxDocumentSizeBytes: 10 * 1024 * 1024,
   maxConcurrentRequests: 3,
   requestsPerMinute: 10,
   requestsPerMinuteEnterprise: 30,
@@ -245,28 +333,15 @@ export const SERVER_LIMITS = {
 // PRICING HELPERS
 // ============================================================
 
-export function getPlanForCountry(country: string | null | undefined): 'tzs' | 'usd' {
-  if (!country) return 'usd';
-  const normalized = country.toLowerCase().trim();
-  if (
-    normalized === 'tanzania' ||
-    normalized === 'tz' ||
-    normalized === 'united republic of tanzania'
-  ) {
-    return 'tzs';
-  }
+export function getPlanForCountry(_country: string | null | undefined): 'usd' {
   return 'usd';
 }
 
-export function formatPrice(plan: Plan, currency: 'tzs' | 'usd'): string {
-  if (plan.contactSales) return 'Custom';
-  const price = plan.pricing[currency];
-  if (price === null) return 'Custom';
-  if (price === 0) return 'Free';
-  if (currency === 'tzs') {
-    return `TZS ${price.toLocaleString()}/mo`;
-  }
-  return `$${price.toFixed(2)}/mo`;
+export function formatPrice(plan: Plan, _currency: 'usd' = 'usd'): string {
+  const price = plan.pricing.usd;
+  if (plan.contactSales || price === null) return 'Custom pricing';
+  if (price === 0) return '$0/month';
+  return `$${price.toFixed(2)}/month`;
 }
 
 export function getCreditCost(requestType: string): number {
@@ -276,4 +351,8 @@ export function getCreditCost(requestType: string): number {
 
 export function getPlanLimits(tier: SubscriptionTier): PlanLimits {
   return SUBSCRIPTION_PLANS[tier]?.limits ?? SUBSCRIPTION_PLANS.free.limits;
+}
+
+export function isKnownSubscriptionTier(value: string): value is SubscriptionTier {
+  return value in SUBSCRIPTION_PLANS;
 }
