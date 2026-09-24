@@ -240,17 +240,21 @@ export async function POST(request: NextRequest) {
     const creditsUsed = enforcementResult.creditsRequired ?? 1;
 
     void (async () => {
-      await recordAICreditsUsed(
-        userId,
-        creditsUsed,
-        normalizedRequestType,
-        aiResponse.provider,
-        aiResponse.model,
-        aiResponse.inputTokens || 0,
-        aiResponse.outputTokens || 0,
-        processingTimeMs
-      );
-    })().catch(() => {});
+      try {
+        await recordAICreditsUsed(
+          userId,
+          creditsUsed,
+          normalizedRequestType,
+          aiResponse.provider,
+          aiResponse.model,
+          aiResponse.inputTokens || 0,
+          aiResponse.outputTokens || 0,
+          processingTimeMs
+        );
+      } catch {
+        // Usage logging must never block the API response.
+      }
+    })();
 
     // Record external API usage (non-blocking)
     supabase.rpc('record_api_key_usage', {
