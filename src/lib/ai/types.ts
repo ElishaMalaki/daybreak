@@ -14,12 +14,21 @@ export type AnalysisCapability =
   | 'web_search';
 
 export type AIRequestType =
+  | 'general'
+  | 'basic_agriculture_guidance'
   | 'market_analysis'
   | 'farm_data_analysis'
+  | 'farm_recommendation'
+  | 'complex_farm_analysis'
   | 'decision_support'
   | 'risk_assessment'
+  | 'crop_intelligence'
+  | 'pest_disease_analysis'
+  | 'plant_photo_analysis'
+  | 'image_analysis'
+  | 'document_analysis'
   | 'research'
-  | 'general';
+  | 'deep_research';
 
 export interface AIMessage {
   role: 'user' | 'assistant' | 'system';
