@@ -97,17 +97,21 @@ export async function POST(request: NextRequest) {
 
       // Record credits and provider usage (non-blocking)
       void (async () => {
-        await recordAICreditsUsed(
-          user.id,
-          creditsUsed,
-          requestType,
-          aiResponse.provider,
-          aiResponse.model,
-          aiResponse.inputTokens || 0,
-          aiResponse.outputTokens || 0,
-          aiResponse.processingTimeMs
-        );
-      })().catch(() => {});
+        try {
+          await recordAICreditsUsed(
+            user.id,
+            creditsUsed,
+            requestType,
+            aiResponse.provider,
+            aiResponse.model,
+            aiResponse.inputTokens || 0,
+            aiResponse.outputTokens || 0,
+            aiResponse.processingTimeMs
+          );
+        } catch {
+          // Usage logging must never block the user response.
+        }
+      })();
 
       // Also update legacy usage_records for backward compatibility
       supabase.rpc('increment_usage', {
