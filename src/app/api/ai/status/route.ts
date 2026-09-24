@@ -1,43 +1,47 @@
 import { createClient } from '@/lib/supabase/server';
-import { getAIRouter } from '@/lib/ai/router';
+import { getAIRouter, PUBLIC_AI_MODEL_NAME } from '@/lib/ai/router';
 import { NextResponse } from 'next/server';
+import { getUserMonthlyUsage, getUserSubscription } from '@/lib/subscription/enforcer';
+import { getPlanLimits } from '@/lib/subscription/config';
 
 export const runtime = 'nodejs';
 
 export async function GET() {
   try {
     const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase?.auth?.getUser();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse?.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const router = getAIRouter();
-    const configuredProviders = router?.getConfiguredProviders();
+    const configuredProviders = router.getConfiguredProviders();
+    const [subscription, usage] = await Promise.all([
+      getUserSubscription(user.id),
+      getUserMonthlyUsage(user.id),
+    ]);
+    const limits = getPlanLimits(subscription.tier);
 
-    // Get user's daily usage
-    const { data: usageData } = await supabase?.rpc('get_user_daily_usage', {
-      p_user_id: user?.id,
-    });
-
-    const usage = usageData?.[0] || { request_count: 0, token_count: 0 };
-
-    return NextResponse?.json({
+    return NextResponse.json({
       model: {
-        name: 'EarthAI Meridian',
-        status: configuredProviders?.length > 0 ? 'ready' : 'not_configured',
+        name: PUBLIC_AI_MODEL_NAME,
+        status: configuredProviders.length > 0 ? 'ready' : 'not_configured',
       },
-      configuredCount: configuredProviders?.length,
-      dailyUsage: {
-        requestCount: usage?.request_count,
-        tokenCount: usage?.token_count,
-        limit: 50,
-        remaining: Math.max(0, 50 - usage?.request_count),
+      configuredCount: configuredProviders.length,
+      usage: {
+        billingPeriodStart: subscription.billingPeriodStart,
+        billingPeriodEnd: subscription.billingPeriodEnd,
+        aiCreditsUsed: usage.aiCreditsUsed,
+        aiCreditsLimit: limits.aiCredits,
+        aiCreditsRemaining: limits.aiCredits === -1 ? -1 : Math.max(0, limits.aiCredits - usage.aiCreditsUsed),
+        aiRequestsUsed: usage.aiRequestsUsed,
+        aiRequestsLimit: limits.aiRequests,
+        aiRequestsRemaining: limits.aiRequests === -1 ? -1 : Math.max(0, limits.aiRequests - usage.aiRequestsUsed),
       },
     });
   } catch (error) {
     console.error('[AI Status] Error:', error);
-    return NextResponse?.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
