@@ -1,15 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin/auth';
 
-// GET /api/admin/users — list all users with subscription info
+const MAX_LIMIT = 100;
+const VALID_ROLES = new Set(['user', 'admin', 'org_admin', 'farm_manager', 'analyst']);
+const VALID_TIERS = new Set(['free', 'starter', 'professional', 'business', 'enterprise']);
+
+function parsePositiveInt(value: string | null, fallback: number, max = Number.MAX_SAFE_INTEGER) {
+  const parsed = Number.parseInt(value || '', 10);
+  if (!Number.isFinite(parsed) || parsed < 1) return fallback;
+  return Math.min(parsed, max);
+}
+
+function escapeSearch(value: string) {
+  return value.replace(/[,%]/g, '').trim();
+}
+
+// GET /api/admin/users - list all users with subscription info
 export async function GET(request: NextRequest) {
   const { error, supabase } = await requireAdmin();
   if (error) return error;
 
   const { searchParams } = new URL(request.url);
-  const page = parseInt(searchParams.get('page') || '1');
-  const limit = parseInt(searchParams.get('limit') || '20');
-  const search = searchParams.get('search') || '';
+  const page = parsePositiveInt(searchParams.get('page'), 1);
+  const limit = parsePositiveInt(searchParams.get('limit'), 20, MAX_LIMIT);
+  const search = escapeSearch(searchParams.get('search') || '');
   const offset = (page - 1) * limit;
 
   let query = supabase!
@@ -25,40 +39,69 @@ export async function GET(request: NextRequest) {
   const { data: users, count, error: dbError } = await query;
 
   if (dbError) {
-    return NextResponse.json({ error: dbError.message }, { status: 500 });
+    console.error('[Admin Users] user_profiles query failed:', dbError.message);
+    return NextResponse.json({ error: 'Unable to load users' }, { status: 500 });
   }
 
-  // Get subscription details for each user
-  const userIds = (users || []).map((u) => u.id);
-  const { data: subscriptions } = await supabase!
-    .from('subscriptions')
-    .select('user_id, tier, status, expires_at')
-    .in('user_id', userIds)
-    .eq('status', 'active');
-
+  const rows = users || [];
+  const userIds = rows.map((u) => u.id).filter(Boolean);
   const subMap: Record<string, { tier: string; status: string; expires_at: string | null }> = {};
-  (subscriptions || []).forEach((s) => {
-    subMap[s.user_id] = { tier: s.tier, status: s.status, expires_at: s.expires_at };
-  });
 
-  const enriched = (users || []).map((u) => ({
+  if (userIds.length > 0) {
+    const { data: subscriptions, error: subError } = await supabase!
+      .from('subscriptions')
+      .select('user_id, tier, status, expires_at, created_at')
+      .in('user_id', userIds)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false });
+
+    if (subError) {
+      console.error('[Admin Users] subscriptions query failed:', subError.message);
+    }
+
+    (subscriptions || []).forEach((s) => {
+      if (!subMap[s.user_id]) {
+        subMap[s.user_id] = { tier: s.tier, status: s.status, expires_at: s.expires_at };
+      }
+    });
+  }
+
+  const enriched = rows.map((u) => ({
     ...u,
-    subscription: subMap[u.id] || { tier: 'free', status: 'active', expires_at: null },
+    subscription: subMap[u.id] || {
+      tier: u.subscription_tier || 'free',
+      status: 'active',
+      expires_at: null,
+    },
   }));
 
   return NextResponse.json({ users: enriched, total: count || 0, page, limit });
 }
 
-// PATCH /api/admin/users — update user role or status
+// PATCH /api/admin/users - update user role, account status, or subscription tier
 export async function PATCH(request: NextRequest) {
   const { error, supabase } = await requireAdmin();
   if (error) return error;
 
-  const body = await request.json();
+  let body: { userId?: string; role?: string; is_active?: boolean; subscription_tier?: string };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+  }
+
   const { userId, role, is_active, subscription_tier } = body;
 
   if (!userId) {
     return NextResponse.json({ error: 'userId is required' }, { status: 400 });
+  }
+
+  if (role !== undefined && !VALID_ROLES.has(role)) {
+    return NextResponse.json({ error: 'Invalid role' }, { status: 400 });
+  }
+
+  if (subscription_tier !== undefined && !VALID_TIERS.has(subscription_tier)) {
+    return NextResponse.json({ error: 'Invalid subscription tier' }, { status: 400 });
   }
 
   const updates: Record<string, unknown> = {};
@@ -66,33 +109,40 @@ export async function PATCH(request: NextRequest) {
   if (is_active !== undefined) updates.is_active = is_active;
   if (subscription_tier !== undefined) updates.subscription_tier = subscription_tier;
 
-  const { error: updateError } = await supabase!
-    .from('user_profiles')
-    .update(updates)
-    .eq('id', userId);
+  if (Object.keys(updates).length > 0) {
+    const { error: updateError } = await supabase!
+      .from('user_profiles')
+      .update(updates)
+      .eq('id', userId);
 
-  if (updateError) {
-    return NextResponse.json({ error: updateError.message }, { status: 500 });
+    if (updateError) {
+      console.error('[Admin Users] profile update failed:', updateError.message);
+      return NextResponse.json({ error: 'Unable to update user profile' }, { status: 500 });
+    }
   }
 
-  // If subscription_tier changed, upsert subscription record
   if (subscription_tier !== undefined) {
-    const { data: existingSub } = await supabase!
+    const { data: existingSub, error: subSelectError } = await supabase!
       .from('subscriptions')
       .select('id')
       .eq('user_id', userId)
       .eq('status', 'active')
-      .single();
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    if (existingSub) {
-      await supabase!
-        .from('subscriptions')
-        .update({ tier: subscription_tier })
-        .eq('id', existingSub.id);
-    } else {
-      await supabase!
-        .from('subscriptions')
-        .insert({ user_id: userId, tier: subscription_tier, status: 'active' });
+    if (subSelectError) {
+      console.error('[Admin Users] subscription lookup failed:', subSelectError.message);
+      return NextResponse.json({ error: 'Unable to load subscription' }, { status: 500 });
+    }
+
+    const subResult = existingSub
+      ? await supabase!.from('subscriptions').update({ tier: subscription_tier }).eq('id', existingSub.id)
+      : await supabase!.from('subscriptions').insert({ user_id: userId, tier: subscription_tier, status: 'active' });
+
+    if (subResult.error) {
+      console.error('[Admin Users] subscription update failed:', subResult.error.message);
+      return NextResponse.json({ error: 'Unable to update subscription' }, { status: 500 });
     }
   }
 
