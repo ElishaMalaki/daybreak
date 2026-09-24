@@ -93,7 +93,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         html, body { min-height: 100%; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #ffffff; color: #111827; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .ie-sidebar { position: fixed; inset: 0 auto 0 0; width: 260px; background: #f7f7f8; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; z-index: 50; transition: transform 0.2s ease; }
-        .ie-main { margin-left: 260px; min-height: 100vh; background: #ffffff; }
+        .ie-main { margin-left: 260px; min-height: 100vh; background: #ffffff; min-width: 0; }
         .ie-topbar { height: 58px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; gap: 12px; padding: 0 24px; background: rgba(255,255,255,0.96); position: sticky; top: 0; z-index: 40; }
         .ie-nav-item { display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 8px 10px; border-radius: 8px; color: #4b5563; text-decoration: none; font-size: 14px; font-weight: 500; line-height: 1.2; }
         .ie-nav-item:hover { background: #ececf1; color: #111827; }
@@ -108,8 +108,35 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         .ie-dropdown-item { width: 100%; display: flex; align-items: center; gap: 9px; padding: 10px 14px; color: #374151; font-family: inherit; font-size: 13px; font-weight: 500; text-decoration: none; border: 0; background: transparent; cursor: pointer; text-align: left; }
         .ie-dropdown-item:hover { background: #f7f7f8; }
         .ie-dropdown-item.danger { color: #b91c1c; }
-        .ie-page-pad { padding: 24px 28px 56px; }
-        @media (max-width: 860px) { .ie-sidebar { transform: translateX(-100%); } .ie-sidebar.open { transform: translateX(0); } .ie-main { margin-left: 0; } .ie-mobile-overlay.open { display: block; } .ie-menu-btn { display: flex; } .ie-topbar { padding: 0 16px; } .ie-page-pad { padding: 18px 16px 40px; } }
+        .ie-page-pad { padding: 24px 28px 56px; max-width: 100%; overflow-x: hidden; }
+        .ie-page-pad * { max-width: 100%; }
+        .ie-page-pad table { min-width: 680px; }
+        .ie-page-pad pre, .ie-page-pad code { white-space: pre-wrap; overflow-wrap: anywhere; }
+        .ie-page-pad p, .ie-page-pad div, .ie-page-pad span, .ie-page-pad a, .ie-page-pad td, .ie-page-pad th { overflow-wrap: anywhere; }
+        @media (max-width: 1180px) {
+          .ie-page-pad [style*="grid-template-columns: repeat(5, 1fr)"] { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important; }
+          .ie-page-pad [style*="grid-template-columns: 1fr 300px"] { grid-template-columns: minmax(0, 1fr) !important; }
+        }
+        @media (max-width: 860px) {
+          .ie-sidebar { transform: translateX(-100%); }
+          .ie-sidebar.open { transform: translateX(0); }
+          .ie-main { margin-left: 0; }
+          .ie-mobile-overlay.open { display: block; }
+          .ie-menu-btn { display: flex; }
+          .ie-topbar { padding: 0 16px; }
+          .ie-page-pad { padding: 18px 16px 40px; }
+          .ie-page-pad [style*="grid-template-columns"] { grid-template-columns: minmax(0, 1fr) !important; }
+          .ie-page-pad [style*="position: absolute"][style*="right: 24px"] { display: none !important; }
+          .ie-page-pad [style*="min-height: 520px"] { min-height: 0 !important; }
+          .ie-page-pad [style*="font-size: 28px"] { font-size: 23px !important; }
+        }
+        @media (max-width: 520px) {
+          .ie-topbar { gap: 8px; }
+          .ie-topbar button span { display: none; }
+          .ie-page-pad { padding: 14px 12px 34px; }
+          .ie-page-pad [style*="padding: 28px 28px 24px"] { padding: 22px 18px !important; }
+          .ie-page-pad [style*="padding: 20px 22px"] { padding: 16px !important; }
+        }
       `}</style>
 
       <div style={{ display: 'flex', minHeight: '100vh' }}>
