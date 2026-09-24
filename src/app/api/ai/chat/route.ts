@@ -114,12 +114,18 @@ export async function POST(request: NextRequest) {
       })();
 
       // Also update legacy usage_records for backward compatibility
-      supabase.rpc('increment_usage', {
-        p_user_id: user.id,
-        p_tokens: aiResponse.totalTokens || 0,
-        p_input_tokens: aiResponse.inputTokens || 0,
-        p_output_tokens: aiResponse.outputTokens || 0,
-      }).then(() => {}).catch(() => {});
+      void (async () => {
+        try {
+          await supabase.rpc('increment_usage', {
+            p_user_id: user.id,
+            p_tokens: aiResponse.totalTokens || 0,
+            p_input_tokens: aiResponse.inputTokens || 0,
+            p_output_tokens: aiResponse.outputTokens || 0,
+          });
+        } catch {
+          // Legacy usage logging must never block the user response.
+        }
+      })();
     }
 
     // ── 7. Persist message to conversation if conversationId provided ──
