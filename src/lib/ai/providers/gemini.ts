@@ -9,7 +9,7 @@ import type { AIProvider, AIRequest, AIResponse, ProviderHealth, AnalysisCapabil
 
 // Internal error categories — never sent to client
 type GeminiErrorCategory =
-  | 'invalid_api_key' |'unauthorized' |'model_not_found' |'rate_limit' |'server_error' |'timeout' |'network_error' |'unknown';
+  | 'invalid_api_key' | 'unauthorized' | 'model_not_found' | 'rate_limit' | 'server_error' | 'timeout' | 'network_error' | 'unknown';
 
 interface GeminiErrorResult {
   category: GeminiErrorCategory;
@@ -31,7 +31,7 @@ function classifyGeminiError(status: number, errorMessage: string): GeminiErrorR
     return { category: 'unauthorized', message: 'API key does not have permission to access this resource', isAuthError: true, retryable: false };
   }
   if (status === 404) {
-    return { category: 'model_not_found', message: `Model not found or access restricted. Google is limiting gemini-2.5 access for new API keys — set GEMINI_MODEL=gemini-3.5-flash in your environment variables.`, isAuthError: false, retryable: false };
+    return { category: 'model_not_found', message: `Model not found or access restricted. Set GEMINI_MODEL to a Gemini model that supports your requested capability.`, isAuthError: false, retryable: false };
   }
   if (status === 429) {
     return { category: 'rate_limit', message: 'Rate limit or quota exceeded', isAuthError: false, retryable: true };
@@ -49,6 +49,7 @@ export class GeminiAdapter implements AIProvider {
     'text_generation',
     'structured_response',
     'document_analysis',
+    'image_analysis',
     'long_context',
   ];
   readonly maxTokensPerRequest = 8192;
@@ -66,7 +67,6 @@ export class GeminiAdapter implements AIProvider {
   }
 
   isConfigured(): boolean {
-    // Only check that the key exists and is non-empty — no hard-coded comparisons
     return !!(this.apiKey && this.apiKey.trim().length > 0);
   }
 
@@ -86,15 +86,25 @@ export class GeminiAdapter implements AIProvider {
     }
 
     try {
-      // Build contents array from messages
+      const imageParts = (request.attachments || []).map((attachment) => ({
+        inlineData: {
+          mimeType: attachment.mimeType,
+          data: attachment.data,
+        },
+      }));
+
       const contents = request.messages
         .filter((m) => m.role !== 'system')
-        .map((m) => ({
-          role: m.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: m.content }],
-        }));
+        .map((m, index, messages) => {
+          const isLastUserMessage = m.role === 'user' && index === messages.length - 1;
+          return {
+            role: m.role === 'assistant' ? 'model' : 'user',
+            parts: isLastUserMessage && imageParts.length > 0
+              ? [{ text: m.content }, ...imageParts]
+              : [{ text: m.content }],
+          };
+        });
 
-      // Prepend system instruction if present
       const systemInstruction = request.systemPrompt
         ? { parts: [{ text: request.systemPrompt }] }
         : undefined;
@@ -114,9 +124,6 @@ export class GeminiAdapter implements AIProvider {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
 
-      // API key is passed as a query param per Google's Gemini REST API authentication spec.
-      // This runs server-side only — the key is never sent to the browser or included in
-      // client-visible responses, logs, or API output.
       const response = await fetch(
         `${this.baseUrl}/models/${this.model}:generateContent?key=${this.apiKey}`,
         {
@@ -136,7 +143,6 @@ export class GeminiAdapter implements AIProvider {
         const rawMessage = errorBody?.error?.message || response.statusText || '';
         const classified = classifyGeminiError(response.status, rawMessage);
 
-        // Log category only — never log the raw error message which may contain key hints
         console.error(`[GeminiAdapter] Request failed: ${classified.category} (HTTP ${response.status})`);
 
         return {
@@ -152,7 +158,7 @@ export class GeminiAdapter implements AIProvider {
 
       const data = await response.json();
       const candidate = data?.candidates?.[0];
-      const content = candidate?.content?.parts?.[0]?.text || '';
+      const content = candidate?.content?.parts?.map((part: { text?: string }) => part.text || '').join('').trim() || '';
       const usageMetadata = data?.usageMetadata;
 
       return {
@@ -212,7 +218,6 @@ export class GeminiAdapter implements AIProvider {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-      // Verify the model is accessible and authentication succeeds
       const response = await fetch(
         `${this.baseUrl}/models/${this.model}?key=${this.apiKey}`,
         { signal: controller.signal }
@@ -234,7 +239,6 @@ export class GeminiAdapter implements AIProvider {
       const rawMessage = errorBody?.error?.message || response.statusText || '';
       const classified = classifyGeminiError(response.status, rawMessage);
 
-      // Map category to a user-safe message — never expose the key
       const healthMessages: Record<GeminiErrorCategory, string> = {
         invalid_api_key: 'Authentication failed: API key is invalid or revoked',
         unauthorized: 'Authentication failed: API key lacks required permissions',
