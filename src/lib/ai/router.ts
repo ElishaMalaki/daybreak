@@ -11,17 +11,14 @@ import { GroqAdapter } from './providers/groq';
 import { OpenAIAdapter } from './providers/openai';
 import { AnthropicAdapter } from './providers/anthropic';
 
-// Per-user in-memory rate limiting (resets on server restart)
-// For production, use Redis or database-backed rate limiting
 const userRequestCounts = new Map<string, { count: number; resetAt: number }>();
 
-const DAILY_REQUEST_LIMIT = 50; // free tier limit per user per day
-const MAX_INPUT_LENGTH = 8000; // characters
-const MAX_RETRY_ATTEMPTS = 1; // max fallback attempts
+const DAILY_REQUEST_LIMIT = 50;
+const MAX_INPUT_LENGTH = 8000;
+const MAX_RETRY_ATTEMPTS = 1;
 export const PUBLIC_AI_PROVIDER_NAME = 'earthai';
 export const PUBLIC_AI_MODEL_NAME = 'EarthAI Meridian';
 
-// Provider priority by request type
 const PROVIDER_ROUTING: Record<AIRequestType, string[]> = {
   market_analysis: ['gemini', 'groq', 'openai', 'anthropic'],
   farm_data_analysis: ['gemini', 'groq', 'anthropic', 'openai'],
@@ -31,7 +28,6 @@ const PROVIDER_ROUTING: Record<AIRequestType, string[]> = {
   general: ['gemini', 'groq', 'openai', 'anthropic'],
 };
 
-// Agricultural system prompt
 const AGRICULTURAL_SYSTEM_PROMPT = `You are Intelligence E, an advanced agricultural intelligence assistant developed by Earth AI.
 
 Your role is to provide expert-level agricultural intelligence across these five core capabilities:
@@ -40,6 +36,13 @@ Your role is to provide expert-level agricultural intelligence across these five
 3. Agricultural Decision Support — planting windows, irrigation, input optimization
 4. Crop, Livestock & Farm Risk Intelligence — weather, pest, disease, market risk
 5. Agricultural AI Research & Intelligence Assistant — agronomic research, scientific literature
+
+When images or documents are attached:
+- Identify what is visible before giving recommendations
+- Separate observations from likely interpretations
+- Ask for location, crop/livestock type, growth stage, and timeline when needed
+- Flag uncertainty and recommend local expert/lab confirmation for disease, chemical, pest, veterinary, or safety-critical decisions
+- Do not invent details that are not visible or provided
 
 Guidelines:
 - Provide accurate, evidence-based agricultural intelligence
@@ -59,7 +62,6 @@ export class AIRouter {
   constructor() {
     this.providers = new Map();
 
-    // Register all providers
     const gemini = new GeminiAdapter();
     const groq = new GroqAdapter();
     const openai = new OpenAIAdapter();
@@ -104,25 +106,31 @@ export class AIRouter {
       return `Input too long. Maximum ${MAX_INPUT_LENGTH} characters allowed.`;
     }
 
+    if ((request.attachments || []).length > 0) {
+      const hasImageProvider = this.getOrderedProviders(request.requestType, true).length > 0;
+      if (!hasImageProvider) {
+        return 'Image analysis is not currently available. Please contact your administrator to configure a vision-capable Earth AI provider.';
+      }
+    }
+
     return null;
   }
 
-  private getOrderedProviders(requestType: AIRequestType): AIProvider[] {
+  private getOrderedProviders(requestType: AIRequestType, requiresImageAnalysis = false): AIProvider[] {
     const priority = PROVIDER_ROUTING[requestType] || PROVIDER_ROUTING.general;
     const ordered: AIProvider[] = [];
 
     for (const name of priority) {
       const provider = this.providers.get(name);
-      if (provider && provider.isConfigured()) {
-        ordered.push(provider);
-      }
+      if (!provider || !provider.isConfigured()) continue;
+      if (requiresImageAnalysis && !provider.capabilities.includes('image_analysis')) continue;
+      ordered.push(provider);
     }
 
     return ordered;
   }
 
   async route(request: AIRequest): Promise<AIResponse & { rateLimitRemaining?: number }> {
-    // Rate limit check
     const rateLimit = this.checkRateLimit(request.userId);
     if (!rateLimit.allowed) {
       return {
@@ -136,11 +144,10 @@ export class AIRouter {
       };
     }
 
-    // Input validation
     const validationError = this.validateInput(request);
     if (validationError) {
       return {
-        content: '',
+        content: validationError,
         provider: 'system',
         model: 'none',
         processingTimeMs: 0,
@@ -150,28 +157,28 @@ export class AIRouter {
       };
     }
 
-    // Inject agricultural system prompt
     const enrichedRequest: AIRequest = {
       ...request,
       systemPrompt: request.systemPrompt || AGRICULTURAL_SYSTEM_PROMPT,
     };
 
-    // Get ordered providers for this request type
-    const orderedProviders = this.getOrderedProviders(request.requestType);
+    const requiresImageAnalysis = (request.attachments || []).length > 0;
+    const orderedProviders = this.getOrderedProviders(request.requestType, requiresImageAnalysis);
 
     if (orderedProviders.length === 0) {
       return {
-        content: 'Intelligence E AI services are not currently configured. Please contact your administrator to set up AI provider API keys.',
+        content: requiresImageAnalysis
+          ? 'Image analysis is not currently available. Please contact your administrator to configure a vision-capable Earth AI provider.'
+          : 'Intelligence E AI services are not currently configured. Please contact your administrator to set up AI provider API keys.',
         provider: 'system',
         model: 'none',
         processingTimeMs: 0,
         success: false,
-        error: 'NO_PROVIDERS_AVAILABLE',
+        error: requiresImageAnalysis ? 'NO_VISION_PROVIDERS_AVAILABLE' : 'NO_PROVIDERS_AVAILABLE',
         rateLimitRemaining: rateLimit.remaining,
       };
     }
 
-    // Try providers in order with fallback
     let lastError = '';
     let attempts = 0;
 
@@ -190,11 +197,8 @@ export class AIRouter {
 
       lastError = response.error || 'Unknown error';
 
-      // Do not retry on authentication errors — a bad key won't succeed on retry
       const isAuthError = (response as AIResponse & { isAuthError?: boolean }).isAuthError === true;
       if (isAuthError) break;
-
-      // Don't retry on configuration errors
       if (lastError.includes('not configured')) continue;
     }
 
@@ -210,9 +214,7 @@ export class AIRouter {
   }
 
   toPublicResponse(response: AIResponse & { rateLimitRemaining?: number }): AIResponse & { rateLimitRemaining?: number } {
-    if (!response.success) {
-      return response;
-    }
+    if (!response.success) return response;
 
     return {
       ...response,
@@ -224,9 +226,7 @@ export class AIRouter {
   getConfiguredProviders(): string[] {
     const configured: string[] = [];
     for (const [name, provider] of this.providers) {
-      if (provider.isConfigured()) {
-        configured.push(name);
-      }
+      if (provider.isConfigured()) configured.push(name);
     }
     return configured;
   }
@@ -243,7 +243,6 @@ export class AIRouter {
   }
 }
 
-// Singleton router instance
 let routerInstance: AIRouter | null = null;
 
 export function getAIRouter(): AIRouter {
