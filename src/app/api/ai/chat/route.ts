@@ -90,6 +90,7 @@ export async function POST(request: NextRequest) {
       userId: user.id,
       contextData,
     });
+    const publicAIResponse = router.toPublicResponse(aiResponse);
 
     // ── 6. Record usage ONLY after successful response ──
     if (aiResponse.success) {
@@ -145,9 +146,9 @@ export async function POST(request: NextRequest) {
         conversation_id: conversationId,
         user_id: user.id,
         role: 'assistant',
-        content: aiResponse.content,
+        content: publicAIResponse.content,
         ai_provider: aiResponse.provider as any,
-        model_used: aiResponse.model,
+        model_used: publicAIResponse.model,
         tokens_used: aiResponse.totalTokens,
         processing_time_ms: aiResponse.processingTimeMs,
       });
@@ -163,9 +164,9 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({
-      content: aiResponse.content,
-      provider: aiResponse.provider,
-      model: aiResponse.model,
+      content: publicAIResponse.content,
+      provider: publicAIResponse.provider,
+      model: publicAIResponse.model,
       tokens: aiResponse.totalTokens,
       processingTimeMs: aiResponse.processingTimeMs,
       success: aiResponse.success,
