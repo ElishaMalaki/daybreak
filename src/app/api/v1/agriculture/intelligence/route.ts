@@ -13,15 +13,15 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import type { AIRequestType } from '@/lib/ai/types';
 import {
-  checkAIRequestAllowed,
   recordAICreditsUsed,
+  refundAIRequestUsage,
+  reserveAIRequestUsage,
 } from '@/lib/subscription/enforcer';
 import { createHash } from 'crypto';
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
 
-// Allowed request types for external API
 const ALLOWED_REQUEST_TYPES: AIRequestType[] = [
   'general',
   'farm_data_analysis',
@@ -31,7 +31,6 @@ const ALLOWED_REQUEST_TYPES: AIRequestType[] = [
   'market_analysis',
 ];
 
-// Max input length for external API (slightly stricter)
 const MAX_INPUT_LENGTH = 6000;
 
 interface ExternalAPIRequest {
@@ -57,7 +56,6 @@ function extractApiKey(request: NextRequest): string | null {
   if (authHeader && authHeader.startsWith('Bearer ')) {
     return authHeader.slice(7).trim();
   }
-  // Also support X-API-Key header
   const apiKeyHeader = request.headers.get('X-API-Key');
   if (apiKeyHeader) return apiKeyHeader.trim();
   return null;
@@ -70,7 +68,6 @@ function hashApiKey(key: string): string {
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
-  // ── 1. Extract API key ──
   const rawKey = extractApiKey(request);
   if (!rawKey) {
     return NextResponse.json(
@@ -83,7 +80,6 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // ── 2. Validate API key against database ──
   const supabase = await createClient();
   const keyHash = hashApiKey(rawKey);
 
@@ -105,22 +101,15 @@ export async function POST(request: NextRequest) {
   }
 
   if (!apiKey.is_active) {
-    return NextResponse.json(
-      { error: 'This API key has been revoked.', code: 'KEY_REVOKED' },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: 'This API key has been revoked.', code: 'KEY_REVOKED' }, { status: 401 });
   }
 
   if (apiKey.expires_at && new Date(apiKey.expires_at) < new Date()) {
-    return NextResponse.json(
-      { error: 'This API key has expired.', code: 'KEY_EXPIRED' },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: 'This API key has expired.', code: 'KEY_EXPIRED' }, { status: 401 });
   }
 
   const userId = apiKey.user_id;
 
-  // ── 3. Check user has API access (Business/Enterprise only) ──
   const { data: subscription } = await supabase
     .from('subscriptions')
     .select('tier, status')
@@ -145,15 +134,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // ── 4. Parse and validate request body ──
   let body: ExternalAPIRequest;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { error: 'Invalid JSON request body.', code: 'INVALID_REQUEST' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Invalid JSON request body.', code: 'INVALID_REQUEST' }, { status: 400 });
   }
 
   const { query, request_type = 'general', context, conversation_history, metadata } = body;
@@ -181,8 +166,7 @@ export async function POST(request: NextRequest) {
     ? (request_type as AIRequestType)
     : 'general';
 
-  // ── 5. Server-side subscription & credit enforcement ──
-  const enforcementResult = await checkAIRequestAllowed(userId, normalizedRequestType);
+  const enforcementResult = await reserveAIRequestUsage(userId, normalizedRequestType);
 
   if (!enforcementResult.allowed) {
     return NextResponse.json(
@@ -196,10 +180,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // ── 6. Build messages array ──
   const messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }> = [];
 
-  // Add context as system message if provided
   if (context && Object.keys(context).length > 0) {
     const contextLines = Object.entries(context)
       .filter(([, v]) => v !== undefined && v !== null && v !== '')
@@ -212,7 +194,6 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Add conversation history if provided (max 10 turns)
   if (conversation_history && Array.isArray(conversation_history)) {
     const history = conversation_history.slice(-10);
     for (const turn of history) {
@@ -222,10 +203,8 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Add the current query
   messages.push({ role: 'user', content: query.trim() });
 
-  // ── 7. Route through AI layer ──
   const router = getAIRouter();
   const aiResponse = await router.route({
     messages,
@@ -234,48 +213,10 @@ export async function POST(request: NextRequest) {
   });
 
   const processingTimeMs = Date.now() - startTime;
-
-  // ── 8. Record usage after successful response ──
-  if (aiResponse.success) {
-    const creditsUsed = enforcementResult.creditsRequired ?? 1;
-
-    void (async () => {
-      try {
-        await recordAICreditsUsed(
-          userId,
-          creditsUsed,
-          normalizedRequestType,
-          aiResponse.provider,
-          aiResponse.model,
-          aiResponse.inputTokens || 0,
-          aiResponse.outputTokens || 0,
-          processingTimeMs
-        );
-      } catch {
-        // Usage logging must never block the API response.
-      }
-    })();
-
-    // Record external API usage (non-blocking)
-    void (async () => {
-      try {
-        await supabase.rpc('record_api_key_usage', {
-          p_key_hash: keyHash,
-          p_endpoint: '/api/v1/agriculture/intelligence',
-          p_request_type: normalizedRequestType,
-          p_credits_used: creditsUsed,
-          p_response_status: 200,
-          p_processing_time_ms: processingTimeMs,
-          p_ip_address: request.headers.get('x-forwarded-for') || null,
-          p_user_agent: request.headers.get('user-agent') || null,
-        });
-      } catch {
-        // API key usage logging must never block the API response.
-      }
-    })();
-  }
+  const creditsUsed = enforcementResult.creditsRequired ?? 1;
 
   if (!aiResponse.success) {
+    await refundAIRequestUsage(userId, creditsUsed);
     return NextResponse.json(
       {
         error: 'Intelligence E is temporarily unavailable. Please try again.',
@@ -285,7 +226,40 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // ── 9. Return structured response ──
+  void (async () => {
+    try {
+      await recordAICreditsUsed(
+        userId,
+        creditsUsed,
+        normalizedRequestType,
+        aiResponse.provider,
+        aiResponse.model,
+        aiResponse.inputTokens || 0,
+        aiResponse.outputTokens || 0,
+        processingTimeMs
+      );
+    } catch {
+      // Provider analytics must never block the API response.
+    }
+  })();
+
+  void (async () => {
+    try {
+      await supabase.rpc('record_api_key_usage', {
+        p_key_hash: keyHash,
+        p_endpoint: '/api/v1/agriculture/intelligence',
+        p_request_type: normalizedRequestType,
+        p_credits_used: creditsUsed,
+        p_response_status: 200,
+        p_processing_time_ms: processingTimeMs,
+        p_ip_address: request.headers.get('x-forwarded-for') || null,
+        p_user_agent: request.headers.get('user-agent') || null,
+      });
+    } catch {
+      // API key usage analytics must never block the API response.
+    }
+  })();
+
   return NextResponse.json({
     success: true,
     intelligence: {
@@ -293,8 +267,8 @@ export async function POST(request: NextRequest) {
       request_type: normalizedRequestType,
     },
     usage: {
-      credits_used: enforcementResult.creditsRequired ?? 1,
-      credits_remaining: (enforcementResult.creditsRemaining ?? 0) - (enforcementResult.creditsRequired ?? 1),
+      credits_used: creditsUsed,
+      credits_remaining: enforcementResult.creditsRemaining ?? 0,
     },
     meta: {
       processing_time_ms: processingTimeMs,
@@ -304,7 +278,6 @@ export async function POST(request: NextRequest) {
   });
 }
 
-// ── GET: API health check / info ──
 export async function GET() {
   return NextResponse.json({
     service: 'Intelligence E Agriculture API',
