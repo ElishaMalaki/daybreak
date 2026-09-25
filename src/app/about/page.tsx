@@ -20,24 +20,24 @@ const dayTheme: ThemeConfig = {
   label: 'Day',
   image: 'https://images.unsplash.com/photo-1539643973272-3c845cfb223a',
   imageAlt: 'Clear daytime sky with soft white clouds',
-  overlay: 'linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.58) 42%, rgba(255,255,255,0.80) 100%)',
+  overlay: 'linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.58) 42%, rgba(255,255,255,0.82) 100%)',
   text: '#101418',
   muted: 'rgba(16,20,24,0.72)',
   buttonBg: '#101418',
   buttonText: '#ffffff',
-  panelBg: 'rgba(255,255,255,0.58)',
+  panelBg: 'rgba(255,255,255,0.62)',
 };
 
 const nightTheme: ThemeConfig = {
   label: 'Night',
   image: 'https://images.unsplash.com/photo-1518066000714-58c45f1a2c0a',
   imageAlt: 'Clear night sky filled with stars',
-  overlay: 'linear-gradient(180deg, rgba(4,7,18,0.76) 0%, rgba(4,7,18,0.66) 42%, rgba(4,7,18,0.82) 100%)',
+  overlay: 'linear-gradient(180deg, rgba(4,7,18,0.78) 0%, rgba(4,7,18,0.66) 42%, rgba(4,7,18,0.84) 100%)',
   text: '#f5f7fb',
-  muted: 'rgba(245,247,251,0.74)',
+  muted: 'rgba(245,247,251,0.76)',
   buttonBg: '#f5f7fb',
   buttonText: '#101418',
-  panelBg: 'rgba(255,255,255,0.08)',
+  panelBg: 'rgba(255,255,255,0.09)',
 };
 
 function getThemeForHour(hour: number): ThemeConfig {
@@ -46,53 +46,59 @@ function getThemeForHour(hour: number): ThemeConfig {
 
 export default function AboutPage() {
   const [theme, setTheme] = useState<ThemeConfig>(dayTheme);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const updateTheme = () => {
-      setTheme(getThemeForHour(new Date().getHours()));
-      setMounted(true);
-    };
-
+    const updateTheme = () => setTheme(getThemeForHour(new Date().getHours()));
     updateTheme();
     const interval = window.setInterval(updateTheme, 60000);
     return () => window.clearInterval(interval);
   }, []);
 
-  const values = useMemo(() => [
-    {
-      title: 'Domain Expertise',
-      body: 'We design intelligence around the realities of specific industries, their workflows, risks, terminology, and decision requirements.',
-    },
-    {
-      title: 'Responsible AI',
-      body: 'We treat AI as a decision-support layer. Critical business logic, calculations, and accountability remain outside the model.',
-    },
-    {
-      title: 'Security and Trust',
-      body: 'We build with privacy, access control, data isolation, and operational reliability as core requirements from the beginning.',
-    },
-    {
-      title: 'Practical Outcomes',
-      body: 'Our products are measured by their ability to help people understand information, reduce uncertainty, and make better decisions.',
-    },
-  ], []);
-
   const products = useMemo(() => [
     {
-      name: 'Intelligence E for Agriculture',
-      status: 'Private beta',
-      body: 'A specialized agricultural intelligence platform for farmers, agribusinesses, cooperatives, researchers, and agricultural professionals. It supports agricultural guidance, crop intelligence, pest and disease analysis, research assistance, reporting, and document or photo intelligence.',
+      name: 'Intelligence E Agriculture',
+      status: 'Try Intelligence E Now',
+      href: '/login',
+      body: 'An agricultural intelligence platform designed to help users understand agricultural data, research, risks, markets, production and decision making. Intelligence E Agriculture provides specialized AI capabilities for farmers, agribusinesses, and agricultural professionals.',
+    },
+    {
+      name: 'Intelligence E Finance',
+      status: 'Coming Soon',
+      href: '/finance',
+      body: 'A financial intelligence vertical within the Intelligence E platform. Designed to provide specialized AI capabilities for financial analysis, market intelligence, and economic decision making.',
     },
     {
       name: 'Pelit Farm',
-      status: 'Farm management system',
-      body: 'A farm management platform that provides the operational agriculture data model and management workflows that complement Intelligence E. Full farm-management capability is planned to live in Pelit Farm.',
+      status: 'Farm Management',
+      href: '/waitlist',
+      body: 'A farm management platform designed to help farmers and agricultural businesses manage operations, production and financial information. Pelit Farm provides the operational layer that complements Intelligence E Agriculture analytical capabilities, giving agricultural businesses a complete view of their operations.',
+    },
+  ], []);
+
+  const principles = useMemo(() => [
+    {
+      title: 'Specialized Intelligence',
+      body: 'Deep domain focus over broad generality. Each product is built for a specific industry and use case.',
     },
     {
-      name: 'Intelligence E for Finance',
-      status: 'Planned vertical',
-      body: 'A future financial intelligence platform focused on analysis, explanation, forecasting, reporting, and decision support. It is intended to remain separate from accounting engines and financial calculation systems.',
+      title: 'Practical Decision Support',
+      body: 'Intelligence that leads to better decisions, not just information for its own sake.',
+    },
+    {
+      title: 'Data Driven Analysis',
+      body: 'Conclusions grounded in data, not assumptions. Rigorous analysis at every layer.',
+    },
+    {
+      title: 'Responsible AI',
+      body: 'Thoughtful deployment. We consider the implications of AI in high stakes environments.',
+    },
+    {
+      title: 'Security and Privacy',
+      body: 'User data is protected. Security is a design requirement, not an afterthought.',
+    },
+    {
+      title: 'Scalable Technology',
+      body: 'Built to grow with the organizations and industries we serve.',
     },
   ], []);
 
@@ -113,31 +119,29 @@ export default function AboutPage() {
         .about-link { color: inherit; text-decoration: none; font-size: 14px; font-weight: 700; opacity: 0.72; padding: 9px 12px; border-radius: 999px; }
         .about-link:hover, .about-link.active { opacity: 1; background: rgba(255,255,255,0.16); }
         .about-button { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 18px; border-radius: 999px; text-decoration: none; font-size: 14px; font-weight: 800; }
-        .about-main { max-width: 1080px; margin: 0 auto; padding: clamp(70px, 10vw, 130px) 0 56px; }
-        .about-eyebrow { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 24px; padding: 7px 13px; border: 1px solid rgba(255,255,255,0.24); border-radius: 999px; background: var(--panel); backdrop-filter: blur(18px); font-size: 12px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
-        .about-title { max-width: 860px; margin: 0; font-size: clamp(42px, 7vw, 86px); line-height: 0.98; letter-spacing: -0.065em; font-weight: 800; }
-        .about-lead { max-width: 760px; margin: 28px 0 0; color: var(--muted); font-size: clamp(17px, 2vw, 22px); line-height: 1.65; font-weight: 500; }
+        .about-main { max-width: 1080px; margin: 0 auto; padding: clamp(70px, 10vw, 128px) 0 56px; }
+        .about-eyebrow { display: inline-flex; align-items: center; margin-bottom: 24px; padding: 7px 13px; border: 1px solid rgba(255,255,255,0.24); border-radius: 999px; background: var(--panel); backdrop-filter: blur(18px); font-size: 12px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+        .about-title { max-width: 880px; margin: 0; font-size: clamp(42px, 7vw, 86px); line-height: 0.98; letter-spacing: -0.065em; font-weight: 800; }
+        .about-lead { max-width: 780px; margin: 28px 0 0; color: var(--muted); font-size: clamp(17px, 2vw, 22px); line-height: 1.65; font-weight: 500; }
         .about-section { margin-top: 72px; }
+        .about-kicker { margin: 0 0 8px; color: var(--muted); font-size: 12px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
         .about-section h2 { margin: 0 0 16px; font-size: clamp(26px, 3vw, 38px); line-height: 1.12; letter-spacing: -0.04em; }
-        .about-section p { max-width: 780px; margin: 0; color: var(--muted); font-size: 16px; line-height: 1.8; }
+        .about-section p { max-width: 820px; margin: 0; color: var(--muted); font-size: 16px; line-height: 1.82; }
         .about-section p + p { margin-top: 16px; }
-        .about-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 24px; }
-        .about-card { min-height: 170px; padding: 24px; border: 1px solid rgba(255,255,255,0.22); border-radius: 18px; background: var(--panel); backdrop-filter: blur(22px) saturate(1.2); }
-        .about-card h3 { margin: 0 0 9px; font-size: 17px; letter-spacing: -0.02em; }
+        .about-products, .about-grid { display: grid; gap: 14px; margin-top: 24px; }
+        .about-products { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .about-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .about-card { min-height: 172px; padding: 24px; border: 1px solid rgba(255,255,255,0.22); border-radius: 18px; background: var(--panel); backdrop-filter: blur(22px) saturate(1.2); }
+        .about-card h3 { margin: 0 0 10px; font-size: 17px; letter-spacing: -0.02em; }
         .about-card p { font-size: 14px; line-height: 1.7; }
-        .about-products { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 24px; }
-        .about-product { padding: 24px; border: 1px solid rgba(255,255,255,0.22); border-radius: 18px; background: var(--panel); backdrop-filter: blur(22px) saturate(1.2); }
-        .about-product span { display: inline-flex; margin-bottom: 14px; font-size: 11px; font-weight: 800; letter-spacing: 0.10em; text-transform: uppercase; opacity: 0.72; }
-        .about-product h3 { margin: 0 0 10px; font-size: 18px; letter-spacing: -0.025em; }
-        .about-product p { font-size: 14px; line-height: 1.7; }
+        .about-card a { display: inline-flex; margin-top: 16px; color: inherit; font-size: 13px; font-weight: 800; text-decoration: none; opacity: 0.78; }
         .about-cta { margin-top: 72px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
         .about-secondary { color: inherit; text-decoration: none; font-size: 14px; font-weight: 800; opacity: 0.72; }
         .about-footer { max-width: 1080px; margin: 0 auto; display: flex; justify-content: space-between; gap: 16px; color: var(--muted); font-size: 13px; font-weight: 700; }
         .about-footer a { color: inherit; text-decoration: none; margin-left: 14px; }
-        @media (max-width: 900px) { .about-products { grid-template-columns: 1fr; } }
+        @media (max-width: 980px) { .about-products, .about-grid { grid-template-columns: 1fr; } }
         @media (max-width: 720px) {
           .about-nav-links { display: none; }
-          .about-grid { grid-template-columns: 1fr; }
           .about-footer { flex-direction: column; }
           .about-footer a { margin: 0 14px 0 0; }
         }
@@ -170,74 +174,85 @@ export default function AboutPage() {
 
           <main className="about-main">
             <div className="about-eyebrow">About Us</div>
-            <h1 className="about-title">Building specialized intelligence for essential industries.</h1>
+            <h1 className="about-title">Specialized intelligence for the real world.</h1>
             <p className="about-lead">
-              Earth AI is a technology company developing domain-specific artificial intelligence products for real-world industries. Our work focuses on practical intelligence systems that help professionals analyze information, understand risk, and make better decisions.
+              Earth AI is an artificial intelligence company developing specialized AI products designed to provide practical intelligence for specific industries and domains.
             </p>
 
             <section className="about-section">
-              <h2>Who We Are</h2>
+              <p className="about-kicker">The Company</p>
+              <h2>Earth AI</h2>
               <p>
-                Earth AI was founded to make artificial intelligence more useful, reliable, and relevant for industries where decisions have operational, financial, and human impact. We believe the strongest AI products are not generic tools, but focused systems designed around the data, workflows, constraints, and responsibilities of a specific domain.
+                Earth AI focuses on building specialized intelligence rather than being a general purpose chatbot. The company believes that the most useful AI is the kind that deeply understands the domain it operates in, trained on the right data, designed for the right decisions, and built for the people who depend on accurate, actionable information.
               </p>
               <p>
-                Our first product vertical is Intelligence E for Agriculture, a specialized agricultural intelligence platform for farmers, agribusinesses, cooperatives, researchers, and agricultural professionals. Earth AI is also preparing additional Intelligence E verticals, including Finance, as part of a broader long-term platform strategy.
-              </p>
-            </section>
-
-            <section className="about-section">
-              <h2>Our Mission</h2>
-              <p>
-                Our mission is to provide specialized intelligence that helps people solve practical problems, reduce uncertainty, and act with greater confidence. We build AI systems that support professional judgment rather than replace it.
+                Where general AI tools offer broad capability, Earth AI products offer depth. Each product is built around a specific industry, with the goal of making advanced artificial intelligence genuinely useful in real world environments, not just impressive in a demonstration.
               </p>
             </section>
 
             <section className="about-section">
-              <h2>Our Products</h2>
+              <p className="about-kicker">The Platform</p>
+              <h2>Intelligence E</h2>
               <p>
-                Earth AI develops focused products under a shared intelligence platform. Each product is designed with clear boundaries, secure infrastructure, and a specific professional purpose.
+                Intelligence E is Earth AI&apos;s vertical intelligence platform. It is designed to deliver domain specific AI capabilities across industries where precision, context, and reliability matter most. Each Intelligence E vertical is a focused product, not a feature, built to serve a specific professional environment.
+              </p>
+              <p>
+                The current Intelligence E focus is Agriculture. Other verticals, including Finance, are part of the future roadmap.
+              </p>
+            </section>
+
+            <section className="about-section">
+              <p className="about-kicker">Products</p>
+              <h2>The Earth AI Ecosystem</h2>
+              <p>
+                Earth AI is building a focused ecosystem of specialized products. Each product addresses a distinct need within its domain.
               </p>
               <div className="about-products">
                 {products.map((product) => (
-                  <article key={product.name} className="about-product">
-                    <span>{product.status}</span>
+                  <article key={product.name} className="about-card">
                     <h3>{product.name}</h3>
                     <p>{product.body}</p>
+                    <Link href={product.href}>{product.status}</Link>
                   </article>
                 ))}
               </div>
             </section>
 
             <section className="about-section">
-              <h2>How We Work</h2>
+              <p className="about-kicker">Vision</p>
+              <h2>Why Earth AI Exists</h2>
               <p>
-                Earth AI is built around responsible product architecture, secure data handling, and long-term maintainability. Our systems are designed so that AI assists analysis, explanation, forecasting, research, and decision support while critical calculations and business logic remain deterministic and auditable.
+                Earth AI aims to make advanced artificial intelligence more useful by applying it to real world industries, organizations and decision making environments. The goal is not to build AI that is impressive in isolation, but AI that is genuinely valuable in the hands of professionals who need reliable, domain specific intelligence to make better decisions.
+              </p>
+              <p>
+                Industries like agriculture and finance operate in complex, high stakes environments where the cost of poor decisions is real. Earth AI is built on the belief that specialized intelligence, grounded in domain knowledge, trained on relevant data, and designed for specific workflows, is far more valuable than general purpose AI applied broadly.
+              </p>
+            </section>
+
+            <section className="about-section">
+              <p className="about-kicker">Principles</p>
+              <h2>Product Philosophy</h2>
+              <p>
+                Every Earth AI product is built around a consistent set of principles that guide how we design, build, and deploy intelligence.
               </p>
               <div className="about-grid">
-                {values.map((value) => (
-                  <article key={value.title} className="about-card">
-                    <h3>{value.title}</h3>
-                    <p>{value.body}</p>
+                {principles.map((principle) => (
+                  <article key={principle.title} className="about-card">
+                    <h3>{principle.title}</h3>
+                    <p>{principle.body}</p>
                   </article>
                 ))}
               </div>
-            </section>
-
-            <section className="about-section">
-              <h2>Our Commitment</h2>
-              <p>
-                We are committed to building Earth AI as a professional, secure, and scalable SaaS platform. As our products grow, our priority remains the same: deliver useful intelligence that respects the complexity of the industries we serve and the trust of the people who use our systems.
-              </p>
             </section>
 
             <div className="about-cta">
-              <Link href="/waitlist" className="about-button" style={{ background: theme.buttonBg, color: theme.buttonText }}>Join Waitlist</Link>
+              <Link href="/login" className="about-button" style={{ background: theme.buttonBg, color: theme.buttonText }}>Try Intelligence E Now</Link>
               <Link href="/agriculture" className="about-secondary">Learn about Intelligence E Agriculture</Link>
             </div>
           </main>
 
           <footer className="about-footer">
-            <span>Earth AI. Specialized intelligence for real-world industries.</span>
+            <span>Earth AI. Specialized intelligence for real world industries.</span>
             <span>
               <Link href="/privacy">Privacy</Link>
               <Link href="/terms">Terms</Link>
