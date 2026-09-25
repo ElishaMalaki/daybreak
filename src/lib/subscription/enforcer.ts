@@ -48,6 +48,13 @@ interface AIUsageControlRow {
   suspension_reason: string | null;
 }
 
+interface AIReservationRow {
+  allowed: boolean;
+  credits_used: number;
+  requests_used: number;
+  credits_remaining: number;
+}
+
 function getCurrentBillingPeriod(now = new Date()) {
   const billingStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
   const billingEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999));
@@ -93,9 +100,44 @@ async function getEffectivePlanLimits(userId: string, tier: SubscriptionTier): P
   return applyUsageControlOverrides(baseLimits, (data || []) as AIUsageControlRow[]);
 }
 
-// ============================================================
-// Get authenticated user's subscription (server-side only)
-// ============================================================
+function deniedForFeature(
+  limits: PlanLimits,
+  options: AIUsageRequestOptions,
+  creditsRequired: number,
+  creditsRemaining: number
+): EnforcementResult | null {
+  if (options.requiresImageAnalysis && !limits.imageAnalysis) {
+    return {
+      allowed: false,
+      reason: 'Image analysis is not included in your current plan. Upgrade your plan to analyze farm photos.',
+      creditsRequired,
+      creditsRemaining,
+      limitType: 'image_analysis',
+    };
+  }
+
+  if (options.requiresDocumentAnalysis && !limits.documentAnalysis) {
+    return {
+      allowed: false,
+      reason: 'Document analysis is not included in your current plan. Upgrade your plan to analyze documents.',
+      creditsRequired,
+      creditsRemaining,
+      limitType: 'document_analysis',
+    };
+  }
+
+  if (options.isAdvancedDocumentAnalysis && !limits.advancedDocumentAnalysis) {
+    return {
+      allowed: false,
+      reason: 'Advanced document intelligence is not included in your current plan.',
+      creditsRequired,
+      creditsRemaining,
+      limitType: 'advanced_document_analysis',
+    };
+  }
+
+  return null;
+}
 
 export async function getUserSubscription(userId: string): Promise<SubscriptionStatus> {
   const supabase = await createClient();
@@ -111,12 +153,7 @@ export async function getUserSubscription(userId: string): Promise<SubscriptionS
 
   const tier = (sub?.tier as SubscriptionTier) || 'free';
   const now = new Date();
-
-  let isActive = true;
-  if (sub?.expires_at) {
-    isActive = new Date(sub.expires_at) > now;
-  }
-
+  const isActive = sub?.expires_at ? new Date(sub.expires_at) > now : true;
   const effectiveTier: SubscriptionTier = isActive ? tier : 'free';
   const { billingStart, billingEnd } = getCurrentBillingPeriod(now);
 
@@ -131,10 +168,6 @@ export async function getUserSubscription(userId: string): Promise<SubscriptionS
   };
 }
 
-// ============================================================
-// Get current month usage (server-side only)
-// ============================================================
-
 export async function getUserMonthlyUsage(userId: string): Promise<UsageSummary> {
   const supabase = await createClient();
   const { billingStart, billingEnd, billingMonth } = getCurrentBillingPeriod();
@@ -148,16 +181,17 @@ export async function getUserMonthlyUsage(userId: string): Promise<UsageSummary>
     .gte('date', monthStart)
     .lte('date', monthEnd);
 
-  const aiRequestsUsed = (usageRows || []).reduce((sum, r) => sum + (r.request_count || 0), 0);
+  const legacyRequestsUsed = (usageRows || []).reduce((sum, r) => sum + (r.request_count || 0), 0);
 
   const { data: creditRow } = await supabase
     .from('monthly_ai_credits')
-    .select('credits_used')
+    .select('credits_used, requests_used')
     .eq('user_id', userId)
     .eq('billing_month', billingMonth)
     .maybeSingle();
 
   const aiCreditsUsed = creditRow?.credits_used || 0;
+  const reservedRequestsUsed = creditRow?.requests_used || 0;
 
   const { count: reportsUsed } = await supabase
     .from('reports')
@@ -181,17 +215,13 @@ export async function getUserMonthlyUsage(userId: string): Promise<UsageSummary>
 
   return {
     aiCreditsUsed,
-    aiRequestsUsed,
+    aiRequestsUsed: Math.max(legacyRequestsUsed, reservedRequestsUsed),
     reportsUsed: reportsUsed || 0,
     researchRequestsUsed: researchRequestsUsed || 0,
     farmsCount: farmsCount || 0,
     usersCount: 1,
   };
 }
-
-// ============================================================
-// Check if AI request is allowed (server-side enforcement)
-// ============================================================
 
 export async function checkAIRequestAllowed(
   userId: string,
@@ -205,57 +235,21 @@ export async function checkAIRequestAllowed(
 
   const { limits, suspendedReason } = await getEffectivePlanLimits(userId, subscription.tier);
   const creditsRequired = getCreditCost(requestType);
+  const creditsRemaining = limits.aiCredits === -1 ? -1 : Math.max(0, limits.aiCredits - usage.aiCreditsUsed);
 
   if (suspendedReason) {
-    return {
-      allowed: false,
-      reason: suspendedReason,
-      creditsRequired,
-      creditsRemaining: limits.aiCredits === -1 ? -1 : Math.max(0, limits.aiCredits - usage.aiCreditsUsed),
-      limitType: 'ai_suspended',
-    };
+    return { allowed: false, reason: suspendedReason, creditsRequired, creditsRemaining, limitType: 'ai_suspended' };
   }
 
-  if (options.requiresImageAnalysis && !limits.imageAnalysis) {
-    return {
-      allowed: false,
-      reason: 'Image analysis is not included in your current plan. Upgrade your plan to analyze farm photos.',
-      creditsRequired,
-      creditsRemaining: limits.aiCredits === -1 ? -1 : Math.max(0, limits.aiCredits - usage.aiCreditsUsed),
-      limitType: 'image_analysis',
-    };
-  }
+  const featureDenial = deniedForFeature(limits, options, creditsRequired, creditsRemaining);
+  if (featureDenial) return featureDenial;
 
-  if (options.requiresDocumentAnalysis && !limits.documentAnalysis) {
-    return {
-      allowed: false,
-      reason: 'Document analysis is not included in your current plan. Upgrade your plan to analyze documents.',
-      creditsRequired,
-      creditsRemaining: limits.aiCredits === -1 ? -1 : Math.max(0, limits.aiCredits - usage.aiCreditsUsed),
-      limitType: 'document_analysis',
-    };
-  }
-
-  if (options.isAdvancedDocumentAnalysis && !limits.advancedDocumentAnalysis) {
-    return {
-      allowed: false,
-      reason: 'Advanced document intelligence is not included in your current plan.',
-      creditsRequired,
-      creditsRemaining: limits.aiCredits === -1 ? -1 : Math.max(0, limits.aiCredits - usage.aiCreditsUsed),
-      limitType: 'advanced_document_analysis',
-    };
-  }
-
-  if (limits.aiCredits === -1) {
-    return { allowed: true, creditsRequired, creditsRemaining: -1 };
-  }
-
-  if (usage.aiCreditsUsed + creditsRequired > limits.aiCredits) {
+  if (limits.aiCredits !== -1 && usage.aiCreditsUsed + creditsRequired > limits.aiCredits) {
     return {
       allowed: false,
       reason: 'Your monthly AI allowance has been reached. Upgrade your plan to continue using Intelligence E.',
       creditsRequired,
-      creditsRemaining: Math.max(0, limits.aiCredits - usage.aiCreditsUsed),
+      creditsRemaining,
       limitType: 'ai_credits',
     };
   }
@@ -265,7 +259,7 @@ export async function checkAIRequestAllowed(
       allowed: false,
       reason: 'Your monthly AI request limit has been reached. Upgrade your plan to continue.',
       creditsRequired,
-      creditsRemaining: Math.max(0, limits.aiCredits - usage.aiCreditsUsed),
+      creditsRemaining,
       limitType: 'ai_requests',
     };
   }
@@ -273,13 +267,87 @@ export async function checkAIRequestAllowed(
   return {
     allowed: true,
     creditsRequired,
-    creditsRemaining: limits.aiCredits - usage.aiCreditsUsed - creditsRequired,
+    creditsRemaining: limits.aiCredits === -1 ? -1 : Math.max(0, limits.aiCredits - usage.aiCreditsUsed - creditsRequired),
   };
 }
 
-// ============================================================
-// Check farm creation limit
-// ============================================================
+export async function reserveAIRequestUsage(
+  userId: string,
+  requestType: string,
+  options: AIUsageRequestOptions = {}
+): Promise<EnforcementResult> {
+  const [subscription, usage] = await Promise.all([
+    getUserSubscription(userId),
+    getUserMonthlyUsage(userId),
+  ]);
+
+  const { limits, suspendedReason } = await getEffectivePlanLimits(userId, subscription.tier);
+  const creditsRequired = getCreditCost(requestType);
+  const creditsRemaining = limits.aiCredits === -1 ? -1 : Math.max(0, limits.aiCredits - usage.aiCreditsUsed);
+
+  if (suspendedReason) {
+    return { allowed: false, reason: suspendedReason, creditsRequired, creditsRemaining, limitType: 'ai_suspended' };
+  }
+
+  const featureDenial = deniedForFeature(limits, options, creditsRequired, creditsRemaining);
+  if (featureDenial) return featureDenial;
+
+  const supabase = await createClient();
+  const { billingMonth } = getCurrentBillingPeriod();
+  const { data, error } = await supabase.rpc('reserve_monthly_ai_usage', {
+    p_user_id: userId,
+    p_billing_month: billingMonth,
+    p_credits: creditsRequired,
+    p_credit_limit: limits.aiCredits,
+    p_request_limit: limits.aiRequests,
+  });
+
+  if (error) {
+    console.error('[Subscription Enforcer] AI usage reservation failed:', error.message);
+    return {
+      allowed: false,
+      reason: 'AI usage could not be verified. Please try again.',
+      creditsRequired,
+      creditsRemaining,
+      limitType: 'usage_reservation_failed',
+    };
+  }
+
+  const reservation = Array.isArray(data) ? (data[0] as AIReservationRow | undefined) : (data as AIReservationRow | undefined);
+  if (!reservation?.allowed) {
+    const exhaustedRequests = limits.aiRequests !== -1 && usage.aiRequestsUsed >= limits.aiRequests;
+    return {
+      allowed: false,
+      reason: exhaustedRequests
+        ? 'Your monthly AI request limit has been reached. Upgrade your plan to continue.'
+        : 'Your monthly AI allowance has been reached. Upgrade your plan to continue using Intelligence E.',
+      creditsRequired,
+      creditsRemaining: reservation?.credits_remaining ?? creditsRemaining,
+      limitType: exhaustedRequests ? 'ai_requests' : 'ai_credits',
+    };
+  }
+
+  return {
+    allowed: true,
+    creditsRequired,
+    creditsRemaining: reservation.credits_remaining,
+  };
+}
+
+export async function refundAIRequestUsage(userId: string, creditsUsed: number): Promise<void> {
+  if (creditsUsed < 0) return;
+  const supabase = await createClient();
+  const { billingMonth } = getCurrentBillingPeriod();
+  const { error } = await supabase.rpc('refund_monthly_ai_usage', {
+    p_user_id: userId,
+    p_billing_month: billingMonth,
+    p_credits: creditsUsed,
+  });
+
+  if (error) {
+    console.error('[Subscription Enforcer] AI usage refund failed:', error.message);
+  }
+}
 
 export async function checkFarmCreationAllowed(userId: string): Promise<EnforcementResult> {
   const [subscription, usage] = await Promise.all([
@@ -302,10 +370,6 @@ export async function checkFarmCreationAllowed(userId: string): Promise<Enforcem
   return { allowed: true };
 }
 
-// ============================================================
-// Check report generation limit
-// ============================================================
-
 export async function checkReportAllowed(userId: string): Promise<EnforcementResult> {
   const [subscription, usage] = await Promise.all([
     getUserSubscription(userId),
@@ -326,10 +390,6 @@ export async function checkReportAllowed(userId: string): Promise<EnforcementRes
 
   return { allowed: true };
 }
-
-// ============================================================
-// Check research request limit
-// ============================================================
 
 export async function checkResearchAllowed(userId: string): Promise<EnforcementResult> {
   const [subscription, usage] = await Promise.all([
@@ -352,14 +412,10 @@ export async function checkResearchAllowed(userId: string): Promise<EnforcementR
   return { allowed: true };
 }
 
-// ============================================================
-// Record AI credit usage (server-side, after successful response)
-// ============================================================
-
 export async function recordAICreditsUsed(
   userId: string,
-  creditsUsed: number,
-  requestType: string,
+  _creditsUsed: number,
+  _requestType: string,
   provider: string,
   model: string,
   inputTokens: number,
@@ -367,13 +423,6 @@ export async function recordAICreditsUsed(
   processingTimeMs: number
 ): Promise<void> {
   const supabase = await createClient();
-  const { billingMonth } = getCurrentBillingPeriod();
-
-  await supabase.rpc('increment_monthly_credits', {
-    p_user_id: userId,
-    p_billing_month: billingMonth,
-    p_credits: creditsUsed,
-  });
 
   await supabase.rpc('increment_provider_usage', {
     p_user_id: userId,
@@ -385,10 +434,6 @@ export async function recordAICreditsUsed(
     p_latency_ms: processingTimeMs,
   });
 }
-
-// ============================================================
-// Validate input length server-side
-// ============================================================
 
 export function validateInputLength(content: string): EnforcementResult {
   if (content.length > SERVER_LIMITS.maxInputCharacters) {
