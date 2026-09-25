@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { checkResearchAllowed, checkAIRequestAllowed, recordAICreditsUsed } from '@/lib/subscription/enforcer';
+import { checkResearchAllowed, recordAICreditsUsed, refundAIRequestUsage, reserveAIRequestUsage } from '@/lib/subscription/enforcer';
 import { getAIRouter } from '@/lib/ai/router';
 
 export const runtime = 'nodejs';
@@ -16,21 +16,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Server-side research limit enforcement
     const researchCheck = await checkResearchAllowed(user.id);
     if (!researchCheck.allowed) {
       return NextResponse.json(
         { error: researchCheck.reason, limitType: researchCheck.limitType, upgradeRequired: true },
         { status: 403 }
-      );
-    }
-
-    // Server-side AI credit enforcement for research
-    const creditCheck = await checkAIRequestAllowed(user.id, 'research');
-    if (!creditCheck.allowed) {
-      return NextResponse.json(
-        { error: creditCheck.reason, limitType: creditCheck.limitType, upgradeRequired: true, creditsRemaining: creditCheck.creditsRemaining },
-        { status: 429 }
       );
     }
 
@@ -47,7 +37,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Research query is required' }, { status: 400 });
     }
 
-    // Create research request record
+    const creditCheck = await reserveAIRequestUsage(user.id, 'research');
+    if (!creditCheck.allowed) {
+      return NextResponse.json(
+        { error: creditCheck.reason, limitType: creditCheck.limitType, upgradeRequired: true, creditsRemaining: creditCheck.creditsRemaining },
+        { status: 429 }
+      );
+    }
+
+    const creditsUsed = creditCheck.creditsRequired ?? 5;
+
     const { data: researchRecord, error: insertError } = await supabase
       .from('research_requests')
       .insert({
@@ -59,10 +58,10 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError || !researchRecord) {
+      await refundAIRequestUsage(user.id, creditsUsed);
       return NextResponse.json({ error: 'Failed to create research request' }, { status: 500 });
     }
 
-    // Generate research via AI
     const router = getAIRouter();
     const aiResponse = await router.route({
       messages: [
@@ -76,10 +75,9 @@ export async function POST(request: NextRequest) {
     });
 
     if (aiResponse.success) {
-      // Record credits
       recordAICreditsUsed(
         user.id,
-        creditCheck.creditsRequired ?? 5,
+        creditsUsed,
         'research',
         aiResponse.provider,
         aiResponse.model,
@@ -88,7 +86,6 @@ export async function POST(request: NextRequest) {
         aiResponse.processingTimeMs
       ).catch(() => {});
 
-      // Update research record
       await supabase
         .from('research_requests')
         .update({
@@ -104,16 +101,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         id: researchRecord.id,
         result: aiResponse.content,
-        creditsUsed: creditCheck.creditsRequired,
+        creditsUsed,
       });
-    } else {
-      await supabase
-        .from('research_requests')
-        .update({ status: 'failed' })
-        .eq('id', researchRecord.id);
-
-      return NextResponse.json({ error: aiResponse.error || 'Research failed' }, { status: 500 });
     }
+
+    await refundAIRequestUsage(user.id, creditsUsed);
+    await supabase
+      .from('research_requests')
+      .update({ status: 'failed' })
+      .eq('id', researchRecord.id);
+
+    return NextResponse.json({ error: aiResponse.error || 'Research failed' }, { status: 500 });
   } catch (error) {
     console.error('[Research API] Error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
