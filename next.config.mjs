@@ -15,6 +15,27 @@ const nextConfig = {
     minimumCacheTTL: 60,
     qualities: [75, 85, 100],
   },
+  async headers() {
+    return [
+      {
+        source: '/about',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+          },
+          {
+            key: 'CDN-Cache-Control',
+            value: 'no-store',
+          },
+          {
+            key: 'Vercel-CDN-Cache-Control',
+            value: 'no-store',
+          },
+        ],
+      },
+    ];
+  },
   webpack(
     config,
     {
