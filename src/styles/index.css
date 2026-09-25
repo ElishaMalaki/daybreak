@@ -1,1 +1,194 @@
 @import './tailwind.css';
+
+html[data-earth-ai-theme='dark'] {
+  color-scheme: dark;
+}
+
+html[data-earth-ai-theme='dark'] body {
+  background: #050507 !important;
+  color: #f4f4f5 !important;
+}
+
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) {
+  --ea-dark-bg: #050507;
+  --ea-dark-surface: rgba(18, 19, 24, 0.96);
+  --ea-dark-surface-2: rgba(255, 255, 255, 0.06);
+  --ea-dark-surface-3: rgba(255, 255, 255, 0.09);
+  --ea-dark-text: #f4f4f5;
+  --ea-dark-muted: #c4c4cc;
+  --ea-dark-border: rgba(255, 255, 255, 0.12);
+  --ea-dark-border-strong: rgba(255, 255, 255, 0.18);
+  color: var(--ea-dark-text) !important;
+}
+
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) :where(
+  .bg-white,
+  .bg-gray-50,
+  .bg-slate-50,
+  .bg-zinc-50,
+  .bg-neutral-50,
+  .dash-hero,
+  .dash-card,
+  .dash-panel,
+  .feedback-card,
+  .delete-card
+) {
+  background: var(--ea-dark-surface) !important;
+  border-color: var(--ea-dark-border) !important;
+  color: var(--ea-dark-text) !important;
+}
+
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) :where(
+  .text-gray-400,
+  .text-gray-500,
+  .text-gray-600,
+  .text-slate-400,
+  .text-slate-500,
+  .text-slate-600,
+  .text-zinc-400,
+  .text-zinc-500,
+  .text-zinc-600,
+  .text-neutral-400,
+  .text-neutral-500,
+  .text-neutral-600
+) {
+  color: var(--ea-dark-muted) !important;
+}
+
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) :where(
+  .text-gray-700,
+  .text-gray-800,
+  .text-gray-900,
+  .text-slate-700,
+  .text-slate-800,
+  .text-slate-900,
+  .text-zinc-700,
+  .text-zinc-800,
+  .text-zinc-900,
+  .text-neutral-700,
+  .text-neutral-800,
+  .text-neutral-900
+) {
+  color: var(--ea-dark-text) !important;
+}
+
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) :where(
+  .border,
+  .border-gray-100,
+  .border-gray-200,
+  .border-gray-300,
+  .border-slate-100,
+  .border-slate-200,
+  .border-slate-300,
+  .border-zinc-100,
+  .border-zinc-200,
+  .border-zinc-300
+) {
+  border-color: var(--ea-dark-border) !important;
+}
+
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) :where(table, thead, tbody, tr, th, td) {
+  border-color: var(--ea-dark-border) !important;
+  color: var(--ea-dark-text) !important;
+}
+
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) :where(th, thead, [role='columnheader']) {
+  background: var(--ea-dark-surface-2) !important;
+  color: var(--ea-dark-text) !important;
+}
+
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) :where(input, select, textarea) {
+  background: rgba(255, 255, 255, 0.07) !important;
+  border-color: var(--ea-dark-border-strong) !important;
+  color: var(--ea-dark-text) !important;
+}
+
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) :where(input::placeholder, textarea::placeholder) {
+  color: #a1a1aa !important;
+  opacity: 1 !important;
+}
+
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) :where(option) {
+  background: #111217 !important;
+  color: var(--ea-dark-text) !important;
+}
+
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) :where(pre, code) {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: var(--ea-dark-border) !important;
+  color: var(--ea-dark-text) !important;
+}
+
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='background: white'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='background-color: white'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='background: #fff'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='background-color: #fff'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='background: #ffffff'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='background-color: #ffffff'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='background: rgb(255'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='background-color: rgb(255'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='background: #f8fafc'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='background-color: #f8fafc'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='background: #f9fafb'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='background-color: #f9fafb'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='background: #f7f7f8'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='background-color: #f7f7f8'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='background: rgb(248'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='background-color: rgb(248'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='background: rgb(249'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='background-color: rgb(249'] {
+  background: var(--ea-dark-surface) !important;
+  color: var(--ea-dark-text) !important;
+  border-color: var(--ea-dark-border) !important;
+  box-shadow: none !important;
+}
+
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='border: 1px solid #e5e7eb'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='border-color: #e5e7eb'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='border: 1px solid rgb(229'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='border-color: rgb(229'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='border: 1px solid #e8edf2'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='border-color: #e8edf2'] {
+  border-color: var(--ea-dark-border) !important;
+}
+
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='color: #111827'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='color: #0f172a'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='color: #1f2937'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='color: rgb(17'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='color: rgb(15'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='color: rgb(31'] {
+  color: var(--ea-dark-text) !important;
+}
+
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='color: #6b7280'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='color: #64748b'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='color: #475569'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='color: #94a3b8'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='color: rgb(107'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='color: rgb(100'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='color: rgb(71'],
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) [style*='color: rgb(148'] {
+  color: var(--ea-dark-muted) !important;
+}
+
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) :where(h1, h2, h3, h4, h5, h6, strong, label) {
+  color: var(--ea-dark-text) !important;
+}
+
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) :where(p, li, small, span) {
+  color: inherit;
+}
+
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) :where(a) {
+  color: #d8e8ff;
+}
+
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) :where(button) {
+  border-color: var(--ea-dark-border) !important;
+}
+
+html[data-earth-ai-theme='dark'] :where(.ie-page-pad, .adm-page-pad) :where(button[style*='background: #111827'], button[style*='background-color: #111827']) {
+  background: #f4f4f5 !important;
+  color: #09090b !important;
+}
