@@ -4,11 +4,20 @@ import { NextResponse, type NextRequest } from 'next/server';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vaidosdmzuexydbugsrk.supabase.co';
 const supabasePublishableKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_l-fvWnm8L4MXP6lIovn_YQ_K8ZVUt_F';
+const privateBetaEnabled = process.env.PRIVATE_BETA_ENABLED === 'true';
 
-function redirectToLogin(request: NextRequest) {
+function redirectToLogin(request: NextRequest, reason?: string) {
   const url = request.nextUrl.clone();
   url.pathname = '/login';
   url.searchParams.set('redirect', request.nextUrl.pathname);
+  if (reason) url.searchParams.set('reason', reason);
+  return NextResponse.redirect(url);
+}
+
+function redirectToWaitlist(request: NextRequest) {
+  const url = request.nextUrl.clone();
+  url.pathname = '/waitlist';
+  url.searchParams.set('private_beta', 'required');
   return NextResponse.redirect(url);
 }
 
@@ -38,6 +47,24 @@ export async function middleware(request: NextRequest) {
 
     if ((error || !user) && pathname.startsWith('/app')) {
       return redirectToLogin(request);
+    }
+
+    if (user && pathname.startsWith('/app')) {
+      if (!user.email_confirmed_at) {
+        await supabase.auth.signOut();
+        return redirectToLogin(request, 'verify_email');
+      }
+
+      if (privateBetaEnabled) {
+        const { data: betaAllowed, error: betaError } = await supabase.rpc('is_private_beta_user', {
+          p_email: user.email || '',
+        });
+
+        if (betaError || betaAllowed !== true) {
+          await supabase.auth.signOut();
+          return redirectToWaitlist(request);
+        }
+      }
     }
 
     if (user && (pathname === '/login' || pathname === '/register')) {
