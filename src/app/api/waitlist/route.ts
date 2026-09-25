@@ -14,30 +14,22 @@ export async function POST(request: NextRequest) {
     const interest = String(body.interest || 'agriculture').trim();
     const message = String(body.message || '').trim().slice(0, 1200);
 
-    if (!emailPattern.test(email)) {
-      return NextResponse.json({ error: 'Enter a valid email address.' }, { status: 400 });
-    }
-    if (!fullName) {
-      return NextResponse.json({ error: 'Full name is required.' }, { status: 400 });
-    }
-    if (!allowedInterests.has(interest)) {
-      return NextResponse.json({ error: 'Invalid interest selected.' }, { status: 400 });
-    }
+    if (!emailPattern.test(email)) return NextResponse.json({ error: 'Enter a valid email address.' }, { status: 400 });
+    if (!fullName) return NextResponse.json({ error: 'Full name is required.' }, { status: 400 });
+    if (!allowedInterests.has(interest)) return NextResponse.json({ error: 'Invalid interest selected.' }, { status: 400 });
 
     const supabase = await createClient();
-    const { error } = await supabase.from('waitlist_entries').upsert(
-      {
-        email,
-        full_name: fullName,
-        interest,
-        message,
-        source: 'earth_ai_website',
-        status: 'new',
-      },
-      { onConflict: 'email' }
-    );
+    const { error } = await supabase.from('waitlist_entries').insert({
+      email,
+      full_name: fullName,
+      interest,
+      message,
+      source: 'earth_ai_website',
+      status: 'new',
+    });
 
     if (error) {
+      if (error.code === '23505') return NextResponse.json({ success: true, alreadyJoined: true });
       console.error('[Waitlist] insert failed:', error.message);
       return NextResponse.json({ error: 'Waitlist is not ready yet. Please try again shortly.' }, { status: 503 });
     }
