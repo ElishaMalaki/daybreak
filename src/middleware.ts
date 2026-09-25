@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vaidosdmzuexydbugsrk.supabase.co';
 const supabasePublishableKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_l-fvWnm8L4MXP6lIovn_YQ_K8ZVUt_F';
-const privateBetaEnabled = process.env.PRIVATE_BETA_ENABLED === 'true';
+const privateBetaEnabled = process.env.PRIVATE_BETA_ENABLED !== 'false';
 
 function redirectToLogin(request: NextRequest, reason?: string) {
   const url = request.nextUrl.clone();
