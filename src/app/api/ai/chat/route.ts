@@ -4,8 +4,9 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import type { AIImageAttachment, AIRequestType } from '@/lib/ai/types';
 import {
-  checkAIRequestAllowed,
   recordAICreditsUsed,
+  refundAIRequestUsage,
+  reserveAIRequestUsage,
   validateInputLength,
 } from '@/lib/subscription/enforcer';
 
@@ -149,7 +150,7 @@ export async function POST(request: NextRequest) {
     }
 
     const effectiveRequestType = normalizeRequestType(requestType, attachments.length > 0);
-    const enforcementResult = await checkAIRequestAllowed(user.id, effectiveRequestType, {
+    const enforcementResult = await reserveAIRequestUsage(user.id, effectiveRequestType, {
       requiresImageAnalysis: attachments.length > 0 || effectiveRequestType === 'image_analysis' || effectiveRequestType === 'plant_photo_analysis',
       requiresDocumentAnalysis: effectiveRequestType === 'document_analysis',
       isAdvancedDocumentAnalysis: effectiveRequestType === 'document_analysis' && Boolean(contextData?.advanced),
@@ -177,10 +178,13 @@ export async function POST(request: NextRequest) {
       attachments,
     });
     const publicAIResponse = router.toPublicResponse(aiResponse);
+    const creditsUsed = enforcementResult.creditsRequired ?? 1;
+
+    if (!aiResponse.success) {
+      await refundAIRequestUsage(user.id, creditsUsed);
+    }
 
     if (aiResponse.success) {
-      const creditsUsed = enforcementResult.creditsRequired ?? 1;
-
       void (async () => {
         try {
           await recordAICreditsUsed(
@@ -194,7 +198,7 @@ export async function POST(request: NextRequest) {
             aiResponse.processingTimeMs
           );
         } catch {
-          // Usage logging must never block the user response.
+          // Provider analytics must never block the user response.
         }
       })();
 
@@ -207,7 +211,7 @@ export async function POST(request: NextRequest) {
             p_output_tokens: aiResponse.outputTokens || 0,
           });
         } catch {
-          // Legacy usage logging must never block the user response.
+          // Legacy usage analytics must never block the user response.
         }
       })();
     }
@@ -253,7 +257,7 @@ export async function POST(request: NextRequest) {
       processingTimeMs: aiResponse.processingTimeMs,
       success: aiResponse.success,
       error: aiResponse.error,
-      creditsUsed: enforcementResult.creditsRequired,
+      creditsUsed,
       creditsRemaining: enforcementResult.creditsRemaining,
     });
   } catch (error) {
