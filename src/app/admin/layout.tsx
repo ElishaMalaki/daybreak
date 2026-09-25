@@ -5,6 +5,10 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
+type ThemeMode = 'light' | 'dark';
+
+const THEME_STORAGE_KEY = 'earth-ai-theme';
+
 const Icon = ({ children }: { children: React.ReactNode }) => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     {children}
@@ -27,6 +31,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [signingOut, setSigningOut] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [theme, setTheme] = useState<ThemeMode>('light');
+
+  useEffect(() => {
+    const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY) as ThemeMode | null;
+    if (storedTheme === 'light' || storedTheme === 'dark') {
+      setTheme(storedTheme);
+      return;
+    }
+    setTheme(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    document.documentElement.dataset.earthAiTheme = theme;
+  }, [theme]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -78,6 +97,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Admin';
   const userInitial = userName[0]?.toUpperCase() || 'A';
   const currentItem = adminNavItems.find((item) => item.exact ? pathname === item.href : pathname?.startsWith(item.href));
+  const nextTheme = theme === 'dark' ? 'light' : 'dark';
 
   return (
     <>
@@ -86,32 +106,40 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         *, *::before, *::after { box-sizing: border-box; }
         html, body { min-height: 100%; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #ffffff; color: #111827; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .adm-sidebar { position: fixed; inset: 0 auto 0 0; width: 260px; background: #f7f7f8; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; z-index: 50; transition: transform 0.2s ease; }
-        .adm-main { margin-left: 260px; min-height: 100vh; background: #ffffff; min-width: 0; }
-        .adm-topbar { height: 58px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; gap: 12px; padding: 0 24px; background: rgba(255,255,255,0.96); position: sticky; top: 0; z-index: 40; }
-        .adm-nav-item { display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 8px 10px; border-radius: 8px; color: #4b5563; text-decoration: none; font-size: 14px; font-weight: 500; line-height: 1.2; }
-        .adm-nav-item:hover { background: #ececf1; color: #111827; }
-        .adm-nav-item.active { background: #ececf1; color: #111827; font-weight: 600; }
+        .adm-shell { --app-bg: #ffffff; --surface: #ffffff; --surface-soft: #f7f7f8; --surface-hover: #ececf1; --text: #111827; --muted: #6b7280; --muted-strong: #4b5563; --border: #e5e7eb; --danger: #b91c1c; --avatar-bg: #111827; --avatar-text: #ffffff; --shadow: 0 12px 30px rgba(17,24,39,0.10); display: flex; min-height: 100vh; background: var(--app-bg); color: var(--text); }
+        .adm-shell.theme-dark { --app-bg: #050507; --surface: rgba(18, 19, 24, 0.94); --surface-soft: rgba(13, 14, 19, 0.96); --surface-hover: rgba(255,255,255,0.08); --text: #f4f4f5; --muted: #a1a1aa; --muted-strong: #d4d4d8; --border: rgba(255,255,255,0.10); --danger: #fca5a5; --avatar-bg: #f4f4f5; --avatar-text: #09090b; --shadow: 0 18px 46px rgba(0,0,0,0.42); }
+        .adm-shell.theme-dark::before { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(circle at 18% -4%, rgba(115, 115, 130, 0.20), transparent 30%), radial-gradient(circle at 84% 10%, rgba(86, 100, 120, 0.16), transparent 28%), linear-gradient(180deg, #050507 0%, #090a0f 48%, #050507 100%); }
+        .adm-sidebar { position: fixed; inset: 0 auto 0 0; width: 260px; background: var(--surface-soft); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 50; transition: transform 0.2s ease; backdrop-filter: blur(18px); }
+        .adm-main { margin-left: 260px; min-height: 100vh; background: transparent; min-width: 0; flex: 1; position: relative; z-index: 1; }
+        .adm-topbar { height: 58px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; padding: 0 24px; background: color-mix(in srgb, var(--surface) 90%, transparent); backdrop-filter: blur(16px); position: sticky; top: 0; z-index: 40; }
+        .adm-nav-item { display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 8px 10px; border-radius: 8px; color: var(--muted-strong); text-decoration: none; font-size: 14px; font-weight: 500; line-height: 1.2; }
+        .adm-nav-item:hover { background: var(--surface-hover); color: var(--text); }
+        .adm-nav-item.active { background: var(--surface-hover); color: var(--text); font-weight: 600; }
         .adm-section { padding: 14px 10px 0; }
-        .adm-section-label { padding: 0 10px 8px; color: #8b8f98; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+        .adm-section-label { padding: 0 10px 8px; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
         .adm-mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(17,24,39,0.32); z-index: 49; }
         .adm-menu-btn { display: none; }
-        .adm-top-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff; color: #4b5563; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .adm-top-btn:hover { background: #f7f7f8; color: #111827; }
-        .adm-page-pad { padding: 24px 28px 56px; max-width: 100%; overflow-x: hidden; }
+        .adm-top-btn, .adm-theme-toggle, .adm-mode { border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--muted-strong); display: flex; align-items: center; justify-content: center; cursor: pointer; font-family: inherit; }
+        .adm-top-btn { width: 36px; height: 36px; }
+        .adm-top-btn:hover, .adm-theme-toggle:hover { background: var(--surface-hover); color: var(--text); }
+        .adm-theme-toggle { height: 38px; gap: 8px; padding: 0 11px; font-size: 12px; font-weight: 700; }
+        .adm-theme-toggle svg { width: 15px; height: 15px; }
+        .adm-page-pad { padding: 24px 28px 56px; max-width: 100%; overflow-x: hidden; color: var(--text); }
         .adm-page-pad * { max-width: 100%; }
         .adm-page-pad table { min-width: 680px; }
         .adm-page-pad pre, .adm-page-pad code { white-space: pre-wrap; overflow-wrap: anywhere; }
         .adm-page-pad p, .adm-page-pad div, .adm-page-pad span, .adm-page-pad a, .adm-page-pad td, .adm-page-pad th { overflow-wrap: anywhere; }
-        .adm-mode { display: inline-flex; align-items: center; gap: 7px; min-height: 32px; padding: 0 10px; border: 1px solid #e5e7eb; border-radius: 8px; color: #374151; font-size: 12px; font-weight: 600; background: #fff; }
-        .adm-mode-dot { width: 7px; height: 7px; border-radius: 999px; background: #111827; }
+        .adm-mode { display: inline-flex; gap: 7px; min-height: 32px; padding: 0 10px; font-size: 12px; font-weight: 600; cursor: default; }
+        .adm-mode-dot { width: 7px; height: 7px; border-radius: 999px; background: var(--avatar-bg); }
+        .theme-dark .adm-page-pad [style*="background: #fff"], .theme-dark .adm-page-pad [style*="background: #ffffff"], .theme-dark .adm-page-pad [style*="backgroundColor: #fff"], .theme-dark .adm-page-pad [style*="backgroundColor: #ffffff"] { background: var(--surface) !important; border-color: var(--border) !important; color: var(--text) !important; }
+        .theme-dark .adm-page-pad [style*="background: #f8fafc"], .theme-dark .adm-page-pad [style*="background: #f9fafb"], .theme-dark .adm-page-pad [style*="background: #f7f7f8"] { background: rgba(255,255,255,0.05) !important; }
+        .theme-dark .adm-page-pad [style*="border: 1px solid #e5e7eb"], .theme-dark .adm-page-pad [style*="border: 1px solid #e8edf2"] { border-color: var(--border) !important; }
+        .theme-dark .adm-page-pad [style*="color: #111827"], .theme-dark .adm-page-pad [style*="color: #0f172a"], .theme-dark .adm-page-pad h1, .theme-dark .adm-page-pad h2, .theme-dark .adm-page-pad h3 { color: var(--text) !important; }
+        .theme-dark .adm-page-pad [style*="color: #6b7280"], .theme-dark .adm-page-pad [style*="color: #64748b"], .theme-dark .adm-page-pad [style*="color: #475569"] { color: var(--muted) !important; }
+        .theme-dark .adm-page-pad input, .theme-dark .adm-page-pad select, .theme-dark .adm-page-pad textarea { background: rgba(255,255,255,0.06) !important; color: var(--text) !important; border-color: var(--border) !important; }
         @media (max-width: 1180px) {
-          .adm-page-pad [style*="grid-template-columns: repeat(5, 1fr)"],
-          .adm-page-pad [style*="grid-template-columns: repeat(4, 1fr)"],
-          .adm-page-pad [style*="grid-template-columns: repeat(3, 1fr)"] { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important; }
-          .adm-page-pad [style*="grid-template-columns: 1fr 300px"],
-          .adm-page-pad [style*="grid-template-columns: 1fr 320px"],
-          .adm-page-pad [style*="grid-template-columns: 1fr 340px"] { grid-template-columns: minmax(0, 1fr) !important; }
+          .adm-page-pad [style*="grid-template-columns: repeat(5, 1fr)"], .adm-page-pad [style*="grid-template-columns: repeat(4, 1fr)"], .adm-page-pad [style*="grid-template-columns: repeat(3, 1fr)"] { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important; }
+          .adm-page-pad [style*="grid-template-columns: 1fr 300px"], .adm-page-pad [style*="grid-template-columns: 1fr 320px"], .adm-page-pad [style*="grid-template-columns: 1fr 340px"] { grid-template-columns: minmax(0, 1fr) !important; }
         }
         @media (max-width: 860px) {
           .adm-sidebar { transform: translateX(-100%); }
@@ -126,21 +154,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }
         @media (max-width: 520px) {
           .adm-topbar { gap: 8px; }
-          .adm-mode { display: none; }
+          .adm-mode, .adm-theme-toggle span { display: none; }
           .adm-page-pad { padding: 14px 12px 34px; }
         }
       `}</style>
 
-      <div style={{ display: 'flex', minHeight: '100vh' }}>
+      <div className={`adm-shell theme-${theme}`}>
         <div className={`adm-mobile-overlay${sidebarOpen ? ' open' : ''}`} onClick={() => setSidebarOpen(false)} aria-hidden="true" />
 
         <aside className={`adm-sidebar${sidebarOpen ? ' open' : ''}`} role="navigation" aria-label="Admin navigation">
-          <div style={{ padding: '14px 14px 12px', borderBottom: '1px solid #e5e7eb' }}>
+          <div style={{ padding: '14px 14px 12px', borderBottom: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <img src="/assets/images/h9O7B-1789370942958.jpg" alt="Earth AI" style={{ width: 34, height: 34, borderRadius: 8, objectFit: 'cover', border: '1px solid #e5e7eb' }} />
+              <img src="/assets/images/h9O7B-1789370942958.jpg" alt="Earth AI" style={{ width: 34, height: 34, borderRadius: 8, objectFit: 'cover', border: '1px solid var(--border)' }} />
               <div style={{ minWidth: 0 }}>
-                <div style={{ color: '#111827', fontSize: 14, fontWeight: 700, lineHeight: 1.2 }}>Earth AI</div>
-                <div style={{ color: '#6b7280', fontSize: 12, marginTop: 1 }}>Admin Portal</div>
+                <div style={{ color: 'var(--text)', fontSize: 14, fontWeight: 700, lineHeight: 1.2 }}>Earth AI</div>
+                <div style={{ color: 'var(--muted)', fontSize: 12, marginTop: 1 }}>Admin Portal</div>
               </div>
             </div>
           </div>
@@ -156,7 +184,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               ))}
             </div>
 
-            <div className="adm-section" style={{ marginTop: 10, borderTop: '1px solid #e5e7eb', paddingTop: 14 }}>
+            <div className="adm-section" style={{ marginTop: 10, borderTop: '1px solid var(--border)', paddingTop: 14 }}>
               <div className="adm-section-label">Application</div>
               <Link href="/app/agriculture" className="adm-nav-item">
                 <Icon><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></Icon>
@@ -165,12 +193,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           </nav>
 
-          <div style={{ padding: 10, borderTop: '1px solid #e5e7eb' }}>
+          <div style={{ padding: 10, borderTop: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: 8, borderRadius: 8 }}>
-              <div style={{ width: 30, height: 30, borderRadius: 8, background: '#111827', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 12, flex: '0 0 auto' }}>{userInitial}</div>
+              <div style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--avatar-bg)', color: 'var(--avatar-text)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 12, flex: '0 0 auto' }}>{userInitial}</div>
               <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ color: '#111827', fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{userName}</div>
-                <div style={{ color: '#6b7280', fontSize: 11, marginTop: 1 }}>Administrator</div>
+                <div style={{ color: 'var(--text)', fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{userName}</div>
+                <div style={{ color: 'var(--muted)', fontSize: 11, marginTop: 1 }}>Administrator</div>
               </div>
               <button onClick={handleSignOut} disabled={signingOut} title="Sign out" className="adm-top-btn" style={{ width: 32, height: 32, flex: '0 0 auto' }}>
                 <Icon><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></Icon>
@@ -185,9 +213,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Icon><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></Icon>
             </button>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ color: '#111827', fontSize: 14, fontWeight: 700, lineHeight: 1.2 }}>{currentItem?.label || 'Admin Portal'}</div>
-              <div style={{ color: '#6b7280', fontSize: 12, marginTop: 1 }}>Platform administration and control</div>
+              <div style={{ color: 'var(--text)', fontSize: 14, fontWeight: 700, lineHeight: 1.2 }}>{currentItem?.label || 'Admin Portal'}</div>
+              <div style={{ color: 'var(--muted)', fontSize: 12, marginTop: 1 }}>Platform administration and control</div>
             </div>
+            <button className="adm-theme-toggle" onClick={() => setTheme(nextTheme)} aria-label={`Switch to ${nextTheme} mode`} title={`Switch to ${nextTheme} mode`}>
+              <Icon>{theme === 'dark' ? <><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></> : <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>}</Icon>
+              <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
+            </button>
             <div className="adm-mode"><span className="adm-mode-dot" /> Admin Mode</div>
           </div>
           <div className="adm-page-pad">{children}</div>
