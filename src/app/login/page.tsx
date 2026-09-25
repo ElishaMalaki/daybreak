@@ -1,50 +1,56 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import Image from 'next/image';
+
+const DEFAULT_REDIRECT = '/app/agriculture';
+
+function getSafeRedirect(searchParams: ReturnType<typeof useSearchParams>) {
+  const redirect = searchParams?.get('redirect') || searchParams?.get('next');
+  if (!redirect || !redirect.startsWith('/app/')) return DEFAULT_REDIRECT;
+  return redirect;
+}
 
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { signIn, signUp, user, loading } = useAuth();
-
+  const { signIn, signUp, signInWithOAuth, user, loading } = useAuth();
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [focusedField, setFocusedField] = useState<string | null>(null);
-  const [resetSent, setResetSent] = useState(false);
-  const [resetLoading, setResetLoading] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    if (mounted && !loading && user) router.replace(getSafeRedirect(searchParams));
+  }, [mounted, loading, user, router, searchParams]);
 
-  useEffect(() => {
-    if (mounted && !loading && user) {
-      const redirect = searchParams?.get('redirect') || '/app/agriculture';
-      router.replace(redirect);
-    }
-  }, [user, loading, mounted, router, searchParams]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submitEmailAuth = async (event: React.FormEvent) => {
+    event.preventDefault();
     setError('');
+    setNotice('');
     setSubmitting(true);
 
     try {
+      const redirectTo = getSafeRedirect(searchParams);
       if (mode === 'signin') {
         await signIn(email, password);
-        router.replace('/app/agriculture');
+        router.replace(redirectTo);
       } else {
-        await signUp(email, password, { fullName });
-        router.replace('/app/agriculture');
+        const result = await signUp(email, password, { fullName });
+        if (!result?.session) {
+          setNotice('Check your email to verify your account before signing in. Private beta access is limited to approved users.');
+        } else {
+          router.replace(redirectTo);
+        }
       }
     } catch (err: any) {
       setError(err?.message || 'Authentication failed. Please try again.');
@@ -53,705 +59,132 @@ function LoginContent() {
     }
   };
 
-  const handleForgotPassword = async () => {
-    if (!email) {
-      setError('Enter your email address above, then click Forgot password.');
-      return;
-    }
-    setResetLoading(true);
+  const submitOAuth = async (provider: 'google' | 'apple') => {
     setError('');
+    setSubmitting(true);
     try {
-      const { createClient } = await import('@/lib/supabase/client');
-      const supabase = createClient();
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      });
-      if (resetError) throw resetError;
-      setResetSent(true);
+      await signInWithOAuth(provider, getSafeRedirect(searchParams));
     } catch (err: any) {
-      setError(err?.message || 'Failed to send reset email. Please try again.');
-    } finally {
-      setResetLoading(false);
+      setError(err?.message || `${provider} sign-in is not available yet.`);
+      setSubmitting(false);
     }
   };
 
   if (!mounted || loading) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(180deg, #151926 0%, #1c2538 56%, #25344d 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-        <div style={{
-          width: 28,
-          height: 28,
-          border: '2px solid rgba(255,255,255,0.08)',
-          borderTopColor: 'rgba(255,255,255,0.6)',
-          borderRadius: '50%',
-          animation: 'spin 0.8s linear infinite',
-        }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <div className="auth-loading">
+        <div className="auth-spinner" />
+        <style>{styles}</style>
       </div>
     );
   }
 
-  const inputShellStyle = (fieldName: string): React.CSSProperties => ({
-    display: 'flex',
-    alignItems: 'center',
-    height: 46,
-    borderRadius: 10,
-    border: focusedField === fieldName
-      ? '1px solid rgba(255,255,255,0.5)'
-      : '1px solid rgba(255,255,255,0.36)',
-    background: '#0c0f17',
-    padding: '0 14px',
-    transition: 'border-color 0.15s',
-    gap: 0,
-  });
-
-  const inputStyle: React.CSSProperties = {
-    flex: 1,
-    height: '100%',
-    background: 'transparent',
-    border: 'none',
-    outline: 'none',
-    color: '#f6f7fb',
-    fontSize: 14.5,
-    fontFamily: 'inherit',
-    letterSpacing: '-0.005em',
-  };
-
   return (
     <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes earthAuthFadeUp {
-          from { opacity: 0; transform: translateY(18px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes twinkle {
-          0%, 100% { opacity: 0.2; transform: scale(0.8); }
-          50% { opacity: 1; transform: scale(1.2); }
-        }
-        @keyframes twinkleSlow {
-          0%, 100% { opacity: 0.1; transform: scale(0.9); }
-          50% { opacity: 0.8; transform: scale(1.1); }
-        }
-        @keyframes shootingStar {
-          0% { transform: translateX(0) translateY(0) rotate(-35deg); opacity: 1; width: 0; }
-          30% { width: 120px; opacity: 1; }
-          100% { transform: translateX(400px) translateY(200px) rotate(-35deg); opacity: 0; width: 120px; }
-        }
-        @keyframes auroraShift {
-          0%, 100% { opacity: 0.12; transform: scaleX(1) scaleY(1); }
-          50% { opacity: 0.22; transform: scaleX(1.08) scaleY(1.12); }
-        }
-        @keyframes moonGlow {
-          0%, 100% { box-shadow: 0 0 40px 12px rgba(200,220,255,0.18), 0 0 80px 30px rgba(160,190,255,0.10); }
-          50% { box-shadow: 0 0 60px 20px rgba(200,220,255,0.28), 0 0 120px 50px rgba(160,190,255,0.16); }
-        }
-        .earth-auth-input::placeholder { color: rgba(246,247,251,0.38); }
-        .earth-auth-input:-webkit-autofill,
-        .earth-auth-input:-webkit-autofill:hover,
-        .earth-auth-input:-webkit-autofill:focus {
-          -webkit-box-shadow: 0 0 0 1000px #0c0f17 inset !important;
-          -webkit-text-fill-color: #f6f7fb !important;
-          caret-color: #f6f7fb;
-        }
-        .earth-auth-tab {
-          flex: 1;
-          padding: 7px 0;
-          border-radius: 7px;
-          border: none;
-          cursor: pointer;
-          font-family: inherit;
-          font-size: 13.5px;
-          font-weight: 500;
-          letter-spacing: -0.005em;
-          transition: all 0.18s;
-          background: transparent;
-          color: rgba(246,247,251,0.42);
-        }
-        .earth-auth-tab.active {
-          background: rgba(255,255,255,0.08);
-          color: #f6f7fb;
-        }
-        .earth-auth-tab:hover:not(.active) {
-          color: rgba(246,247,251,0.7);
-        }
-        .earth-auth-primary-btn {
-          width: 100%;
-          height: 46px;
-          border-radius: 10px;
-          border: none;
-          background: #f4f6fa;
-          color: #0b0e14;
-          font-family: inherit;
-          font-size: 14.5px;
-          font-weight: 600;
-          letter-spacing: -0.005em;
-          cursor: pointer;
-          transition: background 0.15s, box-shadow 0.15s;
-          box-shadow: 0 12px 30px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.65);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-        }
-        .earth-auth-primary-btn:hover:not(:disabled) {
-          background: #ffffff;
-        }
-        .earth-auth-primary-btn:disabled {
-          opacity: 0.65;
-          cursor: not-allowed;
-        }
-        .earth-auth-back-link {
-          color: rgba(246,247,251,0.42);
-          text-decoration: none;
-          font-size: 13px;
-          font-weight: 500;
-          letter-spacing: -0.005em;
-          transition: color 0.15s;
-          display: inline-flex;
-          align-items: center;
-          gap: 5px;
-        }
-        .earth-auth-back-link:hover {
-          color: rgba(246,247,251,0.72);
-        }
-        .earth-auth-terms-link {
-          color: rgba(246,247,251,0.82);
-          text-decoration: underline;
-          text-decoration-color: rgba(246,247,251,0.32);
-          text-underline-offset: 2px;
-          text-decoration-thickness: 1px;
-          font-weight: 500;
-        }
-        .earth-auth-terms-link:hover {
-          color: #f6f7fb;
-          text-decoration-color: rgba(246,247,251,0.6);
-        }
-        .earth-auth-switch-btn {
-          background: none;
-          border: none;
-          cursor: pointer;
-          font-family: inherit;
-          font-size: 13px;
-          font-weight: 600;
-          color: rgba(246,247,251,0.82);
-          text-decoration: underline;
-          text-underline-offset: 2px;
-          text-decoration-color: rgba(246,247,251,0.32);
-          padding: 0;
-          transition: color 0.15s;
-        }
-        .earth-auth-switch-btn:hover {
-          color: #f6f7fb;
-        }
-      `}</style>
+      <style>{styles}</style>
+      <main className="auth-root">
+        <div className="auth-bg" />
+        <section className="auth-card" aria-label="Earth AI authentication">
+          <Link href="/" className="auth-brand" aria-label="Earth AI home">
+            <Image src="/assets/images/h9O7B-1789370942958.jpg" alt="Earth AI logo" width={44} height={44} priority />
+            <span>Earth AI</span>
+          </Link>
 
-      <div style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(180deg, #020510 0%, #060c1a 30%, #0a1228 60%, #0d1830 100%)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 'max(28px, env(safe-area-inset-top)) 24px max(28px, env(safe-area-inset-bottom))',
-        fontFamily: "'Plus Jakarta Sans', -apple-system, sans-serif",
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
-        {/* Night sky stars layer */}
-        <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
-          {/* Static star field */}
-          {[
-            { top: '4%', left: '8%', size: 2, delay: '0s', dur: '3.2s' },
-            { top: '7%', left: '22%', size: 1.5, delay: '0.4s', dur: '2.8s' },
-            { top: '3%', left: '38%', size: 2.5, delay: '1.1s', dur: '4s' },
-            { top: '9%', left: '55%', size: 1, delay: '0.7s', dur: '3.5s' },
-            { top: '5%', left: '70%', size: 2, delay: '1.8s', dur: '2.6s' },
-            { top: '2%', left: '85%', size: 1.5, delay: '0.3s', dur: '3.8s' },
-            { top: '12%', left: '14%', size: 1, delay: '2.1s', dur: '3s' },
-            { top: '15%', left: '30%', size: 2, delay: '0.9s', dur: '4.2s' },
-            { top: '11%', left: '48%', size: 1.5, delay: '1.5s', dur: '2.9s' },
-            { top: '18%', left: '62%', size: 2.5, delay: '0.2s', dur: '3.6s' },
-            { top: '13%', left: '78%', size: 1, delay: '1.3s', dur: '2.7s' },
-            { top: '20%', left: '92%', size: 2, delay: '2.4s', dur: '3.3s' },
-            { top: '25%', left: '5%', size: 1.5, delay: '0.6s', dur: '4.1s' },
-            { top: '28%', left: '18%', size: 1, delay: '1.7s', dur: '3s' },
-            { top: '22%', left: '35%', size: 2, delay: '0.8s', dur: '2.5s' },
-            { top: '30%', left: '52%', size: 1.5, delay: '2.2s', dur: '3.7s' },
-            { top: '26%', left: '68%', size: 2.5, delay: '0.5s', dur: '4.4s' },
-            { top: '32%', left: '82%', size: 1, delay: '1.9s', dur: '3.1s' },
-            { top: '38%', left: '10%', size: 2, delay: '1.2s', dur: '2.8s' },
-            { top: '35%', left: '25%', size: 1.5, delay: '0.1s', dur: '3.9s' },
-            { top: '42%', left: '42%', size: 1, delay: '2.6s', dur: '3.4s' },
-            { top: '40%', left: '58%', size: 2, delay: '0.4s', dur: '2.6s' },
-            { top: '45%', left: '75%', size: 1.5, delay: '1.4s', dur: '4s' },
-            { top: '48%', left: '88%', size: 2.5, delay: '0.7s', dur: '3.2s' },
-            { top: '55%', left: '3%', size: 1, delay: '2s', dur: '2.9s' },
-            { top: '52%', left: '20%', size: 2, delay: '1.6s', dur: '3.6s' },
-            { top: '58%', left: '37%', size: 1.5, delay: '0.3s', dur: '4.3s' },
-            { top: '60%', left: '55%', size: 1, delay: '2.3s', dur: '3s' },
-            { top: '56%', left: '72%', size: 2, delay: '0.9s', dur: '2.7s' },
-            { top: '62%', left: '90%', size: 1.5, delay: '1.1s', dur: '3.8s' },
-            { top: '68%', left: '12%', size: 2.5, delay: '0.5s', dur: '4.1s' },
-            { top: '65%', left: '28%', size: 1, delay: '1.8s', dur: '3.3s' },
-            { top: '72%', left: '45%', size: 2, delay: '2.5s', dur: '2.8s' },
-            { top: '70%', left: '62%', size: 1.5, delay: '0.2s', dur: '3.5s' },
-            { top: '75%', left: '80%', size: 1, delay: '1.3s', dur: '4.2s' },
-            { top: '80%', left: '7%', size: 2, delay: '0.6s', dur: '3s' },
-            { top: '78%', left: '23%', size: 1.5, delay: '2.1s', dur: '2.6s' },
-            { top: '85%', left: '40%', size: 2.5, delay: '0.8s', dur: '3.7s' },
-            { top: '82%', left: '57%', size: 1, delay: '1.5s', dur: '4.4s' },
-            { top: '88%', left: '74%', size: 2, delay: '0.4s', dur: '3.1s' },
-            { top: '90%', left: '92%', size: 1.5, delay: '1.9s', dur: '2.9s' },
-            { top: '95%', left: '15%', size: 1, delay: '2.7s', dur: '3.6s' },
-            { top: '93%', left: '33%', size: 2, delay: '0.1s', dur: '4s' },
-            { top: '97%', left: '50%', size: 1.5, delay: '1.2s', dur: '3.3s' },
-            { top: '94%', left: '67%', size: 2.5, delay: '2.4s', dur: '2.7s' },
-            { top: '6%', left: '95%', size: 1, delay: '0.7s', dur: '3.9s' },
-            { top: '33%', left: '96%', size: 2, delay: '1.6s', dur: '3.2s' },
-            { top: '50%', left: '97%', size: 1.5, delay: '0.3s', dur: '4.1s' },
-            { top: '16%', left: '1%', size: 2, delay: '2.2s', dur: '2.8s' },
-            { top: '44%', left: '2%', size: 1, delay: '0.9s', dur: '3.5s' },
-          ].map((star, i) => (
-            <div
-              key={i}
-              style={{
-                position: 'absolute',
-                top: star.top,
-                left: star.left,
-                width: star.size,
-                height: star.size,
-                borderRadius: '50%',
-                background: i % 5 === 0 ? '#b8d4ff' : i % 3 === 0 ? '#e8f0ff' : '#ffffff',
-                animation: `${i % 2 === 0 ? 'twinkle' : 'twinkleSlow'} ${star.dur} ${star.delay} ease-in-out infinite`,
-              }}
-            />
-          ))}
-
-          {/* Moon */}
-          <div style={{
-            position: 'absolute',
-            top: '8%',
-            right: '12%',
-            width: 56,
-            height: 56,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle at 38% 38%, #f0f4ff 0%, #d8e4ff 40%, #b8ccff 100%)',
-            animation: 'moonGlow 6s ease-in-out infinite',
-          }}>
-            {/* Moon craters */}
-            <div style={{ position: 'absolute', top: '22%', left: '28%', width: 8, height: 8, borderRadius: '50%', background: 'rgba(160,180,220,0.35)' }} />
-            <div style={{ position: 'absolute', top: '55%', left: '55%', width: 5, height: 5, borderRadius: '50%', background: 'rgba(160,180,220,0.28)' }} />
-            <div style={{ position: 'absolute', top: '38%', left: '62%', width: 6, height: 6, borderRadius: '50%', background: 'rgba(160,180,220,0.22)' }} />
+          <div className="auth-heading">
+            <p>Private beta</p>
+            <h1>{mode === 'signin' ? 'Sign in to Intelligence E' : 'Request your beta account'}</h1>
+            <span>Access is currently limited to the first 10 approved beta users on the Free plan.</span>
           </div>
 
-          {/* Aurora borealis effect */}
-          <div style={{
-            position: 'absolute',
-            top: '15%',
-            left: '-10%',
-            width: '70%',
-            height: '25%',
-            background: 'radial-gradient(ellipse at center, rgba(32,178,120,0.18) 0%, rgba(32,100,200,0.12) 50%, transparent 80%)',
-            borderRadius: '50%',
-            filter: 'blur(40px)',
-            animation: 'auroraShift 8s ease-in-out infinite',
-          }} />
-          <div style={{
-            position: 'absolute',
-            top: '5%',
-            right: '-5%',
-            width: '50%',
-            height: '20%',
-            background: 'radial-gradient(ellipse at center, rgba(80,60,200,0.15) 0%, rgba(140,60,200,0.10) 50%, transparent 80%)',
-            borderRadius: '50%',
-            filter: 'blur(50px)',
-            animation: 'auroraShift 10s 2s ease-in-out infinite',
-          }} />
-
-          {/* Shooting star */}
-          <div style={{
-            position: 'absolute',
-            top: '18%',
-            left: '10%',
-            height: 1.5,
-            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent)',
-            borderRadius: 2,
-            animation: 'shootingStar 8s 3s ease-in infinite',
-          }} />
-          <div style={{
-            position: 'absolute',
-            top: '35%',
-            left: '60%',
-            height: 1,
-            background: 'linear-gradient(90deg, transparent, rgba(200,220,255,0.8), transparent)',
-            borderRadius: 2,
-            animation: 'shootingStar 12s 7s ease-in infinite',
-          }} />
-
-          {/* Milky way subtle band */}
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'linear-gradient(125deg, transparent 20%, rgba(100,120,200,0.04) 40%, rgba(140,160,240,0.07) 50%, rgba(100,120,200,0.04) 60%, transparent 80%)',
-          }} />
-        </div>
-
-        {/* Subtle radial vignette overlay */}
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          pointerEvents: 'none',
-          background: 'radial-gradient(circle at 50% 52%, rgba(8,10,17,0) 0%, rgba(8,10,17,0.12) 38%, rgba(8,10,17,0.62) 100%), linear-gradient(180deg, rgba(7,9,18,0.05) 0%, rgba(7,9,18,0.56) 100%)',
-          zIndex: 0,
-        }} />
-
-        {/* Auth card */}
-        <div style={{
-          position: 'relative',
-          zIndex: 1,
-          width: 'min(100%, 420px)',
-          animation: 'earthAuthFadeUp 0.5s cubic-bezier(0.23,1,0.32,1) both',
-        }}>
-          {/* Logo orb */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            marginBottom: 16,
-          }}>
-            <Link href="/" style={{ display: 'inline-flex', borderRadius: 8, textDecoration: 'none' }} aria-label="Back to Earth AI home">
-              <Image
-                src="/assets/images/h9O7B-1789370942958.jpg"
-                alt="Earth AI logo"
-                width={64}
-                height={64}
-                priority
-                style={{
-                  width: 64,
-                  height: 64,
-                  borderRadius: '50%',
-                  objectFit: 'cover',
-                  display: 'block',
-                  filter: 'drop-shadow(0 18px 38px rgba(0,0,0,0.24))',
-                }}
-              />
-            </Link>
+          <div className="auth-tabs" role="tablist" aria-label="Authentication mode">
+            <button type="button" className={mode === 'signin' ? 'active' : ''} onClick={() => { setMode('signin'); setError(''); setNotice(''); }}>Sign in</button>
+            <button type="button" className={mode === 'signup' ? 'active' : ''} onClick={() => { setMode('signup'); setError(''); setNotice(''); }}>Create account</button>
           </div>
 
-          {/* Heading */}
-          <div style={{ textAlign: 'center', marginBottom: 28 }}>
-            <h1 style={{
-              margin: 0,
-              color: '#f6f7fb',
-              fontSize: 28,
-              fontWeight: 600,
-              letterSpacing: 0,
-              lineHeight: 1.15,
-            }}>
-              {mode === 'signin' ? 'Sign in to Earth AI' : 'Create your account'}
-            </h1>
-            <p style={{
-              margin: '10px 0 0',
-              color: 'rgba(246,247,251,0.58)',
-              fontSize: 15,
-              lineHeight: 1.45,
-              letterSpacing: 0,
-              fontWeight: 400,
-            }}>
-              {mode === 'signin' ?'Intelligence E Agriculture platform' :'Start using Intelligence E Agriculture'}
-            </p>
+          <div className="oauth-row">
+            <button type="button" onClick={() => submitOAuth('google')} disabled={submitting}>Continue with Google</button>
+            <button type="button" onClick={() => submitOAuth('apple')} disabled={submitting}>Continue with Apple</button>
           </div>
 
-          {/* Card */}
-          <div style={{
-            position: 'relative',
-            width: '100%',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: 20,
-            background: '#10141d',
-            color: '#f6f7fb',
-            boxShadow: '0 24px 70px rgba(0,0,0,0.26)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            padding: '32px 28px 28px',
-          }}>
-            {/* Tab switcher */}
-            <div style={{
-              display: 'flex',
-              width: '100%',
-              background: 'rgba(255,255,255,0.04)',
-              borderRadius: 10,
-              padding: 3,
-              marginBottom: 24,
-              gap: 2,
-            }}>
-              <button
-                type="button"
-                className={`earth-auth-tab${mode === 'signin' ? ' active' : ''}`}
-                onClick={() => { setMode('signin'); setError(''); }}
-              >
-                Sign In
-              </button>
-              <button
-                type="button"
-                className={`earth-auth-tab${mode === 'signup' ? ' active' : ''}`}
-                onClick={() => { setMode('signup'); setError(''); }}
-              >
-                Create Account
-              </button>
-            </div>
+          <div className="auth-divider"><span />or use email<span /></div>
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {mode === 'signup' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <label style={{
-                    color: '#f6f7fb',
-                    fontSize: 12,
-                    fontWeight: 600,
-                    letterSpacing: '-0.005em',
-                  }}>
-                    Full Name
-                  </label>
-                  <div style={inputShellStyle('fullName')}>
-                    <input
-                      type="text"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      onFocus={() => setFocusedField('fullName')}
-                      onBlur={() => setFocusedField(null)}
-                      placeholder="Your full name"
-                      required
-                      autoComplete="name"
-                      className="earth-auth-input"
-                      style={inputStyle}
-                    />
-                  </div>
-                </div>
-              )}
+          <form onSubmit={submitEmailAuth} className="auth-form">
+            {mode === 'signup' && (
+              <label>
+                Full name
+                <input value={fullName} onChange={(event) => setFullName(event.target.value)} autoComplete="name" required placeholder="Your name" />
+              </label>
+            )}
+            <label>
+              Email
+              <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required placeholder="you@example.com" />
+            </label>
+            <label>
+              Password
+              <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} minLength={8} required placeholder="Password" />
+            </label>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <label style={{
-                  color: '#f6f7fb',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  letterSpacing: '-0.005em',
-                }}>
-                  Email
-                </label>
-                <div style={inputShellStyle('email')}>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onFocus={() => setFocusedField('email')}
-                    onBlur={() => setFocusedField(null)}
-                    placeholder="you@example.com"
-                    required
-                    autoComplete="email"
-                    inputMode="email"
-                    autoCapitalize="none"
-                    autoCorrect="off"
-                    spellCheck={false}
-                    className="earth-auth-input"
-                    style={inputStyle}
-                  />
-                </div>
-              </div>
+            {error && <div className="auth-error">{error}</div>}
+            {notice && <div className="auth-notice">{notice}</div>}
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <label style={{
-                    color: '#f6f7fb',
-                    fontSize: 12,
-                    fontWeight: 600,
-                    letterSpacing: '-0.005em',
-                  }}>
-                    Password
-                  </label>
-                  {mode === 'signin' && (
-                    <button
-                      type="button"
-                      onClick={handleForgotPassword}
-                      disabled={resetLoading}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        cursor: resetLoading ? 'not-allowed' : 'pointer',
-                        color: resetSent ? '#4ade80' : 'rgba(246,247,251,0.42)',
-                        fontSize: 12,
-                        fontWeight: 500,
-                        letterSpacing: '-0.005em',
-                        padding: 0,
-                        fontFamily: 'inherit',
-                        transition: 'color 0.15s',
-                      }}
-                    >
-                      {resetLoading ? 'Sending...' : resetSent ? 'Reset email sent' : 'Forgot password?'}
-                    </button>
-                  )}
-                </div>
-                <div style={inputShellStyle('password')}>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onFocus={() => setFocusedField('password')}
-                    onBlur={() => setFocusedField(null)}
-                    placeholder="Password"
-                    required
-                    minLength={8}
-                    autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-                    className="earth-auth-input"
-                    style={inputStyle}
-                  />
-                </div>
-              </div>
+            <button className="auth-submit" type="submit" disabled={submitting}>{submitting ? 'Please wait...' : mode === 'signin' ? 'Sign in' : 'Create account'}</button>
+          </form>
 
-              {error && (
-                <div style={{
-                  borderRadius: 8,
-                  border: '1px solid rgba(202,57,42,0.28)',
-                  background: 'rgba(202,57,42,0.10)',
-                  padding: '10px 14px',
-                  color: '#f87171',
-                  fontSize: 13,
-                  lineHeight: 1.5,
-                  letterSpacing: '-0.005em',
-                }}>
-                  {error}
-                </div>
-              )}
-
-              <div style={{ marginTop: 4 }}>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="earth-auth-primary-btn"
-                >
-                  {submitting && (
-                    <div style={{
-                      width: 15,
-                      height: 15,
-                      border: '2px solid rgba(11,14,20,0.25)',
-                      borderTopColor: '#0b0e14',
-                      borderRadius: '50%',
-                      animation: 'spin 0.8s linear infinite',
-                      flexShrink: 0,
-                    }} />
-                  )}
-                  {submitting
-                    ? 'Please wait...'
-                    : mode === 'signin' ?'Sign In' :'Create Account'}
-                </button>
-              </div>
-
-              {/* Divider */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 14,
-                padding: '4px 0',
-              }}>
-                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
-                <span style={{
-                  color: 'rgba(246,247,251,0.38)',
-                  fontSize: 12.5,
-                  fontWeight: 500,
-                  letterSpacing: '0.02em',
-                }}>
-                  or
-                </span>
-                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
-              </div>
-
-              {/* Switch mode */}
-              <div style={{ textAlign: 'center' }}>
-                <span style={{
-                  color: 'rgba(246,247,251,0.42)',
-                  fontSize: 13,
-                  fontWeight: 400,
-                  letterSpacing: '-0.005em',
-                }}>
-                  {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
-                </span>
-                <button
-                  type="button"
-                  className="earth-auth-switch-btn"
-                  onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); }}
-                >
-                  {mode === 'signin' ? 'Create one' : 'Sign in'}
-                </button>
-              </div>
-            </form>
-
-            {/* Terms */}
-            <p style={{
-              marginTop: 20,
-              color: 'rgba(246,247,251,0.38)',
-              fontSize: 11.5,
-              fontWeight: 400,
-              lineHeight: 1.55,
-              textAlign: 'center',
-              letterSpacing: '-0.005em',
-              maxWidth: 320,
-            }}>
-              By continuing, you agree to Earth AI's{' '}
-              <Link href="/terms" className="earth-auth-terms-link">Terms of Service</Link>
-              {' '}and acknowledge the{' '}
-              <Link href="/privacy" className="earth-auth-terms-link">Privacy Policy</Link>.
-            </p>
-          </div>
-
-          {/* Back link */}
-          <div style={{ textAlign: 'center', marginTop: 22 }}>
-            <Link href="/" className="earth-auth-back-link">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-              </svg>
-              Back to Earth AI
-            </Link>
-          </div>
-        </div>
-      </div>
+          <p className="auth-note">
+            Not invited yet? <Link href="/waitlist">Join the waitlist</Link> for early access, launch discounts, and private beta updates.
+          </p>
+          <p className="auth-legal">
+            Email sign-up requires verification. OAuth providers must be enabled in Supabase before Google or Apple sign-in can complete.
+          </p>
+        </section>
+      </main>
     </>
   );
 }
 
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .auth-loading { min-height: 100vh; display: grid; place-items: center; background: #050816; }
+  .auth-spinner { width: 28px; height: 28px; border-radius: 999px; border: 2px solid rgba(255,255,255,0.16); border-top-color: #fff; animation: spin 0.8s linear infinite; }
+  .auth-root { min-height: 100vh; padding: max(28px, env(safe-area-inset-top)) 18px max(28px, env(safe-area-inset-bottom)); display: grid; place-items: center; position: relative; overflow-x: hidden; background: #050816; }
+  .auth-bg { position: fixed; inset: 0; background-image: linear-gradient(180deg, rgba(3,7,18,0.46), rgba(3,7,18,0.74)), url(https://images.unsplash.com/photo-1518066000714-58c45f1a2c0a); background-size: cover; background-position: center; }
+  .auth-card { width: min(100%, 430px); position: relative; z-index: 1; padding: 26px; border: 1px solid rgba(255,255,255,0.16); border-radius: 18px; background: rgba(10,14,24,0.84); color: #f8fafc; backdrop-filter: blur(20px); box-shadow: 0 24px 70px rgba(0,0,0,0.26); }
+  .auth-brand { display: inline-flex; align-items: center; gap: 10px; color: #fff; text-decoration: none; font-size: 15px; font-weight: 700; }
+  .auth-brand img { border-radius: 10px; object-fit: cover; }
+  .auth-heading { margin: 24px 0; }
+  .auth-heading p { margin: 0 0 8px; color: #93c5fd; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800; }
+  .auth-heading h1 { margin: 0; color: #fff; font-size: 27px; line-height: 1.15; letter-spacing: -0.03em; }
+  .auth-heading span { display: block; margin-top: 10px; color: rgba(248,250,252,0.68); font-size: 14px; line-height: 1.55; }
+  .auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 11px; background: rgba(255,255,255,0.07); }
+  .auth-tabs button { min-height: 38px; border: 0; border-radius: 8px; background: transparent; color: rgba(248,250,252,0.6); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .auth-tabs button.active { background: #fff; color: #0f172a; }
+  .oauth-row { display: grid; gap: 9px; margin-top: 16px; }
+  .oauth-row button, .auth-submit { min-height: 44px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.18); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .oauth-row button { background: rgba(255,255,255,0.08); color: #fff; }
+  .oauth-row button:hover { background: rgba(255,255,255,0.13); }
+  .auth-divider { display: flex; align-items: center; gap: 12px; margin: 16px 0; color: rgba(248,250,252,0.44); font-size: 12px; font-weight: 700; }
+  .auth-divider span { flex: 1; height: 1px; background: rgba(255,255,255,0.12); }
+  .auth-form { display: grid; gap: 12px; }
+  .auth-form label { display: grid; gap: 7px; color: rgba(248,250,252,0.82); font-size: 12px; font-weight: 700; }
+  .auth-form input { width: 100%; height: 44px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.22); background: rgba(2,6,23,0.6); color: #fff; padding: 0 13px; font: inherit; outline: none; }
+  .auth-form input:focus { border-color: rgba(147,197,253,0.8); box-shadow: 0 0 0 3px rgba(59,130,246,0.18); }
+  .auth-submit { margin-top: 4px; background: #fff; color: #0f172a; border-color: #fff; }
+  .auth-submit:disabled, .oauth-row button:disabled { opacity: 0.6; cursor: not-allowed; }
+  .auth-error, .auth-notice { border-radius: 10px; padding: 10px 12px; font-size: 13px; line-height: 1.45; }
+  .auth-error { border: 1px solid rgba(248,113,113,0.36); background: rgba(127,29,29,0.28); color: #fecaca; }
+  .auth-notice { border: 1px solid rgba(134,239,172,0.36); background: rgba(20,83,45,0.28); color: #bbf7d0; }
+  .auth-note, .auth-legal { margin: 16px 0 0; color: rgba(248,250,252,0.62); font-size: 13px; line-height: 1.55; text-align: center; }
+  .auth-note a, .auth-legal a { color: #bfdbfe; }
+  .auth-legal { font-size: 11.5px; color: rgba(248,250,252,0.46); }
+  @media (max-width: 460px) { .auth-card { padding: 20px; border-radius: 14px; } .auth-heading h1 { font-size: 24px; } }
+`;
+
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(180deg, #151926 0%, #1c2538 56%, #25344d 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-        <div style={{
-          width: 28,
-          height: 28,
-          border: '2px solid rgba(255,255,255,0.08)',
-          borderTopColor: 'rgba(255,255,255,0.6)',
-          borderRadius: '50%',
-          animation: 'spin 0.8s linear infinite',
-        }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
-    }>
+    <Suspense fallback={<div className="auth-loading"><div className="auth-spinner" /><style>{styles}</style></div>}>
       <LoginContent />
     </Suspense>
   );
