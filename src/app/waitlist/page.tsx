@@ -77,7 +77,7 @@ export default function WaitlistPage() {
           <div className="wait-copy">
             <p>Private beta</p>
             <h1>Join the Earth AI waitlist.</h1>
-            <p>Earth AI is opening Intelligence E carefully. The first private beta is limited to 10 approved users on the Free plan so the product can be tested safely before wider release.</p>
+            <p>Earth AI is opening Intelligence E carefully. Private beta access is approved gradually so the product can be tested safely before wider release.</p>
             <div className="wait-points">
               <div className="wait-point">Approved beta users get early access to Intelligence E for Agriculture.</div>
               <div className="wait-point">Waitlist members receive early access updates and launch discount opportunities.</div>
