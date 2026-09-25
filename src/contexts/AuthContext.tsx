@@ -1,4 +1,3 @@
-
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
@@ -8,6 +7,8 @@ interface SignUpMetadata {
   fullName?: string;
   avatarUrl?: string;
 }
+
+type OAuthProvider = 'google' | 'apple';
 
 const AuthContext = createContext<any>({});
 
@@ -26,16 +27,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const supabase = createClient();
 
   useEffect(() => {
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    // Listen for auth changes
     const {
-      data: { subscription }
+      data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -45,7 +44,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Email/Password Sign Up
   const signUp = async (email: string, password: string, metadata: SignUpMetadata = {}) => {
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -53,44 +51,47 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       options: {
         data: {
           full_name: metadata.fullName || '',
-          avatar_url: metadata.avatarUrl || ''
+          avatar_url: metadata.avatarUrl || '',
         },
-        emailRedirectTo: `${window.location.origin}/auth/callback`
-      }
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
     });
     if (error) throw error;
     return data;
   };
 
-  // Email/Password Sign In
   const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    return data;
+  };
+
+  const signInWithOAuth = async (provider: OAuthProvider, redirectTo = '/app/agriculture') => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
+      },
     });
     if (error) throw error;
     return data;
   };
 
-  // Sign Out
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   };
 
-  // Get Current User
   const getCurrentUser = async () => {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error) throw error;
     return user;
   };
 
-  // Check if Email is Verified
   const isEmailVerified = () => {
-    return user?.email_confirmed_at !== null;
+    return Boolean(user?.email_confirmed_at);
   };
 
-  // Get User Profile from Database
   const getUserProfile = async () => {
     if (!user) return null;
     const { data, error } = await supabase
@@ -108,10 +109,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     loading,
     signUp,
     signIn,
+    signInWithOAuth,
     signOut,
     getCurrentUser,
     isEmailVerified,
-    getUserProfile
+    getUserProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
