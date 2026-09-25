@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { checkReportAllowed, checkAIRequestAllowed, recordAICreditsUsed } from '@/lib/subscription/enforcer';
+import { checkReportAllowed, recordAICreditsUsed, refundAIRequestUsage, reserveAIRequestUsage } from '@/lib/subscription/enforcer';
 import { getAIRouter } from '@/lib/ai/router';
 
 export const runtime = 'nodejs';
@@ -16,21 +16,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Server-side report limit enforcement
     const reportCheck = await checkReportAllowed(user.id);
     if (!reportCheck.allowed) {
       return NextResponse.json(
         { error: reportCheck.reason, limitType: reportCheck.limitType, upgradeRequired: true },
         { status: 403 }
-      );
-    }
-
-    // Server-side AI credit enforcement for report generation
-    const creditCheck = await checkAIRequestAllowed(user.id, 'report');
-    if (!creditCheck.allowed) {
-      return NextResponse.json(
-        { error: creditCheck.reason, limitType: creditCheck.limitType, upgradeRequired: true, creditsRemaining: creditCheck.creditsRemaining },
-        { status: 429 }
       );
     }
 
@@ -47,7 +37,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Title and report type are required' }, { status: 400 });
     }
 
-    // Create report record
+    const creditCheck = await reserveAIRequestUsage(user.id, 'report');
+    if (!creditCheck.allowed) {
+      return NextResponse.json(
+        { error: creditCheck.reason, limitType: creditCheck.limitType, upgradeRequired: true, creditsRemaining: creditCheck.creditsRemaining },
+        { status: 429 }
+      );
+    }
+
+    const creditsUsed = creditCheck.creditsRequired ?? 10;
+
     const { data: report, error: insertError } = await supabase
       .from('reports')
       .insert({
@@ -61,10 +60,10 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError || !report) {
+      await refundAIRequestUsage(user.id, creditsUsed);
       return NextResponse.json({ error: 'Failed to create report' }, { status: 500 });
     }
 
-    // Generate report content via AI
     const router = getAIRouter();
     const aiResponse = await router.route({
       messages: [
@@ -78,10 +77,9 @@ export async function POST(request: NextRequest) {
     });
 
     if (aiResponse.success) {
-      // Record credits
       recordAICreditsUsed(
         user.id,
-        creditCheck.creditsRequired ?? 10,
+        creditsUsed,
         'report',
         aiResponse.provider,
         aiResponse.model,
@@ -90,7 +88,6 @@ export async function POST(request: NextRequest) {
         aiResponse.processingTimeMs
       ).catch(() => {});
 
-      // Update report with content
       await supabase
         .from('reports')
         .update({
@@ -104,10 +101,11 @@ export async function POST(request: NextRequest) {
         .eq('id', report.id);
 
       return NextResponse.json({ report: { ...report, status: 'completed', content: aiResponse.content } });
-    } else {
-      await supabase.from('reports').update({ status: 'failed' }).eq('id', report.id);
-      return NextResponse.json({ error: aiResponse.error || 'Report generation failed' }, { status: 500 });
     }
+
+    await refundAIRequestUsage(user.id, creditsUsed);
+    await supabase.from('reports').update({ status: 'failed' }).eq('id', report.id);
+    return NextResponse.json({ error: aiResponse.error || 'Report generation failed' }, { status: 500 });
   } catch (error) {
     console.error('[Reports API] Error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
