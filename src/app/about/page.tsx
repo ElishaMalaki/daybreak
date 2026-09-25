@@ -59,19 +59,19 @@ export default function AboutPage() {
       name: 'Intelligence E Agriculture',
       status: 'Try Intelligence E Now',
       href: '/login',
-      body: 'An agricultural intelligence platform designed to help users understand agricultural data, research, risks, markets, production and decision making. Intelligence E Agriculture provides specialized AI capabilities for farmers, agribusinesses, and agricultural professionals.',
+      body: 'An agricultural intelligence platform designed to help users understand agricultural data, research, risks, markets, production and decision-making. Intelligence E Agriculture provides specialized AI capabilities for farmers, agribusinesses, and agricultural professionals.',
     },
     {
       name: 'Intelligence E Finance',
       status: 'Coming Soon',
       href: '/finance',
-      body: 'A financial intelligence vertical within the Intelligence E platform. Designed to provide specialized AI capabilities for financial analysis, market intelligence, and economic decision making.',
+      body: 'A financial intelligence vertical within the Intelligence E platform. Designed to provide specialized AI capabilities for financial analysis, market intelligence, and economic decision-making.',
     },
     {
       name: 'Pelit Farm',
       status: 'Farm Management',
       href: '/waitlist',
-      body: 'A farm management platform designed to help farmers and agricultural businesses manage operations, production and financial information. Pelit Farm provides the operational layer that complements Intelligence E Agriculture analytical capabilities, giving agricultural businesses a complete view of their operations.',
+      body: 'A farm management platform designed to help farmers and agricultural businesses manage operations, production and financial information. Pelit Farm provides the operational layer that complements Intelligence E Agriculture\'s analytical capabilities — giving agricultural businesses a complete view of their operations.',
     },
   ], []);
 
@@ -82,15 +82,15 @@ export default function AboutPage() {
     },
     {
       title: 'Practical Decision Support',
-      body: 'Intelligence that leads to better decisions, not just information for its own sake.',
+      body: 'Intelligence that leads to better decisions — not just information for its own sake.',
     },
     {
-      title: 'Data Driven Analysis',
+      title: 'Data-Driven Analysis',
       body: 'Conclusions grounded in data, not assumptions. Rigorous analysis at every layer.',
     },
     {
       title: 'Responsible AI',
-      body: 'Thoughtful deployment. We consider the implications of AI in high stakes environments.',
+      body: 'Thoughtful deployment. We consider the implications of AI in high-stakes environments.',
     },
     {
       title: 'Security and Privacy',
@@ -119,13 +119,11 @@ export default function AboutPage() {
         .about-link { color: inherit; text-decoration: none; font-size: 14px; font-weight: 700; opacity: 0.72; padding: 9px 12px; border-radius: 999px; }
         .about-link:hover, .about-link.active { opacity: 1; background: rgba(255,255,255,0.16); }
         .about-button { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 18px; border-radius: 999px; text-decoration: none; font-size: 14px; font-weight: 800; }
-        .about-main { max-width: 1080px; margin: 0 auto; padding: clamp(70px, 10vw, 128px) 0 56px; }
-        .about-eyebrow { display: inline-flex; align-items: center; margin-bottom: 24px; padding: 7px 13px; border: 1px solid rgba(255,255,255,0.24); border-radius: 999px; background: var(--panel); backdrop-filter: blur(18px); font-size: 12px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
-        .about-title { max-width: 880px; margin: 0; font-size: clamp(42px, 7vw, 86px); line-height: 0.98; letter-spacing: -0.065em; font-weight: 800; }
-        .about-lead { max-width: 780px; margin: 28px 0 0; color: var(--muted); font-size: clamp(17px, 2vw, 22px); line-height: 1.65; font-weight: 500; }
+        .about-main { max-width: 1080px; margin: 0 auto; padding: clamp(56px, 8vw, 104px) 0 56px; }
         .about-section { margin-top: 72px; }
+        .about-section:first-child { margin-top: 0; }
         .about-kicker { margin: 0 0 8px; color: var(--muted); font-size: 12px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
-        .about-section h2 { margin: 0 0 16px; font-size: clamp(26px, 3vw, 38px); line-height: 1.12; letter-spacing: -0.04em; }
+        .about-section h1, .about-section h2 { margin: 0 0 16px; font-size: clamp(28px, 4vw, 48px); line-height: 1.08; letter-spacing: -0.045em; }
         .about-section p { max-width: 820px; margin: 0; color: var(--muted); font-size: 16px; line-height: 1.82; }
         .about-section p + p { margin-top: 16px; }
         .about-products, .about-grid { display: grid; gap: 14px; margin-top: 24px; }
@@ -173,20 +171,14 @@ export default function AboutPage() {
           </nav>
 
           <main className="about-main">
-            <div className="about-eyebrow">About Us</div>
-            <h1 className="about-title">Specialized intelligence for the real world.</h1>
-            <p className="about-lead">
-              Earth AI is an artificial intelligence company developing specialized AI products designed to provide practical intelligence for specific industries and domains.
-            </p>
-
             <section className="about-section">
               <p className="about-kicker">The Company</p>
-              <h2>Earth AI</h2>
+              <h1>Earth AI</h1>
               <p>
-                Earth AI focuses on building specialized intelligence rather than being a general purpose chatbot. The company believes that the most useful AI is the kind that deeply understands the domain it operates in, trained on the right data, designed for the right decisions, and built for the people who depend on accurate, actionable information.
+                Earth AI focuses on building specialized intelligence rather than being a general-purpose chatbot. The company believes that the most useful AI is the kind that deeply understands the domain it operates in — trained on the right data, designed for the right decisions, and built for the people who depend on accurate, actionable information.
               </p>
               <p>
-                Where general AI tools offer broad capability, Earth AI products offer depth. Each product is built around a specific industry, with the goal of making advanced artificial intelligence genuinely useful in real world environments, not just impressive in a demonstration.
+                Where general AI tools offer broad capability, Earth AI products offer depth. Each product is built around a specific industry, with the goal of making advanced artificial intelligence genuinely useful in real-world environments — not just impressive in a demonstration.
               </p>
             </section>
 
@@ -194,7 +186,7 @@ export default function AboutPage() {
               <p className="about-kicker">The Platform</p>
               <h2>Intelligence E</h2>
               <p>
-                Intelligence E is Earth AI&apos;s vertical intelligence platform. It is designed to deliver domain specific AI capabilities across industries where precision, context, and reliability matter most. Each Intelligence E vertical is a focused product, not a feature, built to serve a specific professional environment.
+                Intelligence E is Earth AI&apos;s vertical intelligence platform. It is designed to deliver domain-specific AI capabilities across industries where precision, context, and reliability matter most. Each Intelligence E vertical is a focused product — not a feature — built to serve a specific professional environment.
               </p>
               <p>
                 The current Intelligence E focus is Agriculture. Other verticals, including Finance, are part of the future roadmap.
@@ -222,10 +214,10 @@ export default function AboutPage() {
               <p className="about-kicker">Vision</p>
               <h2>Why Earth AI Exists</h2>
               <p>
-                Earth AI aims to make advanced artificial intelligence more useful by applying it to real world industries, organizations and decision making environments. The goal is not to build AI that is impressive in isolation, but AI that is genuinely valuable in the hands of professionals who need reliable, domain specific intelligence to make better decisions.
+                Earth AI aims to make advanced artificial intelligence more useful by applying it to real-world industries, organizations and decision-making environments. The goal is not to build AI that is impressive in isolation — but AI that is genuinely valuable in the hands of professionals who need reliable, domain-specific intelligence to make better decisions.
               </p>
               <p>
-                Industries like agriculture and finance operate in complex, high stakes environments where the cost of poor decisions is real. Earth AI is built on the belief that specialized intelligence, grounded in domain knowledge, trained on relevant data, and designed for specific workflows, is far more valuable than general purpose AI applied broadly.
+                Industries like agriculture and finance operate in complex, high-stakes environments where the cost of poor decisions is real. Earth AI is built on the belief that specialized intelligence — grounded in domain knowledge, trained on relevant data, and designed for specific workflows — is far more valuable than general-purpose AI applied broadly.
               </p>
             </section>
 
@@ -252,7 +244,7 @@ export default function AboutPage() {
           </main>
 
           <footer className="about-footer">
-            <span>Earth AI. Specialized intelligence for real world industries.</span>
+            <span>Earth AI. Specialized intelligence for real-world industries.</span>
             <span>
               <Link href="/privacy">Privacy</Link>
               <Link href="/terms">Terms</Link>
