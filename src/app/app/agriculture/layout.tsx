@@ -12,6 +12,10 @@ interface NavItem {
   icon: React.ReactNode;
 }
 
+type ThemeMode = 'light' | 'dark';
+
+const THEME_STORAGE_KEY = 'earth-ai-theme';
+
 const Icon = ({ children }: { children: React.ReactNode }) => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     {children}
@@ -41,6 +45,21 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [signingOut, setSigningOut] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [theme, setTheme] = useState<ThemeMode>('light');
+
+  useEffect(() => {
+    const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY) as ThemeMode | null;
+    if (storedTheme === 'light' || storedTheme === 'dark') {
+      setTheme(storedTheme);
+      return;
+    }
+    setTheme(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    document.documentElement.dataset.earthAiTheme = theme;
+  }, [theme]);
 
   useEffect(() => {
     if (!loading && !user) router.replace('/login');
@@ -84,6 +103,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const allNavItems = [...navItems, ...bottomNavItems];
   const currentItem = allNavItems.find((item) => item.exact ? pathname === item.href : pathname?.startsWith(item.href));
   const isActive = (item: NavItem) => item.exact ? pathname === item.href : pathname?.startsWith(item.href);
+  const nextTheme = theme === 'dark' ? 'light' : 'dark';
 
   return (
     <>
@@ -92,27 +112,41 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         *, *::before, *::after { box-sizing: border-box; }
         html, body { min-height: 100%; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #ffffff; color: #111827; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .ie-sidebar { position: fixed; inset: 0 auto 0 0; width: 260px; background: #f7f7f8; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; z-index: 50; transition: transform 0.2s ease; }
-        .ie-main { margin-left: 260px; min-height: 100vh; background: #ffffff; min-width: 0; }
-        .ie-topbar { height: 58px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; gap: 12px; padding: 0 24px; background: rgba(255,255,255,0.96); position: sticky; top: 0; z-index: 40; }
-        .ie-nav-item { display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 8px 10px; border-radius: 8px; color: #4b5563; text-decoration: none; font-size: 14px; font-weight: 500; line-height: 1.2; }
-        .ie-nav-item:hover { background: #ececf1; color: #111827; }
-        .ie-nav-item.active { background: #ececf1; color: #111827; font-weight: 600; }
+        .ie-shell { --app-bg: #ffffff; --shell-bg: #ffffff; --surface: #ffffff; --surface-soft: #f7f7f8; --surface-hover: #ececf1; --text: #111827; --muted: #6b7280; --muted-strong: #4b5563; --border: #e5e7eb; --border-strong: #d1d5db; --danger: #b91c1c; --avatar-bg: #111827; --avatar-text: #ffffff; --shadow: 0 12px 30px rgba(17,24,39,0.10); display: flex; min-height: 100vh; background: var(--app-bg); color: var(--text); }
+        .ie-shell.theme-dark { --app-bg: #050507; --shell-bg: #090a0f; --surface: rgba(18, 19, 24, 0.94); --surface-soft: rgba(13, 14, 19, 0.96); --surface-hover: rgba(255,255,255,0.08); --text: #f4f4f5; --muted: #a1a1aa; --muted-strong: #d4d4d8; --border: rgba(255,255,255,0.10); --border-strong: rgba(255,255,255,0.16); --danger: #fca5a5; --avatar-bg: #f4f4f5; --avatar-text: #09090b; --shadow: 0 18px 46px rgba(0,0,0,0.42); }
+        .ie-shell.theme-dark::before { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(circle at 18% -4%, rgba(115, 115, 130, 0.20), transparent 30%), radial-gradient(circle at 84% 10%, rgba(86, 100, 120, 0.16), transparent 28%), linear-gradient(180deg, #050507 0%, #090a0f 48%, #050507 100%); }
+        .ie-sidebar { position: fixed; inset: 0 auto 0 0; width: 260px; background: var(--surface-soft); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 50; transition: transform 0.2s ease; backdrop-filter: blur(18px); }
+        .ie-main { margin-left: 260px; min-height: 100vh; background: transparent; min-width: 0; flex: 1; position: relative; z-index: 1; }
+        .ie-topbar { height: 58px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; padding: 0 24px; background: color-mix(in srgb, var(--surface) 90%, transparent); backdrop-filter: blur(16px); position: sticky; top: 0; z-index: 40; }
+        .ie-nav-item { display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 8px 10px; border-radius: 8px; color: var(--muted-strong); text-decoration: none; font-size: 14px; font-weight: 500; line-height: 1.2; }
+        .ie-nav-item:hover { background: var(--surface-hover); color: var(--text); }
+        .ie-nav-item.active { background: var(--surface-hover); color: var(--text); font-weight: 600; }
         .ie-nav-section { padding: 14px 10px 0; }
-        .ie-section-label { padding: 0 10px 8px; color: #8b8f98; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+        .ie-section-label { padding: 0 10px 8px; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
         .ie-mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(17,24,39,0.32); z-index: 49; }
         .ie-menu-btn { display: none; }
-        .ie-top-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff; color: #4b5563; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .ie-top-btn:hover { background: #f7f7f8; color: #111827; }
-        .ie-dropdown { position: absolute; top: calc(100% + 8px); right: 0; min-width: 220px; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; box-shadow: 0 12px 30px rgba(17,24,39,0.10); overflow: hidden; z-index: 100; }
-        .ie-dropdown-item { width: 100%; display: flex; align-items: center; gap: 9px; padding: 10px 14px; color: #374151; font-family: inherit; font-size: 13px; font-weight: 500; text-decoration: none; border: 0; background: transparent; cursor: pointer; text-align: left; }
-        .ie-dropdown-item:hover { background: #f7f7f8; }
-        .ie-dropdown-item.danger { color: #b91c1c; }
-        .ie-page-pad { padding: 24px 28px 56px; max-width: 100%; overflow-x: hidden; }
+        .ie-top-btn, .ie-user-menu-btn, .ie-theme-toggle { border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--muted-strong); display: flex; align-items: center; justify-content: center; cursor: pointer; font-family: inherit; }
+        .ie-top-btn { width: 36px; height: 36px; }
+        .ie-top-btn:hover, .ie-user-menu-btn:hover, .ie-theme-toggle:hover { background: var(--surface-hover); color: var(--text); }
+        .ie-theme-toggle { height: 38px; gap: 8px; padding: 0 11px; font-size: 12px; font-weight: 700; }
+        .ie-theme-toggle svg { width: 15px; height: 15px; }
+        .ie-user-menu-btn { gap: 8px; height: 38px; padding: 0 10px 0 5px; }
+        .ie-dropdown { position: absolute; top: calc(100% + 8px); right: 0; min-width: 220px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); overflow: hidden; z-index: 100; }
+        .ie-dropdown-item { width: 100%; display: flex; align-items: center; gap: 9px; padding: 10px 14px; color: var(--muted-strong); font-family: inherit; font-size: 13px; font-weight: 500; text-decoration: none; border: 0; background: transparent; cursor: pointer; text-align: left; }
+        .ie-dropdown-item:hover { background: var(--surface-hover); color: var(--text); }
+        .ie-dropdown-item.danger { color: var(--danger); }
+        .ie-page-pad { padding: 24px 28px 56px; max-width: 100%; overflow-x: hidden; color: var(--text); }
         .ie-page-pad * { max-width: 100%; }
         .ie-page-pad table { min-width: 680px; }
         .ie-page-pad pre, .ie-page-pad code { white-space: pre-wrap; overflow-wrap: anywhere; }
         .ie-page-pad p, .ie-page-pad div, .ie-page-pad span, .ie-page-pad a, .ie-page-pad td, .ie-page-pad th { overflow-wrap: anywhere; }
+        .theme-dark .ie-page-pad [style*="background: #fff"], .theme-dark .ie-page-pad [style*="background: #ffffff"], .theme-dark .ie-page-pad [style*="backgroundColor: #fff"], .theme-dark .ie-page-pad [style*="backgroundColor: #ffffff"], .theme-dark .dash-hero, .theme-dark .dash-card, .theme-dark .dash-panel, .theme-dark .feedback-card, .theme-dark .delete-card { background: var(--surface) !important; border-color: var(--border) !important; color: var(--text) !important; }
+        .theme-dark .ie-page-pad [style*="background: #f8fafc"], .theme-dark .ie-page-pad [style*="background: #f9fafb"], .theme-dark .ie-page-pad [style*="background: #f7f7f8"] { background: rgba(255,255,255,0.05) !important; }
+        .theme-dark .ie-page-pad [style*="border: 1px solid #e5e7eb"], .theme-dark .ie-page-pad [style*="border: 1px solid #e8edf2"], .theme-dark .ie-page-pad [style*="borderColor: #e5e7eb"] { border-color: var(--border) !important; }
+        .theme-dark .ie-page-pad [style*="color: #111827"], .theme-dark .ie-page-pad [style*="color: #0f172a"], .theme-dark .ie-page-pad h1, .theme-dark .ie-page-pad h2, .theme-dark .ie-page-pad h3 { color: var(--text) !important; }
+        .theme-dark .ie-page-pad [style*="color: #6b7280"], .theme-dark .ie-page-pad [style*="color: #64748b"], .theme-dark .ie-page-pad [style*="color: #475569"] { color: var(--muted) !important; }
+        .theme-dark .ie-page-pad input, .theme-dark .ie-page-pad select, .theme-dark .ie-page-pad textarea { background: rgba(255,255,255,0.06) !important; color: var(--text) !important; border-color: var(--border) !important; }
+        .theme-dark .ie-page-pad button:not([class]) { border-color: var(--border) !important; }
         @media (max-width: 1180px) {
           .ie-page-pad [style*="grid-template-columns: repeat(5, 1fr)"] { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important; }
           .ie-page-pad [style*="grid-template-columns: 1fr 300px"] { grid-template-columns: minmax(0, 1fr) !important; }
@@ -132,23 +166,23 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         }
         @media (max-width: 520px) {
           .ie-topbar { gap: 8px; }
-          .ie-topbar button span { display: none; }
+          .ie-theme-toggle span, .ie-user-menu-btn span { display: none; }
           .ie-page-pad { padding: 14px 12px 34px; }
           .ie-page-pad [style*="padding: 28px 28px 24px"] { padding: 22px 18px !important; }
           .ie-page-pad [style*="padding: 20px 22px"] { padding: 16px !important; }
         }
       `}</style>
 
-      <div style={{ display: 'flex', minHeight: '100vh' }}>
+      <div className={`ie-shell theme-${theme}`}>
         <div className={`ie-mobile-overlay${sidebarOpen ? ' open' : ''}`} onClick={() => setSidebarOpen(false)} aria-hidden="true" />
 
         <aside className={`ie-sidebar${sidebarOpen ? ' open' : ''}`} role="navigation" aria-label="Main navigation">
-          <div style={{ padding: '14px 14px 12px', borderBottom: '1px solid #e5e7eb' }}>
+          <div style={{ padding: '14px 14px 12px', borderBottom: '1px solid var(--border)' }}>
             <Link href="/app/agriculture" style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'inherit', textDecoration: 'none' }}>
-              <img src="/assets/images/h9O7B-1789370942958.jpg" alt="Earth AI" style={{ width: 34, height: 34, borderRadius: 8, objectFit: 'cover', border: '1px solid #e5e7eb' }} />
+              <img src="/assets/images/h9O7B-1789370942958.jpg" alt="Earth AI" style={{ width: 34, height: 34, borderRadius: 8, objectFit: 'cover', border: '1px solid var(--border)' }} />
               <div style={{ minWidth: 0 }}>
-                <div style={{ color: '#111827', fontSize: 14, fontWeight: 700, lineHeight: 1.2 }}>Earth AI</div>
-                <div style={{ color: '#6b7280', fontSize: 12, marginTop: 1 }}>Intelligence E</div>
+                <div style={{ color: 'var(--text)', fontSize: 14, fontWeight: 700, lineHeight: 1.2 }}>Earth AI</div>
+                <div style={{ color: 'var(--muted)', fontSize: 12, marginTop: 1 }}>Intelligence E</div>
               </div>
             </Link>
           </div>
@@ -164,7 +198,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               ))}
             </div>
 
-            <div className="ie-nav-section" style={{ marginTop: 10, borderTop: '1px solid #e5e7eb', paddingTop: 14 }}>
+            <div className="ie-nav-section" style={{ marginTop: 10, borderTop: '1px solid var(--border)', paddingTop: 14 }}>
               <div className="ie-section-label">Workspace</div>
               {bottomNavItems.map((item) => (
                 <Link key={item.href} href={item.href} className={`ie-nav-item${isActive(item) ? ' active' : ''}`}>
@@ -180,7 +214,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               )}
             </div>
 
-            <div className="ie-nav-section" style={{ marginTop: 10, borderTop: '1px solid #e5e7eb', paddingTop: 14 }}>
+            <div className="ie-nav-section" style={{ marginTop: 10, borderTop: '1px solid var(--border)', paddingTop: 14 }}>
               <Link href="/help" className={`ie-nav-item${pathname?.startsWith('/help') ? ' active' : ''}`}>
                 <Icon><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></Icon>
                 Help Center
@@ -188,12 +222,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </nav>
 
-          <div style={{ padding: 10, borderTop: '1px solid #e5e7eb' }}>
+          <div style={{ padding: 10, borderTop: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: 8, borderRadius: 8 }}>
-              <div style={{ width: 30, height: 30, borderRadius: 8, background: '#111827', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 12, flex: '0 0 auto' }}>{userInitial}</div>
+              <div style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--avatar-bg)', color: 'var(--avatar-text)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 12, flex: '0 0 auto' }}>{userInitial}</div>
               <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ color: '#111827', fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{userName}</div>
-                <div style={{ color: '#6b7280', fontSize: 11, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</div>
+                <div style={{ color: 'var(--text)', fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{userName}</div>
+                <div style={{ color: 'var(--muted)', fontSize: 11, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</div>
               </div>
               <button onClick={handleSignOut} disabled={signingOut} title="Sign out" className="ie-top-btn" style={{ width: 32, height: 32, flex: '0 0 auto' }}>
                 <Icon><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></Icon>
@@ -208,24 +242,28 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <Icon><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></Icon>
             </button>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ color: '#111827', fontSize: 14, fontWeight: 700, lineHeight: 1.2 }}>{currentItem?.label || 'Agriculture'}</div>
-              <div style={{ color: '#6b7280', fontSize: 12, marginTop: 1 }}>Intelligence E for Agriculture</div>
+              <div style={{ color: 'var(--text)', fontSize: 14, fontWeight: 700, lineHeight: 1.2 }}>{currentItem?.label || 'Agriculture'}</div>
+              <div style={{ color: 'var(--muted)', fontSize: 12, marginTop: 1 }}>Intelligence E for Agriculture</div>
             </div>
+            <button className="ie-theme-toggle" onClick={() => setTheme(nextTheme)} aria-label={`Switch to ${nextTheme} mode`} title={`Switch to ${nextTheme} mode`}>
+              <Icon>{theme === 'dark' ? <><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></> : <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>}</Icon>
+              <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
+            </button>
             <div style={{ position: 'relative' }}>
-              <button onClick={() => setUserMenuOpen(!userMenuOpen)} style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1px solid #e5e7eb', background: '#fff', borderRadius: 8, height: 38, padding: '0 10px 0 5px', cursor: 'pointer', fontFamily: 'inherit' }}>
-                <div style={{ width: 28, height: 28, borderRadius: 7, background: '#111827', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 12 }}>{userInitial}</div>
-                <span style={{ color: '#111827', fontSize: 13, fontWeight: 600 }}>{userFirstName}</span>
+              <button onClick={() => setUserMenuOpen(!userMenuOpen)} className="ie-user-menu-btn">
+                <div style={{ width: 28, height: 28, borderRadius: 7, background: 'var(--avatar-bg)', color: 'var(--avatar-text)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 12 }}>{userInitial}</div>
+                <span style={{ color: 'var(--text)', fontSize: 13, fontWeight: 600 }}>{userFirstName}</span>
                 <Icon><polyline points="6 9 12 15 18 9"/></Icon>
               </button>
               {userMenuOpen && (
                 <div className="ie-dropdown">
-                  <div style={{ padding: '12px 14px', borderBottom: '1px solid #e5e7eb' }}>
-                    <div style={{ color: '#111827', fontSize: 13, fontWeight: 600 }}>{userName}</div>
-                    <div style={{ color: '#6b7280', fontSize: 12, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.email}</div>
+                  <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)' }}>
+                    <div style={{ color: 'var(--text)', fontSize: 13, fontWeight: 600 }}>{userName}</div>
+                    <div style={{ color: 'var(--muted)', fontSize: 12, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.email}</div>
                   </div>
                   <Link href="/app/agriculture/profile" className="ie-dropdown-item" onClick={() => setUserMenuOpen(false)}>{bottomNavItems[2].icon} Profile</Link>
                   <Link href="/app/agriculture/settings" className="ie-dropdown-item" onClick={() => setUserMenuOpen(false)}>{bottomNavItems[3].icon} Settings</Link>
-                  <div style={{ borderTop: '1px solid #e5e7eb', marginTop: 4 }} />
+                  <div style={{ borderTop: '1px solid var(--border)', marginTop: 4 }} />
                   <button onClick={handleSignOut} disabled={signingOut} className="ie-dropdown-item danger">
                     <Icon><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></Icon>
                     {signingOut ? 'Signing out...' : 'Sign Out'}
