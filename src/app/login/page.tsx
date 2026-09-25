@@ -93,7 +93,7 @@ function LoginContent() {
           <div className="auth-heading">
             <p>Private beta</p>
             <h1>{mode === 'signin' ? 'Sign in to Intelligence E' : 'Request your beta account'}</h1>
-            <span>Access is currently limited to the first 10 approved beta users on the Free plan.</span>
+            <span>Access is currently limited to approved beta users on the Free plan.</span>
           </div>
 
           <div className="auth-tabs" role="tablist" aria-label="Authentication mode">
