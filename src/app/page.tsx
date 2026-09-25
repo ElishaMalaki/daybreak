@@ -92,12 +92,12 @@ export default function HomePage() {
 
         <section className="home-hero">
           <div className="hero-inner">
-            <span className="beta-pill">Private beta opening for 10 users</span>
-            <h1>Earth AI builds intelligence for real-world industries.</h1>
+            <span className="beta-pill">Specialized intelligence for the real world</span>
+            <h1>Earth AI builds intelligence for real world industries.</h1>
             <p>Earth AI creates specialized AI products that help people solve complex problems in agriculture, finance, and operations. Intelligence E is our decision intelligence platform, starting with Agriculture and expanding carefully into Finance.</p>
             <div className="hero-actions">
               <Link href="/waitlist" className="primary">Join waitlist</Link>
-              <Link href="/login" className="secondary">Join private beta</Link>
+              <Link href="/login" className="secondary">Try Intelligence E Now</Link>
             </div>
           </div>
         </section>
@@ -109,7 +109,7 @@ export default function HomePage() {
           <p>Intelligence E for Finance is planned as a separate financial intelligence platform. It will focus on analysis, forecasting, explanations, reports, and decision support while keeping business logic and calculations outside the AI model.</p>
           <div className="about-grid">
             <div className="about-item"><h3>Problem solving</h3><p>Earth AI is designed to turn complex information into clear decisions for people working in demanding industries.</p></div>
-            <div className="about-item"><h3>Private beta</h3><p>The beta is limited to 10 approved users on the Free plan so quality, safety, and reliability can be tested carefully.</p></div>
+            <div className="about-item"><h3>Private beta</h3><p>The beta is managed through approved access so quality, safety, and reliability can be tested carefully before wider release.</p></div>
             <div className="about-item"><h3>Built to scale</h3><p>The platform is being prepared for subscriptions, usage limits, provider routing, feedback, and enterprise controls.</p></div>
           </div>
         </section>
