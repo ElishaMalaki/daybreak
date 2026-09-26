@@ -6,8 +6,6 @@
 
 export type SubscriptionTier = 'free' | 'starter' | 'professional' | 'business' | 'enterprise';
 
-export const PRIVATE_BETA_USER_LIMIT = 10;
-export const PRIVATE_BETA_PLAN: SubscriptionTier = 'free';
 export const PELIT_CAPABILITY_NOTICE = 'Full farm management and the expanded agriculture data model will be available in the Pelit app.';
 
 export interface PlanLimits {
@@ -47,10 +45,10 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionTier, Plan> = {
     id: 'free',
     name: 'Free',
     audience: 'For farmers exploring Intelligence E',
-    tagline: 'Private beta and basic agricultural intelligence for evaluation',
+    tagline: 'Basic agricultural intelligence for evaluation',
     pricing: { usd: 0 },
     limits: { farms: 1, users: 1, aiCredits: 25, aiRequests: 25, reports: 2, researchRequests: 1, imageAnalysis: true, limitedImageAnalysis: true, documentAnalysis: true, limitedDocumentAnalysis: true, advancedDocumentAnalysis: false, apiAccess: false, dataExport: false, teamCollaboration: false, priorityRouting: false },
-    features: ['Private beta access when invited', '1 farm', '1 user', 'Limited AI assistance', 'Basic agricultural intelligence', 'Basic crop guidance', 'Basic farm data', 'Limited pest & disease guidance', 'Limited image analysis', 'Limited document analysis', '2 reports/month', '1 research request/month', 'Saved AI conversations', 'Farm history', PELIT_CAPABILITY_NOTICE],
+    features: ['1 farm', '1 user', 'Limited AI assistance', 'Basic agricultural intelligence', 'Basic crop guidance', 'Basic farm data', 'Limited pest & disease guidance', 'Limited image analysis', 'Limited document analysis', '2 reports/month', '1 research request/month', 'Saved AI conversations', 'Farm history', PELIT_CAPABILITY_NOTICE],
   },
   starter: {
     id: 'starter',
