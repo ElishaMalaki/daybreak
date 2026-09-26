@@ -109,7 +109,7 @@ export default function HomePage() {
           <p>Intelligence E for Finance is planned as a separate financial intelligence platform. It will focus on analysis, forecasting, explanations, reports, and decision support while keeping business logic and calculations outside the AI model.</p>
           <div className="about-grid">
             <div className="about-item"><h3>Problem solving</h3><p>Earth AI is designed to turn complex information into clear decisions for people working in demanding industries.</p></div>
-            <div className="about-item"><h3>Private beta</h3><p>The beta is managed through approved access so quality, safety, and reliability can be tested carefully before wider release.</p></div>
+            <div className="about-item"><h3>Product access</h3><p>Users can create an account, use available Intelligence E features, and join the waitlist for product updates and future releases.</p></div>
             <div className="about-item"><h3>Built to scale</h3><p>The platform is being prepared for subscriptions, usage limits, provider routing, feedback, and enterprise controls.</p></div>
           </div>
         </section>
