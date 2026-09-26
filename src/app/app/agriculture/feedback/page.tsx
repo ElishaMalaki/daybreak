@@ -56,7 +56,7 @@ export default function FeedbackPage() {
       <div className="feedback-page">
         <div className="feedback-header">
           <h1>Feedback and bug reports</h1>
-          <p>Report bugs, errors, issues, or suggestions. This helps improve Intelligence E during private beta and gives admins a clean record to review.</p>
+          <p>Report bugs, errors, issues, or suggestions. This helps improve Intelligence E and gives admins a clean record to review.</p>
         </div>
         <div className="feedback-card">
           <form className="feedback-form" onSubmit={submit}>
