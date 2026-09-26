@@ -139,7 +139,7 @@ export default function AgricultureDashboard() {
         <section className="dash-two">
           <div className="dash-panel">
             <h2>What to do next</h2>
-            <p>Ask Intelligence E a practical agriculture question, upload a crop or plant photo for analysis, create a report, or send feedback if something does not work as expected during private beta.</p>
+            <p>Ask Intelligence E a practical agriculture question, upload a crop or plant photo for analysis, create a report, or send feedback if something does not work as expected.</p>
           </div>
           <div className="dash-panel">
             <h2>Usage</h2>
