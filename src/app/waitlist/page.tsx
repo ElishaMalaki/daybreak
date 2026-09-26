@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getPublicSkyPhoto, isPublicSkyDaytime } from '@/lib/public-sky-background';
 
 export default function WaitlistPage() {
   const [email, setEmail] = useState('');
@@ -11,6 +12,21 @@ export default function WaitlistPage() {
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [feedback, setFeedback] = useState('');
+  const [hour, setHour] = useState(12);
+  const [photoIndex, setPhotoIndex] = useState(0);
+  const skyPhoto = useMemo(() => getPublicSkyPhoto(hour, photoIndex), [hour, photoIndex]);
+  const daytime = isPublicSkyDaytime(hour);
+
+  useEffect(() => {
+    const updateTime = () => setHour(new Date().getHours());
+    updateTime();
+    const timeTimer = window.setInterval(updateTime, 60000);
+    const photoTimer = window.setInterval(() => setPhotoIndex((value) => value + 1), 22000);
+    return () => {
+      window.clearInterval(timeTimer);
+      window.clearInterval(photoTimer);
+    };
+  }, []);
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -42,7 +58,7 @@ export default function WaitlistPage() {
         *, *::before, *::after { box-sizing: border-box; }
         html, body { margin: 0; min-height: 100%; font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
         .wait-root { min-height: 100vh; color: #fff; background: #050816; position: relative; overflow-x: hidden; }
-        .wait-bg { position: fixed; inset: 0; background-image: linear-gradient(180deg, rgba(3,7,18,0.42), rgba(3,7,18,0.72)), url(https://images.unsplash.com/photo-1675210266448-5d6f08ee26b9); background-size: cover; background-position: center; }
+        .wait-bg { position: fixed; inset: 0; background-image: var(--wait-overlay), url(var(--wait-photo)); background-size: cover; background-position: center; transition: background-image 1.2s ease; }
         .wait-nav, .wait-main { position: relative; z-index: 1; }
         .wait-nav { display: flex; align-items: center; justify-content: space-between; padding: 22px 5vw; }
         .wait-brand { display: inline-flex; align-items: center; gap: 10px; color: #fff; text-decoration: none; font-weight: 800; }
@@ -50,8 +66,8 @@ export default function WaitlistPage() {
         .wait-main { width: min(1080px, calc(100% - 36px)); margin: 0 auto; padding: 54px 0 80px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(340px, 430px); gap: 44px; align-items: center; }
         .wait-copy p:first-child { margin: 0 0 14px; color: #bfdbfe; font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
         .wait-copy h1 { margin: 0; font-size: clamp(36px, 5.5vw, 70px); line-height: 1.02; letter-spacing: -0.055em; max-width: 720px; }
-        .wait-copy p { color: rgba(255,255,255,0.76); font-size: 16px; line-height: 1.7; max-width: 620px; }
-        .wait-points { display: grid; gap: 10px; margin-top: 24px; color: rgba(255,255,255,0.78); font-size: 14px; }
+        .wait-copy p { color: rgba(255,255,255,0.78); font-size: 16px; line-height: 1.7; max-width: 620px; }
+        .wait-points { display: grid; gap: 10px; margin-top: 24px; color: rgba(255,255,255,0.8); font-size: 14px; }
         .wait-point { padding-left: 16px; border-left: 2px solid rgba(191,219,254,0.55); }
         .wait-card { border: 1px solid rgba(255,255,255,0.17); border-radius: 20px; background: rgba(10,14,24,0.84); backdrop-filter: blur(18px); padding: 26px; box-shadow: 0 24px 70px rgba(0,0,0,0.24); }
         .wait-card h2 { margin: 0 0 8px; font-size: 22px; letter-spacing: -0.03em; }
@@ -67,8 +83,16 @@ export default function WaitlistPage() {
         .wait-feedback.error { color: #fecaca; background: rgba(127,29,29,0.34); border: 1px solid rgba(248,113,113,0.34); }
         @media (max-width: 860px) { .wait-main { grid-template-columns: 1fr; padding-top: 26px; } }
       `}</style>
-      <main className="wait-root">
-        <div className="wait-bg" aria-hidden="true" />
+      <main
+        className="wait-root"
+        style={{
+          '--wait-photo': `'${skyPhoto.url}'`,
+          '--wait-overlay': daytime
+            ? 'linear-gradient(180deg, rgba(3,7,18,0.34), rgba(3,7,18,0.68))'
+            : 'linear-gradient(180deg, rgba(3,7,18,0.52), rgba(3,7,18,0.8))',
+        } as React.CSSProperties}
+      >
+        <div className="wait-bg" role="img" aria-label={skyPhoto.alt} />
         <nav className="wait-nav">
           <Link href="/" className="wait-brand"><Image src="/assets/images/h9O7B-1789370942958.jpg" alt="Earth AI" width={34} height={34} />Earth AI</Link>
           <Link href="/login" style={{ color: '#fff', textDecoration: 'none', fontWeight: 700 }}>Sign in</Link>
