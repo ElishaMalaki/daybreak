@@ -47,7 +47,7 @@ function LoginContent() {
       } else {
         const result = await signUp(email, password, { fullName });
         if (!result?.session) {
-          setNotice('Check your email to verify your account before signing in. Private beta access is limited to approved users.');
+          setNotice('Check your email to verify your account before signing in.');
         } else {
           router.replace(redirectTo);
         }
@@ -91,9 +91,9 @@ function LoginContent() {
           </Link>
 
           <div className="auth-heading">
-            <p>Private beta</p>
-            <h1>{mode === 'signin' ? 'Sign in to Intelligence E' : 'Request your beta account'}</h1>
-            <span>Access is currently limited to approved beta users on the Free plan.</span>
+            <p>Intelligence E</p>
+            <h1>{mode === 'signin' ? 'Sign in to Intelligence E' : 'Create your account'}</h1>
+            <span>Access Intelligence E for Agriculture with your Earth AI account.</span>
           </div>
 
           <div className="auth-tabs" role="tablist" aria-label="Authentication mode">
@@ -131,7 +131,7 @@ function LoginContent() {
           </form>
 
           <p className="auth-note">
-            Not invited yet? <Link href="/waitlist">Join the waitlist</Link> for early access, launch discounts, and private beta updates.
+            Want product updates? <Link href="/waitlist">Join the waitlist</Link> for launch news, discounts, and future Intelligence E releases.
           </p>
           <p className="auth-legal">
             Email sign-up requires verification. OAuth providers must be enabled in Supabase before Google or Apple sign-in can complete.
