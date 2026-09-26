@@ -1,5 +1,24 @@
 import { imageHosts } from './image-hosts.config.mjs';
 
+const publicWebsiteHeaders = [
+  {
+    key: 'Cache-Control',
+    value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+  },
+  {
+    key: 'CDN-Cache-Control',
+    value: 'no-store',
+  },
+  {
+    key: 'Vercel-CDN-Cache-Control',
+    value: 'no-store',
+  },
+  {
+    key: 'X-Earth-AI-Version',
+    value: 'public-site-2026-09-26',
+  },
+];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   productionBrowserSourceMaps: true,
@@ -17,23 +36,14 @@ const nextConfig = {
   },
   async headers() {
     return [
-      {
-        source: '/about',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
-          },
-          {
-            key: 'CDN-Cache-Control',
-            value: 'no-store',
-          },
-          {
-            key: 'Vercel-CDN-Cache-Control',
-            value: 'no-store',
-          },
-        ],
-      },
+      { source: '/', headers: publicWebsiteHeaders },
+      { source: '/about', headers: publicWebsiteHeaders },
+      { source: '/agriculture', headers: publicWebsiteHeaders },
+      { source: '/finance', headers: publicWebsiteHeaders },
+      { source: '/waitlist', headers: publicWebsiteHeaders },
+      { source: '/login', headers: publicWebsiteHeaders },
+      { source: '/privacy', headers: publicWebsiteHeaders },
+      { source: '/terms', headers: publicWebsiteHeaders },
     ];
   },
   webpack(
