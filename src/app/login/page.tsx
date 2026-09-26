@@ -1,10 +1,11 @@
 'use client';
 
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { getPublicSkyPhoto, isPublicSkyDaytime } from '@/lib/public-sky-background';
 
 const DEFAULT_REDIRECT = '/app/agriculture';
 
@@ -26,8 +27,23 @@ function LoginContent() {
   const [notice, setNotice] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [hour, setHour] = useState(12);
+  const [photoIndex, setPhotoIndex] = useState(0);
+  const skyPhoto = useMemo(() => getPublicSkyPhoto(hour, photoIndex), [hour, photoIndex]);
+  const daytime = isPublicSkyDaytime(hour);
 
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    const updateTime = () => setHour(new Date().getHours());
+    updateTime();
+    const timeTimer = window.setInterval(updateTime, 60000);
+    const photoTimer = window.setInterval(() => setPhotoIndex((value) => value + 1), 22000);
+    return () => {
+      window.clearInterval(timeTimer);
+      window.clearInterval(photoTimer);
+    };
+  }, []);
 
   useEffect(() => {
     if (mounted && !loading && user) router.replace(getSafeRedirect(searchParams));
@@ -82,8 +98,16 @@ function LoginContent() {
   return (
     <>
       <style>{styles}</style>
-      <main className="auth-root">
-        <div className="auth-bg" />
+      <main
+        className="auth-root"
+        style={{
+          '--auth-photo': `'${skyPhoto.url}'`,
+          '--auth-overlay': daytime
+            ? 'linear-gradient(180deg, rgba(3,7,18,0.38), rgba(3,7,18,0.72))'
+            : 'linear-gradient(180deg, rgba(3,7,18,0.56), rgba(3,7,18,0.82))',
+        } as React.CSSProperties}
+      >
+        <div className="auth-bg" role="img" aria-label={skyPhoto.alt} />
         <section className="auth-card" aria-label="Earth AI authentication">
           <Link href="/" className="auth-brand" aria-label="Earth AI home">
             <Image src="/assets/images/h9O7B-1789370942958.jpg" alt="Earth AI logo" width={44} height={44} priority />
@@ -150,7 +174,7 @@ const styles = `
   .auth-loading { min-height: 100vh; display: grid; place-items: center; background: #050816; }
   .auth-spinner { width: 28px; height: 28px; border-radius: 999px; border: 2px solid rgba(255,255,255,0.16); border-top-color: #fff; animation: spin 0.8s linear infinite; }
   .auth-root { min-height: 100vh; padding: max(28px, env(safe-area-inset-top)) 18px max(28px, env(safe-area-inset-bottom)); display: grid; place-items: center; position: relative; overflow-x: hidden; background: #050816; }
-  .auth-bg { position: fixed; inset: 0; background-image: linear-gradient(180deg, rgba(3,7,18,0.46), rgba(3,7,18,0.74)), url(https://images.unsplash.com/photo-1518066000714-58c45f1a2c0a); background-size: cover; background-position: center; }
+  .auth-bg { position: fixed; inset: 0; background-image: var(--auth-overlay), url(var(--auth-photo)); background-size: cover; background-position: center; transition: background-image 1.2s ease; }
   .auth-card { width: min(100%, 430px); position: relative; z-index: 1; padding: 26px; border: 1px solid rgba(255,255,255,0.16); border-radius: 18px; background: rgba(10,14,24,0.84); color: #f8fafc; backdrop-filter: blur(20px); box-shadow: 0 24px 70px rgba(0,0,0,0.26); }
   .auth-brand { display: inline-flex; align-items: center; gap: 10px; color: #fff; text-decoration: none; font-size: 15px; font-weight: 700; }
   .auth-brand img { border-radius: 10px; object-fit: cover; }
