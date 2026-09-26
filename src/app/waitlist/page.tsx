@@ -25,7 +25,7 @@ export default function WaitlistPage() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Could not join waitlist.');
       setStatus('success');
-      setFeedback('You are on the Earth AI waitlist. If selected for private beta, you will receive an invitation email.');
+      setFeedback('You are on the Earth AI waitlist. We will send product updates, launch news, and early access opportunities.');
       setEmail('');
       setFullName('');
       setMessage('');
@@ -71,22 +71,22 @@ export default function WaitlistPage() {
         <div className="wait-bg" aria-hidden="true" />
         <nav className="wait-nav">
           <Link href="/" className="wait-brand"><Image src="/assets/images/h9O7B-1789370942958.jpg" alt="Earth AI" width={34} height={34} />Earth AI</Link>
-          <Link href="/login" style={{ color: '#fff', textDecoration: 'none', fontWeight: 700 }}>Invited? Sign in</Link>
+          <Link href="/login" style={{ color: '#fff', textDecoration: 'none', fontWeight: 700 }}>Sign in</Link>
         </nav>
         <section className="wait-main">
           <div className="wait-copy">
-            <p>Private beta</p>
+            <p>Earth AI updates</p>
             <h1>Join the Earth AI waitlist.</h1>
-            <p>Earth AI is opening Intelligence E carefully. Private beta access is approved gradually so the product can be tested safely before wider release.</p>
+            <p>Join the waitlist for Intelligence E updates, product releases, launch discounts, and future access opportunities across Agriculture, Finance, and Pelit.</p>
             <div className="wait-points">
-              <div className="wait-point">Approved beta users get early access to Intelligence E for Agriculture.</div>
-              <div className="wait-point">Waitlist members receive early access updates and launch discount opportunities.</div>
+              <div className="wait-point">Receive Intelligence E for Agriculture product updates.</div>
+              <div className="wait-point">Get future Finance and enterprise release news.</div>
               <div className="wait-point">Full farm management and expanded agricultural data capabilities will be available in the Pelit app.</div>
             </div>
           </div>
           <div className="wait-card">
-            <h2>Request access</h2>
-            <p>If you are invited, sign in. If not, join the waitlist and we will review access as beta seats become available.</p>
+            <h2>Join waitlist</h2>
+            <p>Tell us what you are interested in and we will keep you updated as Earth AI products expand.</p>
             <form className="wait-form" onSubmit={submit}>
               <label>Full name<input value={fullName} onChange={(event) => setFullName(event.target.value)} required placeholder="Your name" /></label>
               <label>Email<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required placeholder="you@example.com" /></label>
