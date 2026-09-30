@@ -967,7 +967,7 @@ export default function AgriculturePage() {
             bringing specialized agricultural intelligence directly into the
             platform farmers and agricultural businesses use to manage their
             operations. It will combine farm data, agricultural knowledge,
-            market signals, environmental information, and AI-powered analysis
+            market signals, environmental information, and AI powered analysis
             to support better decisions across the farm.
           </p>
 
