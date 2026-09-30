@@ -89,7 +89,7 @@ export default function HomePage() {
         <nav className="home-nav" aria-label="Earth AI">
           <Link href="/" className="brand"><Image src="/assets/images/h9O7B-1789370942958.jpg" alt="Earth AI logo" width={34} height={34} priority />Earth AI</Link>
           <div className="nav-links">
-            <Link href="#about">About</Link>
+            <Link href="/about">About</Link>
             <Link href="/agriculture">Agriculture</Link>
             <Link href="/finance">Finance</Link>
             <Link href="/waitlist" className="nav-cta">Join waitlist</Link>
