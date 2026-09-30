@@ -344,13 +344,6 @@ export default function FinancePage() {
             Intelligence E for Finance
           </div>
 
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 14px',
-            borderRadius: 999, background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.20)',
-            marginBottom: 20
-          }}>
-            <span style={{ color: cfg.badgeText, fontSize: 12, fontWeight: 700, letterSpacing: '0.10em', textTransform: 'uppercase' }}>Coming Soon</span>
-          </div>
 
           <h1 className="fi-title" style={{ color: cfg.textColor }}>
             Financial intelligence<br />for better decisions.
