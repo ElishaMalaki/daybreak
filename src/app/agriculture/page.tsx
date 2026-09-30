@@ -663,16 +663,40 @@ export default function AgriculturePage() {
           letter-spacing: -0.035em;
           line-height: 1.06;
           margin-bottom: 20px;
-          max-width: 700px;
+          max-width: 760px;
         }
 
         .ag-subtitle {
           font-size: clamp(15px, 1.5vw, 18px);
           font-weight: 400;
           line-height: 1.65;
-          max-width: 620px;
+          max-width: 720px;
           opacity: 0.72;
           margin-bottom: 56px;
+        }
+
+        .ag-pelit-note {
+          display: inline-flex;
+          align-items: center;
+          gap: 9px;
+          margin-bottom: 24px;
+          padding: 9px 15px;
+          border-radius: 999px;
+          border: 1px solid rgba(255,255,255,0.18);
+          background: rgba(255,255,255,0.10);
+          backdrop-filter: blur(14px) saturate(1.4);
+          -webkit-backdrop-filter: blur(14px) saturate(1.4);
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 0.01em;
+        }
+
+        .ag-pelit-dot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: currentColor;
+          flex-shrink: 0;
         }
 
         .ag-bento {
@@ -844,7 +868,6 @@ export default function AgriculturePage() {
           aria-hidden="true"
         />
 
-        {/* Nav */}
         <nav
           className="ag-nav"
           aria-label="Earth AI"
@@ -915,30 +938,40 @@ export default function AgriculturePage() {
           </Link>
         </nav>
 
-        {/* Content */}
         <div className="ag-content">
+          <div
+            className="ag-pelit-note"
+            style={{ color: cfg.textColor }}
+          >
+            <span
+              className="ag-pelit-dot"
+              aria-hidden="true"
+            />
+            <span>Coming to Pelit App</span>
+          </div>
+
           <h1
             className="ag-title"
             style={{ color: cfg.textColor }}
           >
-            Agricultural Intelligence,
+            Intelligence E for Agriculture,
             <br />
-            built for the real world.
+            coming to Pelit App.
           </h1>
 
           <p
             className="ag-subtitle"
             style={{ color: cfg.textColor }}
           >
-            Advanced agricultural intelligence that combines farm data,
-            market signals, environmental information, and AI-powered
-            analysis to support better operational and strategic decisions.
+            Intelligence E for Agriculture will be available inside Pelit App,
+            bringing specialized agricultural intelligence directly into the
+            platform farmers and agricultural businesses use to manage their
+            operations. It will combine farm data, agricultural knowledge,
+            market signals, environmental information, and AI-powered analysis
+            to support better decisions across the farm.
           </p>
 
-          {/* Bento grid */}
           <div className="ag-bento">
-
-            {/* Market Analysis — large */}
             <div
               className="ag-card ag-card-large"
               style={{
@@ -972,7 +1005,6 @@ export default function AgriculturePage() {
               </div>
             </div>
 
-            {/* Farm Data — small */}
             <div
               className="ag-card ag-card-small"
               style={{
@@ -1005,7 +1037,6 @@ export default function AgriculturePage() {
               </div>
             </div>
 
-            {/* Decision Support — small */}
             <div
               className="ag-card ag-card-small"
               style={{
@@ -1038,7 +1069,6 @@ export default function AgriculturePage() {
               </div>
             </div>
 
-            {/* Risk Intelligence — large */}
             <div
               className="ag-card ag-card-large"
               style={{
@@ -1071,7 +1101,6 @@ export default function AgriculturePage() {
               </div>
             </div>
 
-            {/* Research Assistant — full width */}
             <div
               className="ag-card ag-card-full"
               style={{
@@ -1112,7 +1141,6 @@ export default function AgriculturePage() {
           </div>
         </div>
 
-        {/* Footer */}
         <footer className="ag-footer">
           <div
             className="ag-footer-links"
