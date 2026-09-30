@@ -158,7 +158,7 @@ const features = [
 {
   id: 'market',
   title: 'Agricultural Intelligence\n& Market Analysis',
-  description: 'Real-time commodity pricing, supply chain signals, and global trade pattern analysis — giving agribusinesses a decisive edge before markets move.',
+  description: 'Real time commodity pricing, supply chain signals, and global trade pattern analysis  giving agribusinesses a decisive edge before markets move.',
   icon:
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
@@ -171,7 +171,7 @@ const features = [
 {
   id: 'farm-data',
   title: 'Farm Data Intelligence',
-  description: 'Unified sensor, satellite, and IoT data streams transformed into actionable farm-level insights — soil moisture, yield forecasts, and equipment health in one view.',
+  description: 'Unified sensor, satellite, and IoT data streams transformed into actionable farm-level insights soil moisture, yield forecasts, and equipment health in one view.',
   icon:
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
         <ellipse cx="12" cy="5" rx="9" ry="3" />
@@ -185,7 +185,7 @@ const features = [
 {
   id: 'decision',
   title: 'Agricultural Decision Support',
-  description: 'AI-driven recommendations for planting windows, irrigation scheduling, and input optimization — decisions backed by multi-variable models, not guesswork.',
+  description: 'AI driven recommendations for planting windows, irrigation scheduling, and input optimization decisions backed by multi variable models, not guesswork.',
   icon:
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10" />
@@ -212,7 +212,7 @@ const features = [
 {
   id: 'research',
   title: 'Agricultural AI Research\n& Intelligence Assistant',
-  description: 'An always-on research companion trained on agronomic literature, climate science, and market data — answering complex questions with cited, domain-specific precision.',
+  description: 'An always on research companion trained on agronomic literature, climate science, and market data  answering complex questions with cited, domain specific precision.',
   icon:
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="11" cy="11" r="8" />
