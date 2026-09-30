@@ -35,6 +35,19 @@ const PROVIDER_ROUTING: Record<AIRequestType, string[]> = {
   deep_research: ['gemini', 'openrouter', 'deepseek', 'anthropic', 'openai'],
 };
 
+function normalizeAIResponseContent(content: string): string {
+  return content
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .replace(/[–—]/g, '-')
+    .replace(/[•◦▪▫●○◆◇★☆✓✔✗✘➡→←↑↓]/g, '-')
+    .replace(/[─━═]{2,}/g, '')
+    .replace(/([!?.,:;])\1{1,}/g, '$1')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 export class AIRouter {
   private providers: Map<string, AIProvider>;
 
@@ -156,7 +169,10 @@ export class AIRouter {
       const response = await provider.generateResponse(enrichedRequest);
 
       if (response.success && response.content) {
-        return response;
+        return {
+          ...response,
+          content: normalizeAIResponseContent(response.content),
+        };
       }
 
       lastError = response.error || 'Unknown error';
