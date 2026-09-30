@@ -60,7 +60,6 @@ export default function HomePage() {
         .nav-cta { background: rgba(255,255,255,0.96); color: #0f172a !important; }
         .home-hero { min-height: calc(100vh - 82px); display: grid; place-items: center; text-align: center; padding: 64px 5vw 110px; }
         .hero-inner { width: min(860px, 100%); }
-        .beta-pill { display: inline-flex; align-items: center; min-height: 34px; padding: 0 14px; border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.92); font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; backdrop-filter: blur(12px); }
         .hero-inner h1 { margin: 22px 0 0; font-size: clamp(42px, 7vw, 86px); line-height: 0.98; letter-spacing: -0.06em; }
         .hero-inner p { margin: 24px auto 0; max-width: 650px; color: rgba(255,255,255,0.82); font-size: clamp(16px, 1.7vw, 20px); line-height: 1.65; }
         .hero-actions { margin-top: 34px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
@@ -98,7 +97,6 @@ export default function HomePage() {
 
         <section className="home-hero">
           <div className="hero-inner">
-            <span className="beta-pill">Specialized intelligence for the real world</span>
             <h1>Earth AI builds intelligence for real world industries.</h1>
             <p>Earth AI creates specialized AI products that help people solve complex problems in agriculture, finance, and operations. Intelligence E is our decision intelligence platform, starting with Agriculture and expanding carefully into Finance.</p>
             <div className="hero-actions">
