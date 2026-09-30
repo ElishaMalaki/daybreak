@@ -109,7 +109,7 @@ export default function HomePage() {
         
 
         <footer className="home-footer">
-          <span>Earth AI. Specialized intelligence for real-world industries.</span>
+          <span>Earth AI. Specialized intelligence for real world industries.</span>
           <span><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link><Link href="/waitlist">Waitlist</Link></span>
         </footer>
       </main>
