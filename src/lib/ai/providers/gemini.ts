@@ -18,6 +18,36 @@ interface GeminiErrorResult {
   retryable: boolean;
 }
 
+const REALTIME_REQUEST_TYPES = new Set([
+  'market_analysis',
+  'risk_assessment',
+  'research',
+  'deep_research',
+]);
+
+const REALTIME_KEYWORDS = [
+  'today',
+  'now',
+  'current',
+  'currently',
+  'latest',
+  'recent',
+  'real time',
+  'realtime',
+  'live',
+  'this week',
+  'this month',
+  'price',
+  'prices',
+  'market',
+  'weather',
+  'forecast',
+  'news',
+  'outbreak',
+  'alert',
+  'warning',
+];
+
 function classifyGeminiError(status: number, errorMessage: string): GeminiErrorResult {
   const msg = (errorMessage || '').toLowerCase();
 
@@ -42,6 +72,16 @@ function classifyGeminiError(status: number, errorMessage: string): GeminiErrorR
   return { category: 'unknown', message: `Unexpected error (HTTP ${status})`, isAuthError: false, retryable: true };
 }
 
+function shouldUseSearchGrounding(request: AIRequest): boolean {
+  if ((request.attachments || []).length > 0) return false;
+  if (request.contextData?.requiresRealtime === true) return true;
+  if (REALTIME_REQUEST_TYPES.has(request.requestType)) return true;
+
+  const latestUserMessage = [...request.messages].reverse().find((message) => message.role === 'user');
+  const content = latestUserMessage?.content?.toLowerCase() || '';
+  return REALTIME_KEYWORDS.some((keyword) => content.includes(keyword));
+}
+
 export class GeminiAdapter implements AIProvider {
   readonly name = 'gemini';
   readonly displayName = 'Google Gemini';
@@ -51,6 +91,7 @@ export class GeminiAdapter implements AIProvider {
     'document_analysis',
     'image_analysis',
     'long_context',
+    'web_search',
   ];
   readonly maxTokensPerRequest = 8192;
   readonly timeoutMs = 30000;
@@ -86,6 +127,7 @@ export class GeminiAdapter implements AIProvider {
     }
 
     try {
+      const useSearchGrounding = shouldUseSearchGrounding(request);
       const imageParts = (request.attachments || []).map((attachment) => ({
         inlineData: {
           mimeType: attachment.mimeType,
@@ -119,6 +161,10 @@ export class GeminiAdapter implements AIProvider {
 
       if (systemInstruction) {
         body.systemInstruction = systemInstruction;
+      }
+
+      if (useSearchGrounding) {
+        body.tools = [{ google_search: {} }];
       }
 
       const controller = new AbortController();
