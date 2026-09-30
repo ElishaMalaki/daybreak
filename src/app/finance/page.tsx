@@ -336,14 +336,6 @@ export default function FinancePage() {
           <Link href="/" className="fi-nav-btn" style={{ background: cfg.buttonBg, color: cfg.buttonText }}>Home</Link>
         </nav>
 
-        <div className="fi-content">
-          <div className="fi-eyebrow" style={{ background: cfg.badgeBg, color: cfg.badgeText }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" />
-            </svg>
-            Intelligence E for Finance
-          </div>
-
 
           <h1 className="fi-title" style={{ color: cfg.textColor }}>
             Financial intelligence<br />for better decisions.
