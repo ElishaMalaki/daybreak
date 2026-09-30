@@ -166,7 +166,7 @@ const features = [
 },
 {
   title: 'Financial Analysis & Insights',
-  description: 'Understand revenue, expenses, profitability, cash flow, working capital, and financial performance through AI-assisted analysis and clear business insights.',
+  description: 'Understand revenue, expenses, profitability, cash flow, working capital, and financial performance through AI assisted analysis and clear business insights.',
   icon:
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="3 17 9 11 13 15 21 7" />
@@ -178,7 +178,7 @@ const features = [
 },
 {
   title: 'Planning, Budgeting & Forecasting',
-  description: 'Support financial planning with budgets, forecasts, budget-versus-actual analysis, scenario planning, and forward-looking business insights.',
+  description: 'Support financial planning with budgets, forecasts, budget versus actual analysis, scenario planning, and forward looking business insights.',
   icon:
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <path d="M4 19V5" />
@@ -195,7 +195,7 @@ const features = [
 },
 {
   title: 'AI CFO & Advisory Intelligence',
-  description: 'An AI-powered financial assistant designed to answer business finance questions, explain financial results, surface important trends, and support management decisions.',
+  description: 'An AI powered financial assistant designed to answer business finance questions, explain financial results, surface important trends, and support management decisions.',
   icon:
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="9" />
@@ -207,7 +207,7 @@ const features = [
 },
 {
   title: 'Audit, Risk & Tax Intelligence',
-  description: 'Support audit planning, transaction review, risk identification, financial controls, tax-related analysis, and advisory workflows with AI-assisted intelligence.',
+  description: 'Support audit planning, transaction review, risk identification, financial controls, tax related analysis, and advisory workflows with AI assisted intelligence.',
   icon:
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -357,7 +357,7 @@ export default function FinancePage() {
           </h1>
 
           <p className="fi-subtitle" style={{ color: cfg.textColor }}>
-            Intelligence E for Finance is currently in development. An AI-powered financial intelligence platform bringing together accounting, financial analysis, planning, audit, tax, and advisory intelligence.
+            Intelligence E for Finance is currently in development. An AI powered financial intelligence platform bringing together accounting, financial analysis, planning, audit, tax, and advisory intelligence.
           </p>
 
           <div className="fi-bento">
@@ -382,14 +382,14 @@ export default function FinancePage() {
           <div style={{ marginTop: 40, padding: '20px 24px', borderRadius: 16, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', maxWidth: 480 }}>
             <div style={{ color: cfg.textColor, fontSize: 15, fontWeight: 700, marginBottom: 8 }}>Intelligence E · Agriculture is live</div>
             <div style={{ color: cfg.textColor, opacity: 0.65, fontSize: 13.5, lineHeight: 1.6, marginBottom: 16 }}>
-              While Finance is in development, explore our agricultural intelligence platform — available now.
+              While Finance is in development, explore our agricultural intelligence platform  available now.
             </div>
             <Link href="/app/agriculture" style={{
               display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 20px',
               borderRadius: 999, background: cfg.buttonBg, color: cfg.buttonText,
               fontSize: 13.5, fontWeight: 700, textDecoration: 'none'
             }}>
-              Launch Agriculture App →
+              Intelligence E for Agriculture →
             </Link>
           </div>
         </div>
