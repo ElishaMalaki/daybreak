@@ -5,42 +5,32 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://vaidosdmzue
 const supabasePublishableKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_l-fvWnm8L4MXP6lIovn_YQ_K8ZVUt_F';
 
-const ADMIN_ONLY_PATHS = ['/app', '/admin'];
-const LEGACY_CUSTOMER_WEB_PATHS = [
-  '/app/agriculture/account',
-  '/app/agriculture/data',
-  '/app/agriculture/feedback',
-  '/app/agriculture/profile',
-  '/app/agriculture/settings',
-  '/app/agriculture/subscription',
-];
-
 function redirectToLogin(request: NextRequest, reason?: string) {
   const url = request.nextUrl.clone();
   url.pathname = '/login';
-  url.searchParams.set('redirect', request.nextUrl.pathname);
+  url.searchParams.set('redirect', '/admin');
   if (reason) url.searchParams.set('reason', reason);
   return NextResponse.redirect(url);
 }
 
-function redirectToAdminConsole(request: NextRequest) {
+function redirectLegacyAppPath(request: NextRequest) {
   const url = request.nextUrl.clone();
-  url.pathname = '/app/agriculture';
-  url.search = '';
+  url.pathname = request.nextUrl.pathname.replace(/^\/app\/agriculture/, '/admin') || '/admin';
+  url.searchParams.delete('redirect');
   return NextResponse.redirect(url);
 }
 
-function isAdminOnlyPath(pathname: string) {
-  return ADMIN_ONLY_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
-}
-
-function isLegacyCustomerWebPath(pathname: string) {
-  return LEGACY_CUSTOMER_WEB_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
+function isAdminPath(pathname: string) {
+  return pathname === '/admin' || pathname.startsWith('/admin/');
 }
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const supabaseResponse = NextResponse.next({ request });
+
+  if (pathname === '/app' || pathname.startsWith('/app/agriculture')) {
+    return redirectLegacyAppPath(request);
+  }
 
   try {
     const supabase = createServerClient(supabaseUrl, supabasePublishableKey, {
@@ -62,16 +52,16 @@ export async function middleware(request: NextRequest) {
       error,
     } = await supabase.auth.getUser();
 
-    if ((error || !user) && isAdminOnlyPath(pathname)) {
+    if ((error || !user) && isAdminPath(pathname)) {
       return redirectToLogin(request);
     }
 
-    if (user && isAdminOnlyPath(pathname) && !user.email_confirmed_at) {
+    if (user && isAdminPath(pathname) && !user.email_confirmed_at) {
       await supabase.auth.signOut();
       return redirectToLogin(request, 'verify_email');
     }
 
-    if (user && isAdminOnlyPath(pathname)) {
+    if (user && isAdminPath(pathname)) {
       const { data: profile } = await supabase
         .from('user_profiles')
         .select('role')
@@ -82,15 +72,12 @@ export async function middleware(request: NextRequest) {
         await supabase.auth.signOut();
         return redirectToLogin(request, 'admin_required');
       }
-
-      if (isLegacyCustomerWebPath(pathname)) {
-        return redirectToAdminConsole(request);
-      }
     }
 
     if (user && (pathname === '/login' || pathname === '/register')) {
       const url = request.nextUrl.clone();
-      url.pathname = '/app/agriculture';
+      url.pathname = '/admin';
+      url.search = '';
       return NextResponse.redirect(url);
     }
 
@@ -98,7 +85,7 @@ export async function middleware(request: NextRequest) {
   } catch (error) {
     console.error('[Middleware] Auth check failed:', error);
 
-    if (isAdminOnlyPath(pathname)) {
+    if (isAdminPath(pathname)) {
       return redirectToLogin(request);
     }
 
