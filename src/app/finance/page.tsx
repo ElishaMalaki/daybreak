@@ -362,7 +362,7 @@ export default function FinancePage() {
               }
               </div>
             )}
-          </div>
+          
 
           <div style={{ marginTop: 40, padding: '20px 24px', borderRadius: 16, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', maxWidth: 480 }}>
             <div style={{ color: cfg.textColor, fontSize: 15, fontWeight: 700, marginBottom: 8 }}>Intelligence E · Agriculture is live</div>
