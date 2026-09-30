@@ -68,10 +68,10 @@ export default function AboutPage() {
       body: 'A financial intelligence vertical within the Intelligence E platform. Designed to provide specialized AI capabilities for financial analysis, market intelligence, and economic decision-making.',
     },
     {
-      name: 'Pelit Farm',
-      status: 'Farm Management',
+      name: 'Pelit App',
+      status: 'Farm Management system',
       href: '/waitlist',
-      body: 'A farm management platform designed to help farmers and agricultural businesses manage operations, production and financial information. Pelit Farm provides the operational layer that complements Intelligence E Agriculture\'s analytical capabilities — giving agricultural businesses a complete view of their operations.',
+      body: 'A farm management platform designed to help farmers and agricultural businesses manage operations, production and financial information. Pelit App provides the operational layer that complements Intelligence E Agriculture\'s analytical capabilities — giving agricultural businesses a complete view of their operations.',
     },
   ], []);
 
