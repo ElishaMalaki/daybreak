@@ -35,6 +35,36 @@ const PROVIDER_ROUTING: Record<AIRequestType, string[]> = {
   deep_research: ['gemini', 'openrouter', 'deepseek', 'anthropic', 'openai'],
 };
 
+const REALTIME_REQUEST_TYPES = new Set<AIRequestType>([
+  'market_analysis',
+  'risk_assessment',
+  'research',
+  'deep_research',
+]);
+
+const REALTIME_KEYWORDS = [
+  'today',
+  'now',
+  'current',
+  'currently',
+  'latest',
+  'recent',
+  'real time',
+  'realtime',
+  'live',
+  'this week',
+  'this month',
+  'price',
+  'prices',
+  'market',
+  'weather',
+  'forecast',
+  'news',
+  'outbreak',
+  'alert',
+  'warning',
+];
+
 function normalizeAIResponseContent(content: string): string {
   return content
     .replace(/[“”]/g, '"')
@@ -46,6 +76,16 @@ function normalizeAIResponseContent(content: string): string {
     .replace(/[ \t]+\n/g, '\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
+}
+
+function requestNeedsRealtimeData(request: AIRequest): boolean {
+  if ((request.attachments || []).length > 0) return false;
+  if (request.contextData?.requiresRealtime === true) return true;
+  if (REALTIME_REQUEST_TYPES.has(request.requestType)) return true;
+
+  const latestUserMessage = [...request.messages].reverse().find((message) => message.role === 'user');
+  const content = latestUserMessage?.content?.toLowerCase() || '';
+  return REALTIME_KEYWORDS.some((keyword) => content.includes(keyword));
 }
 
 export class AIRouter {
@@ -102,7 +142,7 @@ export class AIRouter {
     }
 
     if ((request.attachments || []).length > 0) {
-      const hasImageProvider = this.getOrderedProviders(request.requestType, true).length > 0;
+      const hasImageProvider = this.getOrderedProviders(request.requestType, true, false).length > 0;
       if (!hasImageProvider) {
         return 'Image analysis is not currently available. Please contact your administrator to configure a vision-capable Earth AI provider.';
       }
@@ -111,7 +151,7 @@ export class AIRouter {
     return null;
   }
 
-  private getOrderedProviders(requestType: AIRequestType, requiresImageAnalysis = false): AIProvider[] {
+  private getOrderedProviders(requestType: AIRequestType, requiresImageAnalysis = false, requiresRealtimeData = false): AIProvider[] {
     const priority = PROVIDER_ROUTING[requestType] || PROVIDER_ROUTING.general;
     const ordered: AIProvider[] = [];
 
@@ -119,6 +159,7 @@ export class AIRouter {
       const provider = this.providers.get(name);
       if (!provider || !provider.isConfigured()) continue;
       if (requiresImageAnalysis && !provider.capabilities.includes('image_analysis')) continue;
+      if (requiresRealtimeData && !provider.capabilities.includes('web_search')) continue;
       ordered.push(provider);
     }
 
@@ -138,24 +179,37 @@ export class AIRouter {
       };
     }
 
+    const requiresImageAnalysis = (request.attachments || []).length > 0;
+    const requiresRealtimeData = requestNeedsRealtimeData(request);
     const enrichedRequest: AIRequest = {
       ...request,
-      systemPrompt: request.systemPrompt || buildAgriculturalSystemPrompt(request),
+      contextData: {
+        ...(request.contextData || {}),
+        requiresRealtime: requiresRealtimeData,
+      },
+      systemPrompt: request.systemPrompt || buildAgriculturalSystemPrompt({
+        ...request,
+        contextData: {
+          ...(request.contextData || {}),
+          requiresRealtime: requiresRealtimeData,
+        },
+      }),
     };
 
-    const requiresImageAnalysis = (request.attachments || []).length > 0;
-    const orderedProviders = this.getOrderedProviders(request.requestType, requiresImageAnalysis);
+    const orderedProviders = this.getOrderedProviders(request.requestType, requiresImageAnalysis, requiresRealtimeData);
 
     if (orderedProviders.length === 0) {
       return {
         content: requiresImageAnalysis
           ? 'Image analysis is not currently available. Please contact your administrator to configure a vision-capable Earth AI provider.'
-          : 'Intelligence E AI services are not currently configured. Please contact your administrator to set up AI provider API keys.',
+          : requiresRealtimeData
+            ? 'Real-time intelligence is not currently available. Please contact your administrator to configure a search-capable Earth AI provider.'
+            : 'Intelligence E AI services are not currently configured. Please contact your administrator to set up AI provider API keys.',
         provider: 'system',
         model: 'none',
         processingTimeMs: 0,
         success: false,
-        error: requiresImageAnalysis ? 'NO_VISION_PROVIDERS_AVAILABLE' : 'NO_PROVIDERS_AVAILABLE',
+        error: requiresImageAnalysis ? 'NO_VISION_PROVIDERS_AVAILABLE' : requiresRealtimeData ? 'NO_REALTIME_PROVIDERS_AVAILABLE' : 'NO_PROVIDERS_AVAILABLE',
       };
     }
 
