@@ -100,7 +100,6 @@ const timeConfigs: TimeOfDay[] = [
   badgeBg: 'rgba(255,255,255,0.10)', badgeText: 'rgba(220,230,255,0.9)', logoColor: '#F2F6FF'
 }];
 
-
 const daytimePhotoPool: {url: string;alt: string;}[] = [
 { url: "https://images.unsplash.com/photo-1675210266448-5d6f08ee26b9", alt: 'Dramatic golden sunset with towering cumulus clouds lit from below in vivid orange and pink hues' },
 { url: "https://images.unsplash.com/photo-1593358934220-ff87120a32c6", alt: 'Breathtaking sunset over rolling hills with fiery red and amber clouds stretching across the sky' },
@@ -133,7 +132,6 @@ const daytimePhotoPool: {url: string;alt: string;}[] = [
 { url: "https://img.rocket.new/generatedImages/rocket_gen_img_19b4cc046-1778740601730.png", alt: 'Vivid sunrise over mountain peaks with brilliant orange and gold clouds filling the sky' },
 { url: "https://images.unsplash.com/photo-1715229890122-ecd143b963fa", alt: 'Golden hour clouds with warm amber and peach tones glowing over a tranquil landscape' }];
 
-
 const DAYTIME_LABELS = new Set(['Sunrise', 'Morning', 'Midday', 'Afternoon', 'Sunset']);
 
 function pickDaytimePhoto(seed: number): {url: string;alt: string;} {
@@ -155,63 +153,71 @@ function getTimeConfig(hour: number): TimeOfDay {
 
 const features = [
 {
-  title: 'Market Signal Intelligence',
-  description: 'Continuous scanning of equities, commodities, forex, and macro indicators — surfacing non-obvious correlations and early-warning signals before consensus forms.',
+  title: 'Accounting Intelligence',
+  description: 'Bring core financial information together across general ledger, accounts payable and receivable, invoicing, expenses, purchases, sales, reconciliation, and financial reporting.',
   icon:
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" />
-      </svg>,
+    <rect x="3" y="3" width="18" height="18" rx="2" />
+    <path d="M7 8h10M7 12h10M7 16h6" />
+  </svg>,
 
   size: 'large',
   accent: 'rgba(80,140,220,0.15)'
 },
 {
-  title: 'Portfolio Risk & Scenario Modeling',
-  description: 'Monte Carlo simulations, stress tests, and tail-risk analysis across multi-asset portfolios — quantifying exposure before volatility strikes.',
+  title: 'Financial Analysis & Insights',
+  description: 'Understand revenue, expenses, profitability, cash flow, working capital, and financial performance through AI-assisted analysis and clear business insights.',
   icon:
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-        <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
-      </svg>,
+    <polyline points="3 17 9 11 13 15 21 7" />
+    <polyline points="15 7 21 7 21 13" />
+  </svg>,
 
   size: 'small',
-  accent: 'rgba(220,100,80,0.15)'
+  accent: 'rgba(60,160,140,0.15)'
 },
 {
-  title: 'Regulatory & Compliance Intelligence',
-  description: 'Automated monitoring of regulatory filings, policy changes, and compliance requirements across jurisdictions — reducing legal exposure and audit risk.',
+  title: 'Planning, Budgeting & Forecasting',
+  description: 'Support financial planning with budgets, forecasts, budget-versus-actual analysis, scenario planning, and forward-looking business insights.',
   icon:
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-        <polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" />
-      </svg>,
+    <path d="M4 19V5" />
+    <path d="M4 19h16" />
+    <path d="M7 15l4-4 3 2 5-6" />
+    <circle cx="7" cy="15" r="1" />
+    <circle cx="11" cy="11" r="1" />
+    <circle cx="14" cy="13" r="1" />
+    <circle cx="19" cy="7" r="1" />
+  </svg>,
 
   size: 'small',
   accent: 'rgba(200,160,60,0.15)'
 },
 {
-  title: 'Alternative Data & Sentiment Analysis',
-  description: 'Structured intelligence from satellite imagery, web traffic, social sentiment, and supply chain data — alpha sources that traditional models miss entirely.',
+  title: 'AI CFO & Advisory Intelligence',
+  description: 'An AI-powered financial assistant designed to answer business finance questions, explain financial results, surface important trends, and support management decisions.',
   icon:
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" />
-        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-      </svg>,
+    <circle cx="12" cy="12" r="9" />
+    <path d="M8 12h8M12 8v8" />
+  </svg>,
 
   size: 'large',
   accent: 'rgba(120,80,200,0.15)'
 },
 {
-  title: 'Financial AI Research & Intelligence Assistant',
-  description: 'A domain-trained research assistant that synthesizes earnings reports, economic data, and market commentary into concise, cited investment-grade analysis — on demand.',
+  title: 'Audit, Risk & Tax Intelligence',
+  description: 'Support audit planning, transaction review, risk identification, financial controls, tax-related analysis, and advisory workflows with AI-assisted intelligence.',
   icon:
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-        <line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" />
-      </svg>,
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <polyline points="14 2 14 8 20 8" />
+    <path d="M8 13h8M8 17h6" />
+    <path d="M9 9h2" />
+  </svg>,
 
   size: 'full',
-  accent: 'rgba(60,160,140,0.15)'
+  accent: 'rgba(220,100,80,0.15)'
 }];
 
 
@@ -347,10 +353,11 @@ export default function FinancePage() {
           </div>
 
           <h1 className="fi-title" style={{ color: cfg.textColor }}>
-            Finance Intelligence<br />that sees further ahead.
+            Financial intelligence<br />for better decisions.
           </h1>
+
           <p className="fi-subtitle" style={{ color: cfg.textColor }}>
-            Intelligence E for Finance is currently in development. Five AI capabilities purpose-built for financial markets — from signal detection to regulatory compliance.
+            Intelligence E for Finance is currently in development. An AI-powered financial intelligence platform bringing together accounting, financial analysis, planning, audit, tax, and advisory intelligence.
           </p>
 
           <div className="fi-bento">
@@ -366,7 +373,7 @@ export default function FinancePage() {
               <>
                     <div className="fi-card-title" style={{ color: cfg.textColor }}>{feature.title}</div>
                     <div className="fi-card-desc" style={{ color: cfg.textColor }}>{feature.description}</div>
-                  </>
+              </>
               }
               </div>
             )}
@@ -399,10 +406,10 @@ export default function FinancePage() {
           <div className="fi-period-pill" style={{ background: cfg.badgeBg, color: cfg.badgeText }}>
               <span className="fi-period-dot" style={{ background: cfg.buttonBg === '#F2F6FF' || cfg.buttonBg === '#EAF0FF' || cfg.buttonBg === '#E8EEFF' || cfg.buttonBg === '#F0EAFF' ? 'rgba(150,170,255,0.8)' : cfg.buttonBg }} aria-hidden="true" />
               <span>{cfg.label}</span>
-            </div>
+          </div>
           }
         </footer>
       </div>
-    </>);
-
+    </>
+  );
 }
