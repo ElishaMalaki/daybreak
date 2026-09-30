@@ -4,7 +4,7 @@
 //
 // External apps authenticate with an API key (Bearer token).
 // All subscription limits are enforced server-side.
-// This is the public integration contract for beta partners.
+// This is the public integration contract for Intelligence E.
 // ============================================================
 
 import { createClient } from '@/lib/supabase/server';
@@ -210,6 +210,11 @@ export async function POST(request: NextRequest) {
     messages,
     requestType: normalizedRequestType,
     userId,
+    contextData: {
+      ...(context || {}),
+      source_app: metadata?.source_app,
+      reference_id: metadata?.reference_id,
+    },
   });
 
   const processingTimeMs = Date.now() - startTime;
