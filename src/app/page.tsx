@@ -108,53 +108,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section id="about" className="home-section">
-          <div className="home-section-block">
-            <p className="home-kicker">The Company</p>
-            <h2>Earth AI</h2>
-            <p>Earth AI focuses on building specialized intelligence rather than being a general-purpose chatbot. The company believes that the most useful AI is the kind that deeply understands the domain it operates in — trained on the right data, designed for the right decisions, and built for the people who depend on accurate, actionable information.</p>
-            <p>Where general AI tools offer broad capability, Earth AI products offer depth. Each product is built around a specific industry, with the goal of making advanced artificial intelligence genuinely useful in real-world environments — not just impressive in a demonstration.</p>
-          </div>
-
-          <div className="home-section-block">
-            <p className="home-kicker">The Platform</p>
-            <h3>Intelligence E</h3>
-            <p>Intelligence E is Earth AI&apos;s vertical intelligence platform. It is designed to deliver domain-specific AI capabilities across industries where precision, context, and reliability matter most. Each Intelligence E vertical is a focused product — not a feature — built to serve a specific professional environment.</p>
-            <p>The current Intelligence E focus is Agriculture. Other verticals, including Finance, are part of the future roadmap.</p>
-          </div>
-
-          <div className="home-section-block">
-            <p className="home-kicker">Products</p>
-            <h3>The Earth AI Ecosystem</h3>
-            <p>Earth AI is building a focused ecosystem of specialized products. Each product addresses a distinct need within its domain.</p>
-            <div className="about-grid">
-              <article className="about-item"><h4>Intelligence E Agriculture</h4><p>An agricultural intelligence platform designed to help users understand agricultural data, research, risks, markets, production and decision-making. Intelligence E Agriculture provides specialized AI capabilities for farmers, agribusinesses, and agricultural professionals.</p><Link href="/login">Try Intelligence E Now</Link></article>
-              <article className="about-item"><h4>Intelligence E Finance</h4><p>A financial intelligence vertical within the Intelligence E platform. Designed to provide specialized AI capabilities for financial analysis, market intelligence, and economic decision-making.</p><Link href="/finance">Coming Soon</Link></article>
-              <article className="about-item"><h4>Pelit Farm</h4><p>A farm management platform designed to help farmers and agricultural businesses manage operations, production and financial information. Pelit Farm provides the operational layer that complements Intelligence E Agriculture&apos;s analytical capabilities — giving agricultural businesses a complete view of their operations.</p><Link href="/waitlist">Farm Management</Link></article>
-            </div>
-          </div>
-
-          <div className="home-section-block">
-            <p className="home-kicker">Vision</p>
-            <h3>Why Earth AI Exists</h3>
-            <p>Earth AI aims to make advanced artificial intelligence more useful by applying it to real-world industries, organizations and decision-making environments. The goal is not to build AI that is impressive in isolation — but AI that is genuinely valuable in the hands of professionals who need reliable, domain-specific intelligence to make better decisions.</p>
-            <p>Industries like agriculture and finance operate in complex, high-stakes environments where the cost of poor decisions is real. Earth AI is built on the belief that specialized intelligence — grounded in domain knowledge, trained on relevant data, and designed for specific workflows — is far more valuable than general-purpose AI applied broadly.</p>
-          </div>
-
-          <div className="home-section-block">
-            <p className="home-kicker">Principles</p>
-            <h3>Product Philosophy</h3>
-            <p>Every Earth AI product is built around a consistent set of principles that guide how we design, build, and deploy intelligence.</p>
-            <div className="about-grid">
-              <article className="about-item"><h4>Specialized Intelligence</h4><p>Deep domain focus over broad generality. Each product is built for a specific industry and use case.</p></article>
-              <article className="about-item"><h4>Practical Decision Support</h4><p>Intelligence that leads to better decisions — not just information for its own sake.</p></article>
-              <article className="about-item"><h4>Data-Driven Analysis</h4><p>Conclusions grounded in data, not assumptions. Rigorous analysis at every layer.</p></article>
-              <article className="about-item"><h4>Responsible AI</h4><p>Thoughtful deployment. We consider the implications of AI in high-stakes environments.</p></article>
-              <article className="about-item"><h4>Security and Privacy</h4><p>User data is protected. Security is a design requirement, not an afterthought.</p></article>
-              <article className="about-item"><h4>Scalable Technology</h4><p>Built to grow with the organizations and industries we serve.</p></article>
-            </div>
-          </div>
-        </section>
+        
 
         <footer className="home-footer">
           <span>Earth AI. Specialized intelligence for real-world industries.</span>
