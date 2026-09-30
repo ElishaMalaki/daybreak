@@ -65,13 +65,13 @@ export default function AboutPage() {
       name: 'Intelligence E Finance',
       status: 'Coming Soon',
       href: '/finance',
-      body: 'A financial intelligence vertical within the Intelligence E platform. Designed to provide specialized AI capabilities for financial analysis, market intelligence, and economic decision-making.',
+      body: 'A financial intelligence vertical within the Intelligence E platform. Designed to provide specialized AI capabilities for financial analysis, market intelligence, and economic decision making.',
     },
     {
       name: 'Pelit App',
       status: 'Farm Management system',
       href: '/waitlist',
-      body: 'A farm management platform designed to help farmers and agricultural businesses manage operations, production and financial information. Pelit App provides the operational layer that complements Intelligence E Agriculture\'s analytical capabilities — giving agricultural businesses a complete view of their operations.',
+      body: 'A farm management platform designed to help farmers and agricultural businesses manage operations, production and financial information. Pelit App provides the operational layer that complements Intelligence E Agriculture\'s analytical capabilities  giving agricultural businesses a complete view of their operations.',
     },
   ], []);
 
@@ -175,10 +175,10 @@ export default function AboutPage() {
               <p className="about-kicker">The Company</p>
               <h1>Earth AI</h1>
               <p>
-                Earth AI focuses on building specialized intelligence rather than being a general-purpose chatbot. The company believes that the most useful AI is the kind that deeply understands the domain it operates in — trained on the right data, designed for the right decisions, and built for the people who depend on accurate, actionable information.
+                Earth AI focuses on building specialized intelligence rather than being a general-purpose chatbot. The company believes that the most useful AI is the kind that deeply understands the domain it operates in  trained on the right data, designed for the right decisions, and built for the people who depend on accurate, actionable information.
               </p>
               <p>
-                Where general AI tools offer broad capability, Earth AI products offer depth. Each product is built around a specific industry, with the goal of making advanced artificial intelligence genuinely useful in real-world environments — not just impressive in a demonstration.
+                Where general AI tools offer broad capability, Earth AI products offer depth. Each product is built around a specific industry, with the goal of making advanced artificial intelligence genuinely useful in real-world environments  not just impressive in a demonstration.
               </p>
             </section>
 
@@ -214,10 +214,10 @@ export default function AboutPage() {
               <p className="about-kicker">Vision</p>
               <h2>Why Earth AI Exists</h2>
               <p>
-                Earth AI aims to make advanced artificial intelligence more useful by applying it to real-world industries, organizations and decision-making environments. The goal is not to build AI that is impressive in isolation — but AI that is genuinely valuable in the hands of professionals who need reliable, domain-specific intelligence to make better decisions.
+                Earth AI aims to make advanced artificial intelligence more useful by applying it to real world industries, organizations and decision making environments. The goal is not to build AI that is impressive in isolation  but AI that is genuinely valuable in the hands of professionals who need reliable, domain specific intelligence to make better decisions.
               </p>
               <p>
-                Industries like agriculture and finance operate in complex, high-stakes environments where the cost of poor decisions is real. Earth AI is built on the belief that specialized intelligence — grounded in domain knowledge, trained on relevant data, and designed for specific workflows — is far more valuable than general-purpose AI applied broadly.
+                Industries like agriculture and finance operate in complex, high stakes environments where the cost of poor decisions is real. Earth AI is built on the belief that specialized intelligence grounded in domain knowledge, trained on relevant data, and designed for specific workflows is far more valuable than general-purpose AI applied broadly.
               </p>
             </section>
 
@@ -244,7 +244,7 @@ export default function AboutPage() {
           </main>
 
           <footer className="about-footer">
-            <span>Earth AI. Specialized intelligence for real-world industries.</span>
+            <span>Earth AI. Specialized intelligence for real world industries.</span>
             <span>
               <Link href="/privacy">Privacy</Link>
               <Link href="/terms">Terms</Link>
