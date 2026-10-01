@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { error, supabase, user } = await requireAdmin();
   if (error) return error;
+  if (!supabase || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { id } = await params;
   const { error: updateError } = await supabase
