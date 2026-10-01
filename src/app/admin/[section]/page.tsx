@@ -1,37 +1,27 @@
+import AdminWorkspaceClient from '../AdminWorkspaceClient';
+
 const featureCopy: Record<string, { title: string; description: string }> = {
-  intelligence: { title: 'AI Chat Testing', description: 'Internal console for testing Agriculture AI answers, routing, formatting, and safety behavior.' },
-  'crop-doctor': { title: 'Crop Doctor Testing', description: 'Internal test bench for crop health, pest, disease, nutrient, and field issue workflows.' },
-  'image-analysis': { title: 'Image Analysis', description: 'Internal image intelligence area for testing plant, crop, pest, disease, and field photo analysis.' },
-  research: { title: 'Agricultural Research', description: 'Internal research workspace for agriculture intelligence checks and response review.' },
-  prompts: { title: 'AI Prompts', description: 'Internal prompt governance for system instructions, safety rules, response format, and product behavior.' },
-  models: { title: 'Model Selection', description: 'Internal model routing and provider control without exposing provider names to external users.' },
-  knowledge: { title: 'Agricultural Knowledge', description: 'Internal knowledge management for Agriculture references, decision support, and domain intelligence.' },
-  documents: { title: 'Documents', description: 'Internal document intelligence area for reviewing agricultural documents and extracted context.' },
-  conversations: { title: 'Testing Conversations', description: 'Internal archive for AI test conversations, response review, and regression checks.' },
-  costs: { title: 'AI Costs', description: 'Internal cost monitoring for model calls, provider usage, feature usage, and API consumption.' },
-  performance: { title: 'Model Performance', description: 'Internal performance review for latency, quality, failure rate, model routing, and response consistency.' },
-  errors: { title: 'Error Logs', description: 'Internal error review for AI calls, API integration, authentication, provider failures, and operational incidents.' },
-  recommendations: { title: 'Recommendations', description: 'Internal review area for generated agriculture recommendations before reuse in Pelit workflows.' },
-  evaluation: { title: 'Evaluation and Testing', description: 'Internal Agriculture AI evaluation area for test sets, answer quality, regression review, and release readiness.' },
-  content: { title: 'Agricultural Content Management', description: 'Internal content management for agriculture copy, product guidance, and domain materials.' },
+  intelligence: { title: 'AI Chat Testing', description: 'Create and review Agriculture AI chat tests, response examples, routing checks, and safety observations.' },
+  'crop-doctor': { title: 'Crop Doctor Testing', description: 'Track crop health, pest, disease, nutrient, and field issue test cases before they are used through Pelit.' },
+  'image-analysis': { title: 'Image Analysis', description: 'Manage image intelligence test cases for plant, crop, pest, disease, and field photo analysis.' },
+  research: { title: 'Agricultural Research', description: 'Maintain internal agricultural research checks, source review notes, and response quality observations.' },
+  prompts: { title: 'AI Prompts', description: 'Manage internal prompt instructions, answer style rules, safety guidance, and Agriculture AI behavior notes.' },
+  models: { title: 'Model Selection', description: 'Track model routing decisions, fallback behavior, provider performance observations, and model test notes.' },
+  knowledge: { title: 'Agricultural Knowledge', description: 'Organize domain knowledge, crop guidance, pest and disease material, and decision support references.' },
+  documents: { title: 'Documents', description: 'Track document intelligence tests, extracted context reviews, and agricultural document analysis notes.' },
+  conversations: { title: 'Testing Conversations', description: 'Record AI testing conversations, response quality reviews, and regression examples.' },
+  'ai-usage': { title: 'AI Usage', description: 'Track AI usage observations from admin testing and Pelit API integrations.' },
+  usage: { title: 'AI Usage', description: 'Track AI usage observations from admin testing and Pelit API integrations.' },
+  costs: { title: 'AI Costs', description: 'Track AI cost observations by provider, route, feature, and period.' },
+  performance: { title: 'Model Performance', description: 'Review latency, quality, failure rate, response consistency, and routing accuracy.' },
+  errors: { title: 'Error Logs', description: 'Record AI, API, integration, provider, and operational errors for internal review.' },
+  recommendations: { title: 'Recommendations', description: 'Review generated agriculture recommendations before reuse in Pelit workflows.' },
+  evaluation: { title: 'Evaluation and Testing', description: 'Run and record Agriculture AI test sets, answer quality reviews, regression checks, and release readiness notes.' },
+  content: { title: 'Agricultural Content Management', description: 'Manage agriculture content, product guidance, support copy, and domain materials used by Intelligence E.' },
 };
 
 export default async function AdminFeaturePage({ params }: { params: Promise<{ section: string }> }) {
   const { section } = await params;
   const feature = featureCopy[section] || { title: 'Admin Feature', description: 'Internal Earth AI administration section.' };
-
-  return (
-    <div>
-      <div style={{ marginBottom: 22 }}>
-        <h1 style={{ margin: 0, color: 'var(--text, #0f172a)', fontSize: 24, fontWeight: 800, letterSpacing: '-0.03em' }}>{feature.title}</h1>
-        <p style={{ color: 'var(--muted, #64748b)', marginTop: 8, maxWidth: 760, lineHeight: 1.7 }}>{feature.description}</p>
-      </div>
-      <div style={{ padding: 22, border: '1px solid var(--border, #e5e7eb)', borderRadius: 12, background: 'var(--surface, #fff)' }}>
-        <div style={{ color: 'var(--text, #0f172a)', fontWeight: 800, marginBottom: 10 }}>Internal control surface</div>
-        <p style={{ margin: 0, color: 'var(--muted, #64748b)', fontSize: 13, lineHeight: 1.7 }}>
-          This section is reserved for Earth AI administrators. It is not exposed as a customer workflow in the web app. Production data should be connected through secured APIs, audit logging, role checks, and server side Pelit integration.
-        </p>
-      </div>
-    </div>
-  );
+  return <AdminWorkspaceClient section={section} title={feature.title} description={feature.description} />;
 }
