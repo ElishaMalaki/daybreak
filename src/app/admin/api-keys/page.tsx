@@ -1,5 +1,6 @@
 'use client';
 
+import type { CSSProperties, FormEvent } from 'react';
 import { useEffect, useState } from 'react';
 
 type ApiKey = {
@@ -44,7 +45,7 @@ export default function AdminApiKeysPage() {
     void loadKeys();
   }, []);
 
-  async function createKey(event: React.FormEvent) {
+  async function createKey(event: FormEvent) {
     event.preventDefault();
     setSaving(true);
     setSecret('');
@@ -123,7 +124,7 @@ export default function AdminApiKeysPage() {
   );
 }
 
-const labelStyle: React.CSSProperties = { display: 'grid', gap: 7, marginBottom: 12, color: 'var(--muted, #64748b)', fontSize: 12, fontWeight: 800 };
-const inputStyle: React.CSSProperties = { width: '100%', border: '1px solid var(--border, #e5e7eb)', borderRadius: 8, padding: '10px 11px', background: 'var(--surface, #fff)', color: 'var(--text, #0f172a)', font: 'inherit' };
-const buttonStyle: React.CSSProperties = { width: '100%', border: 0, borderRadius: 9, padding: '11px 12px', background: '#111827', color: '#fff', fontWeight: 800, cursor: 'pointer' };
-const emptyStyle: React.CSSProperties = { padding: 18, border: '1px dashed var(--border, #e5e7eb)', borderRadius: 12, color: 'var(--muted, #64748b)', background: 'var(--surface, #fff)', fontSize: 13 };
+const labelStyle: CSSProperties = { display: 'grid', gap: 7, marginBottom: 12, color: 'var(--muted, #64748b)', fontSize: 12, fontWeight: 800 };
+const inputStyle: CSSProperties = { width: '100%', border: '1px solid var(--border, #e5e7eb)', borderRadius: 8, padding: '10px 11px', background: 'var(--surface, #fff)', color: 'var(--text, #0f172a)', font: 'inherit' };
+const buttonStyle: CSSProperties = { width: '100%', border: 0, borderRadius: 9, padding: '11px 12px', background: '#111827', color: '#fff', fontWeight: 800, cursor: 'pointer' };
+const emptyStyle: CSSProperties = { padding: 18, border: '1px dashed var(--border, #e5e7eb)', borderRadius: 12, color: 'var(--muted, #64748b)', background: 'var(--surface, #fff)', fontSize: 13 };
