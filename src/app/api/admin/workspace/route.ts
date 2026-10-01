@@ -16,6 +16,7 @@ function normalizeSection(value: string | null) {
 export async function GET(request: NextRequest) {
   const { error, supabase } = await requireAdmin();
   if (error) return error;
+  if (!supabase) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const section = normalizeSection(request.nextUrl.searchParams.get('section'));
   if (!section) return NextResponse.json({ error: 'Invalid section' }, { status: 400 });
@@ -34,6 +35,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const { error, supabase, user } = await requireAdmin();
   if (error) return error;
+  if (!supabase || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   let body: Record<string, unknown>;
   try {
@@ -48,9 +50,7 @@ export async function POST(request: NextRequest) {
   const status = sanitizeAdminText(body.status, 30) || 'active';
 
   if (!section || !title) return NextResponse.json({ error: 'Section and title are required' }, { status: 400 });
-  if (!['active', 'testing', 'review', 'disabled', 'archived'].includes(status)) {
-    return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
-  }
+  if (!['active', 'testing', 'review', 'disabled', 'archived'].includes(status)) return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
 
   const content = body.content && typeof body.content === 'object' ? body.content : {};
   const metadata = body.metadata && typeof body.metadata === 'object' ? body.metadata : {};
