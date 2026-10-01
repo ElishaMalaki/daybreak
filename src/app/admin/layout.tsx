@@ -26,6 +26,7 @@ const adminNavItems = [
   ['Recommendations', '/admin/recommendations'],
   ['Evaluation', '/admin/evaluation'],
   ['Content Management', '/admin/content'],
+  ['API Keys', '/admin/api-keys'],
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
