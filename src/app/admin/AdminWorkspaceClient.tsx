@@ -1,5 +1,6 @@
 'use client';
 
+import type { CSSProperties, FormEvent } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 
 type WorkspaceItem = {
@@ -40,7 +41,7 @@ export default function AdminWorkspaceClient({ section, title, description }: { 
     void loadItems();
   }, [section]);
 
-  async function submit(event: React.FormEvent) {
+  async function submit(event: FormEvent) {
     event.preventDefault();
     setSaving(true);
     setError('');
@@ -48,13 +49,7 @@ export default function AdminWorkspaceClient({ section, title, description }: { 
       const response = await fetch('/api/admin/workspace', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          section,
-          title: form.title,
-          description: form.description,
-          status: form.status,
-          content: { notes: form.notes },
-        }),
+        body: JSON.stringify({ section, title: form.title, description: form.description, status: form.status, content: { notes: form.notes } }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Unable to save record');
@@ -104,7 +99,7 @@ export default function AdminWorkspaceClient({ section, title, description }: { 
   );
 }
 
-const labelStyle: React.CSSProperties = { display: 'grid', gap: 7, marginBottom: 12, color: 'var(--muted, #64748b)', fontSize: 12, fontWeight: 800 };
-const inputStyle: React.CSSProperties = { width: '100%', border: '1px solid var(--border, #e5e7eb)', borderRadius: 8, padding: '10px 11px', background: 'var(--surface, #fff)', color: 'var(--text, #0f172a)', font: 'inherit' };
-const buttonStyle: React.CSSProperties = { width: '100%', border: 0, borderRadius: 9, padding: '11px 12px', background: '#111827', color: '#fff', fontWeight: 800, cursor: 'pointer' };
-const emptyStyle: React.CSSProperties = { padding: 18, border: '1px dashed var(--border, #e5e7eb)', borderRadius: 12, color: 'var(--muted, #64748b)', background: 'var(--surface, #fff)', fontSize: 13 };
+const labelStyle: CSSProperties = { display: 'grid', gap: 7, marginBottom: 12, color: 'var(--muted, #64748b)', fontSize: 12, fontWeight: 800 };
+const inputStyle: CSSProperties = { width: '100%', border: '1px solid var(--border, #e5e7eb)', borderRadius: 8, padding: '10px 11px', background: 'var(--surface, #fff)', color: 'var(--text, #0f172a)', font: 'inherit' };
+const buttonStyle: CSSProperties = { width: '100%', border: 0, borderRadius: 9, padding: '11px 12px', background: '#111827', color: '#fff', fontWeight: 800, cursor: 'pointer' };
+const emptyStyle: CSSProperties = { padding: 18, border: '1px dashed var(--border, #e5e7eb)', borderRadius: 12, color: 'var(--muted, #64748b)', background: 'var(--surface, #fff)', fontSize: 13 };
