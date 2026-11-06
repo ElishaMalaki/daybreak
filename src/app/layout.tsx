@@ -10,9 +10,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'Intelligence E Finance — Powered by Earth AI',
-  description: 'Financial intelligence, automated operations and better decisions for businesses and financial professionals.',
-  keywords: ['financial intelligence', 'AI accounting', 'AI financial analysis', 'document intelligence', 'Intelligence E'],
+  title: 'Earth AI — Specialized Intelligence for Real-World Industries',
+  description: 'Earth AI delivers domain-specific intelligence for agriculture and finance. Intelligence E — Agriculture is now available.',
   icons: {
     icon: [
       { url: '/favicon.ico', type: 'image/x-icon' }
